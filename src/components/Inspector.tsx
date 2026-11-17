@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CommitNumber } from "./fields.tsx";
+import { FINISH_PRESETS } from "../domain/features.ts";
 import { DEG, formatMm, formatZar } from "../domain/math.ts";
 import { connectedIds } from "../domain/operations.ts";
 import { cutList, fastenerList, profileLabel, shoppingList } from "../domain/reports.ts";
@@ -22,9 +23,10 @@ export function Inspector() {
   const pieces = useProject((state) => state.pieces);
   const boards = useProject((state) => state.boards);
   const fasteners = useProject((state) => state.fasteners);
+  const hardware = useProject((state) => state.hardware);
   const piece = pieces.find((item) => item.id === selection) ?? null;
   const cuts = cutList(boards, pieces);
-  const shop = shoppingList(boards);
+  const shop = shoppingList(boards, hardware);
   const screws = fastenerList(fasteners, pieces);
 
   return (
@@ -46,7 +48,7 @@ export function Inspector() {
         </div>
         <ScrollArea className="min-h-0 flex-1">
           <TabsContent value="piece" className="px-4 py-3">
-            {piece ? <PiecePane piece={piece} joined={connectedIds(fasteners, piece.id).length > 1} /> : <ProjectPane />}
+            {piece ? <PiecePane piece={piece} joined={connectedIds(fasteners, piece.id, pieces).length > 1} /> : <ProjectPane />}
           </TabsContent>
           <TabsContent value="cuts" className="px-4 py-3">
             <CutPane rows={cuts} />
@@ -109,6 +111,7 @@ function PiecePane({ piece, joined }: { piece: Piece; joined: boolean }) {
           {board ? `, ${formatMm(board.length)} mm stick` : ""}. Length is the centreline.
           {(piece.mitreStart !== 0 || piece.mitreEnd !== 0) && " Long and short points are on the cut list."}
         </p>
+        <FinishControls piece={piece} />
       </div>
 
       <div className="grid grid-cols-3 gap-2">
@@ -156,13 +159,39 @@ function PiecePane({ piece, joined }: { piece: Piece; joined: boolean }) {
   );
 }
 
+function FinishControls({ piece }: { piece: Piece }) {
+  const finish = piece.finish ?? { grain: "length" as const, treatment: "bare" as const, color: "#ffffff", label: "Bare" };
+  return (
+    <div className="mt-3">
+      <div className="mb-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Finish</div>
+      <div className="mb-2 flex gap-1">
+        <button type="button" className={`rounded-md border px-2 py-1 text-xs ${finish.grain === "length" ? "bg-primary text-primary-foreground" : ""}`} onClick={() => useProject.getState().setFinish(piece.id, { ...finish, grain: "length" })}>Grain along</button>
+        <button type="button" className={`rounded-md border px-2 py-1 text-xs ${finish.grain === "width" ? "bg-primary text-primary-foreground" : ""}`} onClick={() => useProject.getState().setFinish(piece.id, { ...finish, grain: "width" })}>Grain across</button>
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {FINISH_PRESETS.map((preset) => (
+          <button
+            key={preset.label}
+            type="button"
+            className={`rounded-full border px-2 py-1 text-[11px] ${finish.label === preset.label ? "border-primary" : ""}`}
+            onClick={() => useProject.getState().setFinish(piece.id, { ...preset, grain: finish.grain })}
+          >
+            <span className="mr-1 inline-block size-2 rounded-full border" style={{ background: preset.treatment === "bare" ? "#e4c48a" : preset.color }} />
+            {preset.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function AxisField({ label, value, onCommit, suffix = "mm" }: { label: string; value: number; onCommit: (value: number) => void; suffix?: string }) {
   return <CommitNumber label={label} value={value} suffix={suffix} onCommit={onCommit} />;
 }
 
 function move(piece: Piece, axis: 0 | 1 | 2, value: number) {
   const delta = value - piece.position[axis];
-  const ids = connectedIds(useProject.getState().fasteners, piece.id);
+  const ids = connectedIds(useProject.getState().fasteners, piece.id, useProject.getState().pieces);
   const updates = ids.map((id) => {
     const member = useProject.getState().pieces.find((item) => item.id === id);
     if (!member) return null;
@@ -180,7 +209,7 @@ function turn(piece: Piece, axis: 0 | 1 | 2, radians: number) {
   const after = new THREE.Quaternion().setFromEuler(new THREE.Euler(...next, "XYZ"));
   const delta = after.multiply(before.invert());
   const origin = new THREE.Vector3(...piece.position);
-  const ids = connectedIds(useProject.getState().fasteners, piece.id);
+  const ids = connectedIds(useProject.getState().fasteners, piece.id, useProject.getState().pieces);
   const updates = ids.map((id) => {
     const member = useProject.getState().pieces.find((item) => item.id === id);
     if (!member) return null;
@@ -227,7 +256,7 @@ function CutPane({ rows }: { rows: ReturnType<typeof cutList> }) {
                         mitre {formatMm(part.mitreStart, 0)}° / {formatMm(part.mitreEnd, 0)}° · long {formatMm(part.longPoint)} · short {formatMm(part.shortPoint)}
                       </div>
                     )}
-                    {part.holes > 0 && <div className="text-[11px] text-muted-foreground">{part.holes} hole{part.holes === 1 ? "" : "s"}</div>}
+                    {part.notes ? <div className="text-[11px] text-muted-foreground">{part.notes}</div> : null}
                   </td>
                 </tr>
               ))}

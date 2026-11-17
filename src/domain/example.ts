@@ -1,3 +1,4 @@
+import { shapeDefaults } from "./features.ts";
 import { uid } from "./math.ts";
 import type { Board, Fastener, Piece, ProjectData, StockItem } from "./types.ts";
 
@@ -40,6 +41,7 @@ export function sampleFrame(catalog: StockItem[]): ProjectData {
     mitreStart: 0,
     mitreEnd: 0,
     holes: [],
+    ...shapeDefaults(width),
   };
   const kerf = 3;
   const rightStart = stileLength + kerf;
@@ -109,6 +111,7 @@ export function sampleFrame(catalog: StockItem[]): ProjectData {
     catalog,
     boards: [board],
     pieces: [left, right, bottom, top],
+    hardware: [],
     fasteners: [
       screw(left, -half, bottomZ, 1, bottom),
       screw(left, -half, topZ, 1, top),

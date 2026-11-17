@@ -45,11 +45,23 @@ export function fromTuple(t: Vec3Tuple): Vec3 {
   return { x: t[0], y: t[1], z: t[2] };
 }
 
-/** Z of an end face at a given local X. Length is the centreline. */
-export function endZ(piece: Pick<Piece, "length" | "mitreStart" | "mitreEnd">, end: "start" | "end", x: number): number {
-  const angle = (end === "start" ? piece.mitreStart : piece.mitreEnd) * DEG;
+/** Z of an end face at a given local X and Y. Length is the centreline. */
+export function endZ(
+  piece: Pick<Piece, "length" | "mitreStart" | "mitreEnd" | "bevelStart" | "bevelEnd">,
+  end: "start" | "end",
+  x: number,
+  y = 0,
+): number {
+  const mitre = ((end === "start" ? piece.mitreStart : piece.mitreEnd) || 0) * DEG;
+  const bevel = ((end === "start" ? piece.bevelStart : piece.bevelEnd) || 0) * DEG;
   const base = end === "start" ? -piece.length / 2 : piece.length / 2;
-  return base + x * Math.tan(angle);
+  return base + x * Math.tan(mitre) + y * Math.tan(bevel);
+}
+
+export function sectionWidths(piece: Pick<Piece, "width" | "widthStart" | "widthEnd">): { start: number; end: number } {
+  const start = piece.widthStart || piece.width;
+  const end = piece.widthEnd || piece.width;
+  return { start, end };
 }
 
 export function localToWorld(piece: Pick<Piece, "position" | "rotation">, local: Vec3): Vec3 {
@@ -93,77 +105,31 @@ export function pointLengths(piece: Pick<Piece, "length" | "width" | "mitreStart
   };
 }
 
-export function localFaces(piece: Pick<Piece, "length" | "width" | "thickness" | "mitreStart" | "mitreEnd">): LocalFace[] {
-  const w = piece.width / 2;
+export function localFaces(
+  piece: Pick<Piece, "length" | "width" | "widthStart" | "widthEnd" | "thickness" | "mitreStart" | "mitreEnd" | "bevelStart" | "bevelEnd">,
+): LocalFace[] {
+  const widths = sectionWidths(piece);
+  const ws = widths.start / 2;
+  const we = widths.end / 2;
   const t = piece.thickness / 2;
-  const zs = (x: number) => endZ(piece, "start", x);
-  const ze = (x: number) => endZ(piece, "end", x);
-
-  const startNormal = normalize(v(Math.tan(piece.mitreStart * DEG), 0, -1));
-  const endNormal = normalize(v(-Math.tan(piece.mitreEnd * DEG), 0, 1));
+  const zs = (x: number, y: number) => endZ(piece, "start", x, y);
+  const ze = (x: number, y: number) => endZ(piece, "end", x, y);
+  const face = (id: FaceId, corners: Quad): LocalFace => ({ id, corners, normal: outwardNormal(corners) });
 
   return [
-    {
-      id: "top",
-      normal: v(0, 1, 0),
-      corners: [
-        v(-w, t, zs(-w)),
-        v(w, t, zs(w)),
-        v(w, t, ze(w)),
-        v(-w, t, ze(-w)),
-      ],
-    },
-    {
-      id: "bottom",
-      normal: v(0, -1, 0),
-      corners: [
-        v(-w, -t, zs(-w)),
-        v(-w, -t, ze(-w)),
-        v(w, -t, ze(w)),
-        v(w, -t, zs(w)),
-      ],
-    },
-    {
-      id: "left",
-      normal: v(-1, 0, 0),
-      corners: [
-        v(-w, -t, zs(-w)),
-        v(-w, t, zs(-w)),
-        v(-w, t, ze(-w)),
-        v(-w, -t, ze(-w)),
-      ],
-    },
-    {
-      id: "right",
-      normal: v(1, 0, 0),
-      corners: [
-        v(w, -t, zs(w)),
-        v(w, -t, ze(w)),
-        v(w, t, ze(w)),
-        v(w, t, zs(w)),
-      ],
-    },
-    {
-      id: "start",
-      normal: startNormal,
-      corners: [
-        v(-w, -t, zs(-w)),
-        v(w, -t, zs(w)),
-        v(w, t, zs(w)),
-        v(-w, t, zs(-w)),
-      ],
-    },
-    {
-      id: "end",
-      normal: endNormal,
-      corners: [
-        v(-w, -t, ze(-w)),
-        v(-w, t, ze(-w)),
-        v(w, t, ze(w)),
-        v(w, -t, ze(w)),
-      ],
-    },
+    face("top", [v(-ws, t, zs(-ws, t)), v(ws, t, zs(ws, t)), v(we, t, ze(we, t)), v(-we, t, ze(-we, t))]),
+    face("bottom", [v(-ws, -t, zs(-ws, -t)), v(-we, -t, ze(-we, -t)), v(we, -t, ze(we, -t)), v(ws, -t, zs(ws, -t))]),
+    face("left", [v(-ws, -t, zs(-ws, -t)), v(-ws, t, zs(-ws, t)), v(-we, t, ze(-we, t)), v(-we, -t, ze(-we, -t))]),
+    face("right", [v(ws, -t, zs(ws, -t)), v(we, -t, ze(we, -t)), v(we, t, ze(we, t)), v(ws, t, zs(ws, t))]),
+    face("start", [v(-ws, -t, zs(-ws, -t)), v(ws, -t, zs(ws, -t)), v(ws, t, zs(ws, t)), v(-ws, t, zs(-ws, t))]),
+    face("end", [v(-we, -t, ze(-we, -t)), v(-we, t, ze(-we, t)), v(we, t, ze(we, t)), v(we, -t, ze(we, -t))]),
   ];
+}
+
+function outwardNormal(corners: Quad): Vec3 {
+  const guessed = normalize(cross(sub(corners[1], corners[0]), sub(corners[2], corners[0])));
+  const center = mul(corners.reduce((sum, corner) => add(sum, corner), v(0, 0, 0)), 0.25);
+  return dot(guessed, center) < 0 ? mul(guessed, -1) : guessed;
 }
 
 export function worldFaces(piece: Piece): WorldFace[] {
@@ -187,10 +153,17 @@ export function worldCorners(piece: Piece): Vec3[] {
 }
 
 /** UV in millimetres so a repeating grain texture stays a constant size. */
-function uvOf(face: FaceId, p: Vec3): [number, number] {
-  if (face === "top" || face === "bottom") return [p.x, p.z];
-  if (face === "left" || face === "right") return [p.z, p.y];
-  return [p.x, p.y];
+function uvOf(face: FaceId, p: Vec3, grain: "length" | "width"): [number, number] {
+  let u = p.x;
+  let vv = p.z;
+  if (face === "left" || face === "right") {
+    u = p.z;
+    vv = p.y;
+  } else if (face === "start" || face === "end") {
+    u = p.x;
+    vv = p.y;
+  }
+  return grain === "width" ? [vv, u] : [u, vv];
 }
 
 function wind(corners: Quad, outward: Vec3): Quad {
@@ -199,7 +172,8 @@ function wind(corners: Quad, outward: Vec3): Quad {
   return corners;
 }
 
-export function buildMesh(piece: Pick<Piece, "length" | "width" | "thickness" | "mitreStart" | "mitreEnd">): MeshData {
+export function buildMesh(piece: Piece): MeshData {
+  if (piece.outline && piece.outline.length >= 3) return extrudeOutline(piece.outline, piece.thickness, piece.finish?.grain ?? "length");
   const faces = localFaces(piece);
   const positions = new Float32Array(faces.length * 4 * 3);
   const normals = new Float32Array(faces.length * 4 * 3);
@@ -218,7 +192,7 @@ export function buildMesh(piece: Pick<Piece, "length" | "width" | "thickness" | 
       normals[p] = face.normal.x;
       normals[p + 1] = face.normal.y;
       normals[p + 2] = face.normal.z;
-      const [u, vv] = uvOf(face.id, corner);
+      const [u, vv] = uvOf(face.id, corner, piece.finish?.grain ?? "length");
       uvs[(base + i) * 2] = u / 180;
       uvs[(base + i) * 2 + 1] = vv / 180;
     });
@@ -234,6 +208,120 @@ export function buildMesh(piece: Pick<Piece, "length" | "width" | "thickness" | 
   });
 
   return { positions, normals, uvs, indices, groups };
+}
+
+/** Extrude a simple XZ polygon through the thickness. The outline is the bandsaw path. */
+export function extrudeOutline(outline: Array<{ x: number; z: number }>, thickness: number, grain: "length" | "width" = "length"): MeshData {
+  const triangles = triangulate(outline);
+  const n = outline.length;
+  const vertexCount = n * 6;
+  const positions = new Float32Array(vertexCount * 3);
+  const normals = new Float32Array(positions.length);
+  const uvs = new Float32Array(vertexCount * 2);
+  const indices: number[] = [];
+  const half = thickness / 2;
+  const write = (index: number, x: number, y: number, z: number, nx: number, ny: number, nz: number) => {
+    positions[index * 3] = x;
+    positions[index * 3 + 1] = y;
+    positions[index * 3 + 2] = z;
+    normals[index * 3] = nx;
+    normals[index * 3 + 1] = ny;
+    normals[index * 3 + 2] = nz;
+    const uv = grain === "width" ? [z, x] : [x, z];
+    uvs[index * 2] = uv[0] / 180;
+    uvs[index * 2 + 1] = uv[1] / 180;
+  };
+  outline.forEach((point, index) => {
+    write(index, point.x, half, point.z, 0, 1, 0);
+    write(n + index, point.x, -half, point.z, 0, -1, 0);
+  });
+  for (let i = 0; i < triangles.length; i += 3) {
+    indices.push(triangles[i], triangles[i + 1], triangles[i + 2]);
+    indices.push(n + triangles[i], n + triangles[i + 2], n + triangles[i + 1]);
+  }
+  const topIndexCount = indices.length;
+  for (let i = 0; i < n; i += 1) {
+    const next = (i + 1) % n;
+    const edge = sub(v(outline[next].x, 0, outline[next].z), v(outline[i].x, 0, outline[i].z));
+    const normal = mul(normalize(cross(edge, v(0, 1, 0))), -1);
+    const base = n * 2 + i * 4;
+    const quad = [
+      v(outline[i].x, -half, outline[i].z),
+      v(outline[next].x, -half, outline[next].z),
+      v(outline[next].x, half, outline[next].z),
+      v(outline[i].x, half, outline[i].z),
+    ];
+    quad.forEach((corner, cornerIndex) => write(base + cornerIndex, corner.x, corner.y, corner.z, normal.x, normal.y, normal.z));
+    indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
+  }
+  return {
+    positions,
+    normals,
+    uvs,
+    indices: new Uint32Array(indices),
+    groups: [
+      { start: 0, count: topIndexCount, materialIndex: 0 },
+      { start: topIndexCount, count: indices.length - topIndexCount, materialIndex: 1 },
+    ],
+  };
+}
+
+function triangulate(poly: Array<{ x: number; z: number }>): number[] {
+  const index = poly.map((_, i) => i);
+  const triangles: number[] = [];
+  const ccw = signedArea(poly) > 0;
+  let guard = 0;
+  while (index.length > 3 && guard < 800) {
+    guard += 1;
+    let clipped = false;
+    for (let i = 0; i < index.length; i += 1) {
+      const i0 = index[(i + index.length - 1) % index.length];
+      const i1 = index[i];
+      const i2 = index[(i + 1) % index.length];
+      if (!isEar(poly, index, i0, i1, i2, ccw)) continue;
+      triangles.push(i0, i1, i2);
+      index.splice(i, 1);
+      clipped = true;
+      break;
+    }
+    if (!clipped) break;
+  }
+  if (index.length === 3) triangles.push(index[0], index[1], index[2]);
+  return triangles;
+}
+
+function signedArea(poly: Array<{ x: number; z: number }>): number {
+  let area = 0;
+  for (let i = 0; i < poly.length; i += 1) {
+    const next = poly[(i + 1) % poly.length];
+    area += poly[i].x * next.z - next.x * poly[i].z;
+  }
+  return area / 2;
+}
+
+function isEar(poly: Array<{ x: number; z: number }>, live: number[], i0: number, i1: number, i2: number, ccw: boolean): boolean {
+  const a = poly[i0];
+  const b = poly[i1];
+  const c = poly[i2];
+  const cross2 = (b.x - a.x) * (c.z - a.z) - (b.z - a.z) * (c.x - a.x);
+  if (ccw ? cross2 <= 1e-6 : cross2 >= -1e-6) return false;
+  for (const index of live) {
+    if (index === i0 || index === i1 || index === i2) continue;
+    if (pointInTriangle(poly[index], a, b, c)) return false;
+  }
+  return true;
+}
+
+function pointInTriangle(
+  p: { x: number; z: number },
+  a: { x: number; z: number },
+  b: { x: number; z: number },
+  c: { x: number; z: number },
+): boolean {
+  const ab = (b.x - a.x) * (p.z - a.z) - (b.z - a.z) * (p.x - a.x);
+  const bc = (c.x - b.x) * (p.z - b.z) - (c.z - b.z) * (p.x - b.x);
+  const ca = (a.x - c.x) * (p.z - c.z) - (a.z - c.z) * (p.x - c.x);
+  return (ab >= -1e-6 && bc >= -1e-6 && ca >= -1e-6) || (ab <= 1e-6 && bc <= 1e-6 && ca <= 1e-6);
 }
 
 export interface FaceUv {

@@ -3,6 +3,8 @@ import { create } from "zustand";
 import { defaultCatalog } from "../domain/catalog.ts";
 import { sampleFrame } from "../domain/example.ts";
 import { uid } from "../domain/math.ts";
+import { circleOutline, curveCut, edgeProfile, HARDWARE_CATALOG, placeHardware, planJoint, routeCut, taperPiece } from "../domain/features.ts";
+import { localToWorld } from "../domain/geometry.ts";
 import {
   addStockPiece,
   connectedIds,
@@ -13,17 +15,26 @@ import {
   withoutPiece,
 } from "../domain/operations.ts";
 import { emptyProject, loadStoredProject } from "../domain/project-io.ts";
-import type { Fastener, Hole, ProjectData, StockItem, Vec3Tuple } from "../domain/types.ts";
+import type { FaceId, Fastener, FastenerType, Finish, Hole, Piece, ProjectData, RouterCut, StockItem, Vec3Tuple, XZPoint } from "../domain/types.ts";
 
-type Snapshot = Pick<ProjectData, "name" | "kerf" | "catalog" | "boards" | "pieces" | "fasteners">;
+type Snapshot = Pick<ProjectData, "name" | "kerf" | "catalog" | "boards" | "pieces" | "fasteners" | "hardware">;
 
 export type ActionResult = { ok: true; message?: string; selectId?: string } | { ok: false; message: string };
 
 interface ProjectState extends Snapshot {
   addStock: (stockId: string, length: number) => ActionResult;
-  cutPiece: (pieceId: string, mode: "crosscut" | "rip", distance: number, mitre: number) => ActionResult;
+  cutPiece: (pieceId: string, mode: "crosscut" | "rip", distance: number, mitre: number, bevel?: number) => ActionResult;
+  taper: (pieceId: string, widthAtStart: number, widthAtEnd: number) => ActionResult;
+  curve: (pieceId: string, points: Array<{ u: number; v: number }>, waste: "left" | "right") => ActionResult;
   drillHole: (pieceId: string, input: Omit<Hole, "id">) => ActionResult;
-  addScrew: (input: Omit<Fastener, "id" | "type">) => ActionResult;
+  addRoute: (pieceId: string, input: Omit<RouterCut, "id">) => ActionResult;
+  addProfile: (pieceId: string, profile: "round-over" | "chamfer" | "cove", edge: "left" | "right" | "start" | "end", radius: number) => ActionResult;
+  join: (kind: "mortise-tenon" | "half-lap" | "dovetail" | "dowels", firstId: string, firstFace: FaceId, firstUv: { u: number; v: number }, secondId: string, secondFace: FaceId, secondUv: { u: number; v: number }, dowelDiameter?: number) => ActionResult;
+  addScrew: (input: Omit<Fastener, "id" | "type"> & { type?: FastenerType }) => ActionResult;
+  addHardware: (catalogId: string, pieceId: string, face: FaceId, uv: { u: number; v: number }) => ActionResult;
+  setFinish: (pieceId: string, finish: Finish) => void;
+  removeRoute: (pieceId: string, routeId: string) => void;
+  removeHardware: (hardwareId: string) => void;
   removeHole: (pieceId: string, holeId: string) => void;
   removeFastener: (fastenerId: string) => void;
   deletePiece: (pieceId: string) => void;
@@ -51,6 +62,7 @@ export const useProject = create<ProjectState>()(
       boards: restored.boards,
       pieces: restored.pieces,
       fasteners: restored.fasteners,
+      hardware: restored.hardware ?? [],
 
       addStock: (stockId, length) => {
         const stock = get().catalog.find((item) => item.id === stockId);
@@ -64,10 +76,10 @@ export const useProject = create<ProjectState>()(
         return { ok: true, selectId: created.piece.id, message: `${created.piece.name} is on the bench.` };
       },
 
-      cutPiece: (pieceId, mode, distance, mitre) => {
+      cutPiece: (pieceId, mode, distance, mitre, bevel = 0) => {
         const piece = get().pieces.find((item) => item.id === pieceId);
         if (!piece) return { ok: false, message: "Select a piece first." };
-        const result = mode === "rip" ? rip(piece, distance, get().kerf) : crosscut(piece, distance, mitre, get().kerf);
+        const result = mode === "rip" ? rip(piece, distance, get().kerf) : crosscut(piece, distance, mitre, get().kerf, bevel);
         if (!result.ok) return { ok: false, message: result.reason };
         const dropped = dropFasteners(get().fasteners, pieceId);
         set({
@@ -82,23 +94,98 @@ export const useProject = create<ProjectState>()(
         };
       },
 
+      taper: (pieceId, widthAtStart, widthAtEnd) => {
+        const piece = get().pieces.find((item) => item.id === pieceId);
+        if (!piece) return { ok: false, message: "Select a piece to taper." };
+        const result = taperPiece(piece, widthAtStart, widthAtEnd);
+        if ("error" in result) return { ok: false, message: result.error };
+        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? result.piece : item)) });
+        return { ok: true, message: `Tapered from ${Math.round(widthAtStart)} mm to ${Math.round(widthAtEnd)} mm.` };
+      },
+
+      curve: (pieceId, points, waste) => {
+        const piece = get().pieces.find((item) => item.id === pieceId);
+        if (!piece) return { ok: false, message: "Select a piece, then draw the cut on its face." };
+        const result = curveCut(piece, points, waste);
+        if ("error" in result) return { ok: false, message: result.error };
+        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? result.piece : item)) });
+        return { ok: true, message: "Curved cut. The waste side is off the piece." };
+      },
+
       drillHole: (pieceId, input) => {
         const piece = get().pieces.find((item) => item.id === pieceId);
         if (!piece) return { ok: false, message: "Click a piece to drill." };
         const result = makeHole(piece, input);
         if ("error" in result) return { ok: false, message: result.error };
+        const extra = input.style === "hole-saw" ? holeSawDisc(piece, result.hole) : null;
         set({
-          pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, holes: [...item.holes, result.hole] } : item)),
+          pieces: [
+            ...get().pieces.map((item) => (item.id === pieceId ? { ...item, holes: [...item.holes, result.hole] } : item)),
+            ...(extra ? [extra] : []),
+          ],
         });
-        return { ok: true, message: `⌀${trim(input.diameter)} hole, ${input.through ? "through" : `${trim(result.hole.depth)} mm deep`}.` };
+        const label = input.style === "countersink" ? "Countersink" : input.style === "forstner" ? "Forstner" : input.style === "hole-saw" ? "Hole saw" : "Hole";
+        return { ok: true, selectId: extra?.id, message: `${label} ⌀${trim(input.diameter)}${extra ? ". The plug is a separate piece." : "."}` };
+      },
+
+      addRoute: (pieceId, input) => {
+        const piece = get().pieces.find((item) => item.id === pieceId);
+        if (!piece) return { ok: false, message: "Select a piece to rout." };
+        const result = routeCut(piece, input);
+        if ("error" in result) return { ok: false, message: result.error };
+        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, routes: [...(item.routes ?? []), result.route] } : item)) });
+        return { ok: true, message: `${input.kind[0].toUpperCase()}${input.kind.slice(1)} cut, ${trim(input.width)} mm wide and ${trim(input.depth)} mm deep.` };
+      },
+
+      addProfile: (pieceId, profile, edge, radius) => {
+        const piece = get().pieces.find((item) => item.id === pieceId);
+        if (!piece) return { ok: false, message: "Select a piece for the edge profile." };
+        const result = edgeProfile({ profile, edge, radius }, piece.thickness);
+        if ("error" in result) return { ok: false, message: result.error };
+        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, profiles: [...(item.profiles ?? []), result.profile] } : item)) });
+        return { ok: true, message: `${profile} on the ${edge} edge.` };
+      },
+
+      join: (kind, firstId, firstFace, firstUv, secondId, secondFace, secondUv, dowelDiameter = 8) => {
+        const first = get().pieces.find((item) => item.id === firstId);
+        const second = get().pieces.find((item) => item.id === secondId);
+        if (!first || !second) return { ok: false, message: "Click two pieces." };
+        const plan = planJoint(kind, first, firstFace, firstUv, second, secondFace, secondUv, dowelDiameter);
+        if ("error" in plan) return { ok: false, message: plan.error };
+        const byId = new Map(plan.pieces.map((item) => [item.id, item]));
+        set({ pieces: get().pieces.map((item) => byId.get(item.id) ?? item) });
+        return { ok: true, message: jointMessage(kind) };
       },
 
       addScrew: (input) => {
-        if (input.pieceAId === input.pieceBId) return { ok: false, message: "A screw needs two pieces." };
-        const screw: Fastener = { ...input, id: uid("screw"), type: "screw" };
+        if (input.type !== "glue" && input.pieceAId === input.pieceBId) return { ok: false, message: "That fastener needs two pieces." };
+        const screw: Fastener = { ...input, id: uid(input.type ?? "screw"), type: input.type ?? "screw" };
         set({ fasteners: [...get().fasteners, screw] });
-        return { ok: true, message: "Screwed. Those pieces now move as one." };
+        const verb = screw.type === "glue" ? "Glued" : screw.type === "bolt" ? "Bolted" : screw.type === "pocket-screw" ? "Pocket-screwed" : "Screwed";
+        return { ok: true, message: `${verb}. Those pieces now move as one.` };
       },
+
+      addHardware: (catalogId, pieceId, face, uv) => {
+        const offer = HARDWARE_CATALOG.find((item) => item.id === catalogId);
+        const piece = get().pieces.find((item) => item.id === pieceId);
+        if (!offer || !piece) return { ok: false, message: "Pick a piece of hardware and a face." };
+        const mate = nearestMate(piece, get().pieces);
+        const item = placeHardware(offer, piece, face, uv, mate);
+        set({ hardware: [...get().hardware, item] });
+        return { ok: true, message: `${offer.name} placed${mate ? ` against ${mate.name}` : ""}.` };
+      },
+
+      setFinish: (pieceId, finish) => {
+        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, finish } : item)) });
+      },
+
+      removeRoute: (pieceId, routeId) => {
+        set({
+          pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, routes: (item.routes ?? []).filter((route) => route.id !== routeId), profiles: (item.profiles ?? []).filter((profile) => profile.id !== routeId) } : item)),
+        });
+      },
+
+      removeHardware: (hardwareId) => set({ hardware: get().hardware.filter((item) => item.id !== hardwareId) }),
 
       removeHole: (pieceId, holeId) => {
         set({
@@ -113,7 +200,7 @@ export const useProject = create<ProjectState>()(
       },
 
       deletePiece: (pieceId) => {
-        const next = withoutPiece(get().pieces, get().boards, get().fasteners, pieceId);
+        const next = withoutPiece(get().pieces, get().boards, get().fasteners, pieceId, get().hardware);
         set(next);
       },
 
@@ -154,6 +241,7 @@ export const useProject = create<ProjectState>()(
           boards: project.boards,
           pieces: project.pieces,
           fasteners: project.fasteners,
+          hardware: project.hardware ?? [],
         });
       },
 
@@ -165,6 +253,7 @@ export const useProject = create<ProjectState>()(
           boards: [],
           pieces: [],
           fasteners: [],
+          hardware: [],
         });
       },
 
@@ -176,6 +265,7 @@ export const useProject = create<ProjectState>()(
           boards: frame.boards,
           pieces: frame.pieces,
           fasteners: frame.fasteners,
+          hardware: frame.hardware ?? [],
         });
       },
 
@@ -189,6 +279,7 @@ export const useProject = create<ProjectState>()(
         boards: get().boards,
         pieces: get().pieces,
         fasteners: get().fasteners,
+        hardware: get().hardware,
       }),
     }),
     {
@@ -200,11 +291,13 @@ export const useProject = create<ProjectState>()(
         boards: state.boards,
         pieces: state.pieces,
         fasteners: state.fasteners,
+        hardware: state.hardware,
       }),
       equality: (past, current) =>
         past.boards === current.boards &&
         past.pieces === current.pieces &&
         past.fasteners === current.fasteners &&
+        past.hardware === current.hardware &&
         past.catalog === current.catalog &&
         past.name === current.name &&
         past.kerf === current.kerf,
@@ -214,7 +307,7 @@ export const useProject = create<ProjectState>()(
 
 export function assemblyOf(pieceId: string | null): string[] {
   if (!pieceId) return [];
-  return connectedIds(useProject.getState().fasteners, pieceId);
+  return connectedIds(useProject.getState().fasteners, pieceId, useProject.getState().pieces);
 }
 
 function sameTuple(a: Vec3Tuple, b: Vec3Tuple): boolean {
@@ -224,5 +317,52 @@ function sameTuple(a: Vec3Tuple, b: Vec3Tuple): boolean {
 function trim(n: number): string {
   const rounded = Math.round(n * 10) / 10;
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
+function holeSawDisc(piece: Piece, hole: Hole): Piece {
+  const beside = localToWorld(piece, { x: piece.width / 2 + hole.diameter / 2 + 20, y: piece.thickness / 2, z: hole.v - piece.length / 2 });
+  const outline: XZPoint[] = circleOutline(hole.diameter);
+  return {
+    ...piece,
+    id: uid("piece"),
+    name: `${piece.name} plug ⌀${Math.round(hole.diameter)}`,
+    width: hole.diameter,
+    widthStart: hole.diameter,
+    widthEnd: hole.diameter,
+    length: hole.diameter,
+    outline,
+    holes: [],
+    routes: [],
+    profiles: [],
+    joinery: [],
+    mitreStart: 0,
+    mitreEnd: 0,
+    bevelStart: 0,
+    bevelEnd: 0,
+    position: [beside.x, beside.y, beside.z],
+    spanStart: piece.spanStart,
+    spanEnd: piece.spanStart,
+  };
+}
+
+function nearestMate(piece: Piece, pieces: Piece[]): Piece | undefined {
+  let best: Piece | undefined;
+  let bestDistance = 40;
+  for (const other of pieces) {
+    if (other.id === piece.id) continue;
+    const distance = Math.hypot(other.position[0] - piece.position[0], other.position[1] - piece.position[1], other.position[2] - piece.position[2]);
+    if (distance < bestDistance) {
+      best = other;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
+function jointMessage(kind: "mortise-tenon" | "half-lap" | "dovetail" | "dowels"): string {
+  if (kind === "mortise-tenon") return "Mortise and tenon. The rail moved so the tenon meets the mortise.";
+  if (kind === "half-lap") return "Half-laps cut. Each piece lost half its thickness.";
+  if (kind === "dovetail") return "One dovetail tail and its pin socket.";
+  return "Two dowels, paired on both faces.";
 }
 

@@ -52,6 +52,7 @@ function useAutosave() {
 function useSawDefaults() {
   const selection = useUi((state) => state.selection);
   const sawMode = useUi((state) => state.sawMode);
+  const sawBevel = useUi((state) => state.sawBevel);
   useEffect(() => {
     const piece = useProject.getState().pieces.find((item) => item.id === selection);
     if (!piece) return;
@@ -62,10 +63,10 @@ function useSawDefaults() {
       ui.setSawDistance(clamp(Math.round(piece.width / 2), MIN_PART_MM, Math.max(MIN_PART_MM, max)));
       return;
     }
-    const consumed = kerfAlong(kerf, ui.sawMitre);
+    const consumed = kerfAlong(kerf, ui.sawMitre, sawBevel);
     const max = piece.length - consumed - MIN_PART_MM;
     ui.setSawDistance(clamp(Math.round(piece.length / 2), MIN_PART_MM, Math.max(MIN_PART_MM, max)));
-  }, [selection, sawMode]);
+  }, [selection, sawMode, sawBevel]);
 }
 
 function useHotkeys() {
@@ -106,9 +107,10 @@ function useHotkeys() {
         if (!piece) return;
         const ui = useUi.getState();
         const kerf = useProject.getState().kerf;
-        const consumed = ui.sawMode === "crosscut" ? kerfAlong(kerf, ui.sawMitre) : kerf;
+        if (ui.sawMode === "taper" || ui.sawMode === "curve") return;
+        const consumed = ui.sawMode === "crosscut" ? kerfAlong(kerf, ui.sawMitre, ui.sawBevel) : kerf;
         const distance = ui.sawMode === "rip" || ui.sawFrom === "start" ? ui.sawDistance : piece.length - ui.sawDistance - consumed;
-        const result = useProject.getState().cutPiece(piece.id, ui.sawMode, distance, ui.sawMode === "crosscut" ? ui.sawMitre : 0);
+        const result = useProject.getState().cutPiece(piece.id, ui.sawMode, distance, ui.sawMode === "crosscut" ? ui.sawMitre : 0, ui.sawBevel);
         if (!result.ok) toast.error(result.message);
         else {
           toast.success(result.message ?? "Cut");
@@ -116,7 +118,7 @@ function useHotkeys() {
         }
         return;
       }
-      const tools = { "1": "select", "2": "saw", "3": "drill", "4": "screw" } as const;
+      const tools = { "1": "select", "2": "saw", "3": "drill", "4": "screw", "5": "router", "6": "joint", "7": "hardware" } as const;
       if (key in tools) useUi.getState().setTool(tools[key as keyof typeof tools]);
       if (key === "escape") useUi.getState().setTool("select");
       if (key === "t") useUi.getState().setTransformMode("translate");

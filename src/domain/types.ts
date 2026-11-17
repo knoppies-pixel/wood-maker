@@ -36,6 +36,8 @@ export interface Board {
   sheet: boolean;
 }
 
+export type HoleStyle = "twist" | "countersink" | "forstner" | "hole-saw";
+
 export interface Hole {
   id: string;
   face: FaceId;
@@ -51,7 +53,69 @@ export interface Hole {
   /** mm into the face, along the inward normal. */
   depth: number;
   through: boolean;
+  /** Twist bit unless a countersink, Forstner or hole saw was chosen. */
+  style: HoleStyle;
+  /** Countersink mouth, Forstner rim, or hole-saw pilot, in mm. */
+  secondaryDiameter?: number;
 }
+
+/** A slot or step left by a router. */
+export interface RouterCut {
+  id: string;
+  kind: "dado" | "groove" | "rebate";
+  face: FaceId;
+  /** Across-face position of the slot centre, mm from the face origin. */
+  u: number;
+  /** Along-face position of the slot start, mm from the face origin. */
+  v: number;
+  length: number;
+  width: number;
+  depth: number;
+  /** Rebate only: which edge the step is taken from. */
+  edge?: "left" | "right" | "start" | "end";
+}
+
+export type ProfileName = "round-over" | "chamfer" | "cove";
+
+export interface EdgeProfile {
+  id: string;
+  profile: ProfileName;
+  edge: "left" | "right" | "start" | "end";
+  radius: number;
+}
+
+export interface XZPoint {
+  x: number;
+  z: number;
+}
+
+export type JointKind = "mortise" | "tenon" | "half-lap" | "dovetail-tail" | "dovetail-pin" | "dowel";
+
+/** One half of a paired joint. The mate carries the same pairId. */
+export interface JoineryFeature {
+  id: string;
+  pairId: string;
+  matePieceId: string;
+  kind: JointKind;
+  face: FaceId;
+  u: number;
+  v: number;
+  width: number;
+  height: number;
+  depth: number;
+  /** Dovetail slope, degrees from square. */
+  angle?: number;
+}
+
+export interface Finish {
+  grain: "length" | "width";
+  treatment: "bare" | "stain" | "paint";
+  /** Multiplies the wood texture. Bare is white so the species colour shows through. */
+  color: string;
+  label: string;
+}
+
+export const BARE_FINISH: Finish = { grain: "length", treatment: "bare", color: "#ffffff", label: "Bare" };
 
 export interface Piece {
   id: string;
@@ -68,11 +132,23 @@ export interface Piece {
   mitreStart: number;
   /** Degrees from square at the far end (local +Z). */
   mitreEnd: number;
+  /** Bevel at the reference end. Positive lifts the top corner toward +Z. Degrees. */
+  bevelStart: number;
+  bevelEnd: number;
+  /** Width at the reference end and the far end. Equal when the piece is not tapered. */
+  widthStart: number;
+  widthEnd: number;
+  /** Bandsaw or jigsaw outline in local XZ. Null keeps the rectangular section. */
+  outline: XZPoint[] | null;
   /** World position of the piece centre, mm. */
   position: Vec3Tuple;
   /** Euler XYZ radians, matching three.js. */
   rotation: Vec3Tuple;
   holes: Hole[];
+  routes: RouterCut[];
+  profiles: EdgeProfile[];
+  joinery: JoineryFeature[];
+  finish: Finish;
   /**
    * Interval this part still occupies on the purchased board's length.
    * Kerf gaps are not included. Rips share a span.
@@ -81,18 +157,40 @@ export interface Piece {
   spanEnd: number;
 }
 
+export type FastenerType = "screw" | "pocket-screw" | "bolt" | "glue";
+
 export interface Fastener {
   id: string;
-  type: "screw";
-  /** Piece the head sits on. */
+  type: FastenerType;
+  /** Piece the head sits on. Glue uses the face that was brushed. */
   pieceAId: string;
   pieceBId: string;
   /** Head centre in piece A local space. */
   localPosition: Vec3Tuple;
-  /** Unit direction the screw travels, in piece A local space. */
+  /** Unit direction the fastener travels, in piece A local space. */
   localDirection: Vec3Tuple;
   diameter: number;
   length: number;
+  /** Pocket-screw angle down from the face, degrees. */
+  angle?: number;
+}
+
+export type HardwareKind = "hinge" | "drawer-slide" | "handle";
+
+export interface HardwareItem {
+  id: string;
+  catalogId: string;
+  kind: HardwareKind;
+  name: string;
+  pieceId: string;
+  matePieceId?: string;
+  face: FaceId;
+  u: number;
+  v: number;
+  width: number;
+  height: number;
+  depth: number;
+  price: number;
 }
 
 export interface ProjectData {
@@ -105,6 +203,7 @@ export interface ProjectData {
   boards: Board[];
   pieces: Piece[];
   fasteners: Fastener[];
+  hardware: HardwareItem[];
 }
 
 export const MIN_PART_MM = 5;

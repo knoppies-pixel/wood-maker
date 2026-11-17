@@ -1,7 +1,10 @@
 import { create } from "zustand";
-import type { FaceId, Vec3Tuple } from "../domain/types.ts";
+import type { FaceId, FastenerType, HoleStyle, ProfileName, Vec3Tuple } from "../domain/types.ts";
 
-export type ToolId = "select" | "saw" | "drill" | "screw";
+export type ToolId = "select" | "saw" | "drill" | "screw" | "router" | "joint" | "hardware";
+export type SawMode = "crosscut" | "rip" | "taper" | "curve";
+export type RouterMode = "dado" | "groove" | "rebate" | "profile";
+export type JointMode = "mortise-tenon" | "half-lap" | "dovetail" | "dowels";
 export type InspectorTab = "piece" | "cuts" | "shop" | "screws";
 
 export interface DragPose {
@@ -30,12 +33,30 @@ interface UiState {
   sawDistance: number;
   sawMitre: number;
   sawFrom: "start" | "end";
-  sawMode: "crosscut" | "rip";
+  sawMode: SawMode;
+  sawBevel: number;
+  taperStart: number;
+  taperEnd: number;
+  curvePoints: Array<{ u: number; v: number }>;
+  curveWaste: "left" | "right";
   drillDiameter: number;
   drillDepth: number;
   drillThrough: boolean;
+  drillStyle: HoleStyle;
+  countersinkDiameter: number;
   screwDiameter: number;
   screwLength: number;
+  fastenerKind: FastenerType;
+  routerKind: RouterMode;
+  routerWidth: number;
+  routerDepth: number;
+  routerLength: number;
+  profile: ProfileName;
+  profileEdge: "left" | "right" | "start" | "end";
+  profileRadius: number;
+  jointKind: JointMode;
+  jointFirst: { pieceId: string; face: FaceId; u: number; v: number } | null;
+  hardwareId: string;
   stockOpen: boolean;
   inspectorOpen: boolean;
   tab: InspectorTab;
@@ -53,12 +74,30 @@ interface UiState {
   setSawDistance: (distance: number) => void;
   setSawMitre: (mitre: number) => void;
   setSawFrom: (from: "start" | "end") => void;
-  setSawMode: (mode: "crosscut" | "rip") => void;
+  setSawMode: (mode: SawMode) => void;
+  setSawBevel: (bevel: number) => void;
+  setTaperStart: (width: number) => void;
+  setTaperEnd: (width: number) => void;
+  setCurvePoints: (points: Array<{ u: number; v: number }>) => void;
+  setCurveWaste: (waste: "left" | "right") => void;
   setDrillDiameter: (diameter: number) => void;
   setDrillDepth: (depth: number) => void;
   setDrillThrough: (through: boolean) => void;
+  setDrillStyle: (style: HoleStyle) => void;
+  setCountersinkDiameter: (diameter: number) => void;
   setScrewDiameter: (diameter: number) => void;
   setScrewLength: (length: number) => void;
+  setFastenerKind: (kind: FastenerType) => void;
+  setRouterKind: (kind: RouterMode) => void;
+  setRouterWidth: (width: number) => void;
+  setRouterDepth: (depth: number) => void;
+  setRouterLength: (length: number) => void;
+  setProfile: (profile: ProfileName) => void;
+  setProfileEdge: (edge: "left" | "right" | "start" | "end") => void;
+  setProfileRadius: (radius: number) => void;
+  setJointKind: (kind: JointMode) => void;
+  setJointFirst: (hit: { pieceId: string; face: FaceId; u: number; v: number } | null) => void;
+  setHardwareId: (id: string) => void;
   setStockOpen: (open: boolean) => void;
   setInspectorOpen: (open: boolean) => void;
   setTab: (tab: InspectorTab) => void;
@@ -80,11 +119,29 @@ export const useUi = create<UiState>((set) => ({
   sawMitre: 0,
   sawFrom: "start",
   sawMode: "crosscut",
+  sawBevel: 0,
+  taperStart: 76,
+  taperEnd: 38,
+  curvePoints: [],
+  curveWaste: "left",
   drillDiameter: 5,
   drillDepth: 18,
   drillThrough: false,
+  drillStyle: "twist",
+  countersinkDiameter: 12,
   screwDiameter: 4,
   screwLength: 50,
+  fastenerKind: "screw",
+  routerKind: "dado",
+  routerWidth: 12,
+  routerDepth: 6,
+  routerLength: 80,
+  profile: "round-over",
+  profileEdge: "left",
+  profileRadius: 6,
+  jointKind: "mortise-tenon",
+  jointFirst: null,
+  hardwareId: "butt-hinge-60",
   stockOpen: false,
   inspectorOpen: false,
   tab: "piece",
@@ -103,11 +160,29 @@ export const useUi = create<UiState>((set) => ({
   setSawMitre: (sawMitre) => set({ sawMitre }),
   setSawFrom: (sawFrom) => set({ sawFrom }),
   setSawMode: (sawMode) => set({ sawMode }),
+  setSawBevel: (sawBevel) => set({ sawBevel }),
+  setTaperStart: (taperStart) => set({ taperStart }),
+  setTaperEnd: (taperEnd) => set({ taperEnd }),
+  setCurvePoints: (curvePoints) => set({ curvePoints }),
+  setCurveWaste: (curveWaste) => set({ curveWaste }),
   setDrillDiameter: (drillDiameter) => set({ drillDiameter }),
   setDrillDepth: (drillDepth) => set({ drillDepth }),
   setDrillThrough: (drillThrough) => set({ drillThrough }),
+  setDrillStyle: (drillStyle) => set({ drillStyle }),
+  setCountersinkDiameter: (countersinkDiameter) => set({ countersinkDiameter }),
   setScrewDiameter: (screwDiameter) => set({ screwDiameter }),
   setScrewLength: (screwLength) => set({ screwLength }),
+  setFastenerKind: (fastenerKind) => set({ fastenerKind }),
+  setRouterKind: (routerKind) => set({ routerKind }),
+  setRouterWidth: (routerWidth) => set({ routerWidth }),
+  setRouterDepth: (routerDepth) => set({ routerDepth }),
+  setRouterLength: (routerLength) => set({ routerLength }),
+  setProfile: (profile) => set({ profile }),
+  setProfileEdge: (profileEdge) => set({ profileEdge }),
+  setProfileRadius: (profileRadius) => set({ profileRadius }),
+  setJointKind: (jointKind) => set({ jointKind, jointFirst: null }),
+  setJointFirst: (jointFirst) => set({ jointFirst }),
+  setHardwareId: (hardwareId) => set({ hardwareId }),
   setStockOpen: (stockOpen) => set({ stockOpen }),
   setInspectorOpen: (inspectorOpen) => set({ inspectorOpen }),
   setTab: (tab) => set({ tab, inspectorOpen: true }),

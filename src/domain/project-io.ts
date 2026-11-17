@@ -1,5 +1,6 @@
 import { parseCatalog } from "./catalog.ts";
-import type { Board, Fastener, Hole, Piece, ProjectData, StockItem, Vec3Tuple } from "./types.ts";
+import { normalizePiece } from "./features.ts";
+import type { Board, Fastener, FastenerType, HardwareItem, Hole, Piece, ProjectData, StockItem, Vec3Tuple } from "./types.ts";
 
 const STORAGE_KEY = "benchwork.project.v1";
 
@@ -14,6 +15,7 @@ export function emptyProject(catalog: StockItem[]): ProjectData {
     boards: [],
     pieces: [],
     fasteners: [],
+    hardware: [],
   };
 }
 
@@ -30,8 +32,9 @@ export function parseProject(input: unknown, fallbackCatalog: StockItem[]): { pr
   const catalogParsed = record.catalog ? parseCatalog(record.catalog) : { items: fallbackCatalog };
   if ("error" in catalogParsed) return { error: catalogParsed.error };
   const boards = Array.isArray(record.boards) ? record.boards.filter(isBoard) : [];
-  const pieces = Array.isArray(record.pieces) ? record.pieces.filter(isPiece) : [];
+  const pieces = Array.isArray(record.pieces) ? record.pieces.filter(isPiece).map((piece) => normalizePiece(piece)) : [];
   const fasteners = Array.isArray(record.fasteners) ? record.fasteners.filter(isFastener) : [];
+  const hardware = Array.isArray(record.hardware) ? record.hardware.filter(isHardware) : [];
   const kerf = typeof record.kerf === "number" && record.kerf >= 0 && record.kerf < 20 ? record.kerf : 3;
   return {
     project: {
@@ -44,6 +47,7 @@ export function parseProject(input: unknown, fallbackCatalog: StockItem[]): { pr
       boards,
       pieces,
       fasteners,
+      hardware,
     },
   };
 }
@@ -110,5 +114,12 @@ function isPiece(value: unknown): value is Piece {
 function isFastener(value: unknown): value is Fastener {
   if (!value || typeof value !== "object") return false;
   const fastener = value as Fastener;
-  return fastener.type === "screw" && typeof fastener.pieceAId === "string" && typeof fastener.pieceBId === "string" && isTuple(fastener.localPosition) && isTuple(fastener.localDirection);
+  const kinds: FastenerType[] = ["screw", "pocket-screw", "bolt", "glue"];
+  return kinds.includes(fastener.type) && typeof fastener.pieceAId === "string" && typeof fastener.pieceBId === "string" && isTuple(fastener.localPosition) && isTuple(fastener.localDirection);
+}
+
+function isHardware(value: unknown): value is HardwareItem {
+  if (!value || typeof value !== "object") return false;
+  const item = value as HardwareItem;
+  return typeof item.id === "string" && typeof item.pieceId === "string" && typeof item.kind === "string";
 }

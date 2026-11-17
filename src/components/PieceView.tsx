@@ -7,6 +7,7 @@ import { buildMesh, faceUvFromLocal, holeLocalPoint, inwardNormal } from "../dom
 import type { Hole, Piece } from "../domain/types.ts";
 import { useProject } from "../store/useProject.ts";
 import { useUi, type HoverHit } from "../store/useUi.ts";
+import { FeatureMarks, HardwareMarks } from "./FeatureMarks.tsx";
 import { woodMaps } from "./wood.ts";
 
 export const pieceGroups = new Map<string, THREE.Group>();
@@ -20,8 +21,15 @@ export function PieceView({ piece }: { piece: Piece }) {
   const mate = !selected && selection !== null && joined(fasteners, selection, piece.id);
   const position = drag?.position ?? piece.position;
   const rotation = drag?.rotation ?? piece.rotation;
-  const geometry = useMemo(() => toGeometry(piece), [piece.length, piece.width, piece.thickness, piece.mitreStart, piece.mitreEnd]);
+  const geometry = useMemo(() => toGeometry(piece), [piece]);
   const maps = useMemo(() => woodMaps(piece.species), [piece.species]);
+  const faceMap = useMemo(() => {
+    const map = maps.face.clone();
+    map.needsUpdate = true;
+    return map;
+  }, [maps]);
+  const tint = piece.finish?.treatment === "bare" ? "#ffffff" : piece.finish?.color ?? "#ffffff";
+  const hardware = useProject((state) => state.hardware);
   const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -58,13 +66,15 @@ export function PieceView({ piece }: { piece: Piece }) {
           if (hover?.pieceId === piece.id) useUi.getState().setHover(null);
         }}
       >
-        <meshStandardMaterial attach="material-0" map={maps.face} roughness={0.86} metalness={0} emissive={selected ? "#6a3b16" : "#000000"} emissiveIntensity={selected ? 0.12 : 0} />
-        <meshStandardMaterial attach="material-1" map={maps.edge} roughness={0.92} metalness={0} />
+        <meshStandardMaterial attach="material-0" map={faceMap} color={tint} roughness={piece.finish?.treatment === "paint" ? 0.45 : 0.86} metalness={0} emissive={selected ? "#6a3b16" : "#000000"} emissiveIntensity={selected ? 0.12 : 0} />
+        <meshStandardMaterial attach="material-1" map={maps.edge} color={tint} roughness={0.92} metalness={0} />
         {(selected || mate) && <Edges threshold={20} color={selected ? "#7a3414" : "#c4844a"} />}
       </mesh>
-      {piece.holes.map((hole) => (
+      {(piece.holes ?? []).map((hole) => (
         <HoleMark key={hole.id} piece={piece} hole={hole} />
       ))}
+      <FeatureMarks piece={piece} />
+      <HardwareMarks piece={piece} items={hardware ?? []} />
     </group>
   );
 }
@@ -81,6 +91,18 @@ function HoleMark({ piece, hole }: { piece: Piece; hole: Hole }) {
     [inward.x, inward.y, inward.z],
   );
   const radius = hole.diameter / 2;
+  const style = hole.style ?? "twist";
+  const mouthRadius = (hole.secondaryDiameter ?? hole.diameter * (style === "countersink" ? 2 : 1.15)) / 2;
+  if (style === "hole-saw") {
+    return (
+      <group position={[point.x, point.y, point.z]}>
+        <mesh quaternion={mouth} raycast={() => null}>
+          <ringGeometry args={[radius * 0.92, radius * 1.05, 32]} />
+          <meshBasicMaterial color="#140e0a" side={THREE.DoubleSide} polygonOffset polygonOffsetFactor={-4} polygonOffsetUnits={-4} />
+        </mesh>
+      </group>
+    );
+  }
   return (
     <group position={[point.x, point.y, point.z]}>
       <mesh quaternion={mouth} position={[-inward.x * 0.3, -inward.y * 0.3, -inward.z * 0.3]} raycast={() => null}>
@@ -91,6 +113,18 @@ function HoleMark({ piece, hole }: { piece: Piece; hole: Hole }) {
         <ringGeometry args={[radius * 0.92, radius * 1.18, 28]} />
         <meshBasicMaterial color="#3a2414" side={THREE.DoubleSide} polygonOffset polygonOffsetFactor={-3} polygonOffsetUnits={-3} />
       </mesh>
+      {style === "countersink" ? (
+        <mesh quaternion={barrel} position={[inward.x * 1.2, inward.y * 1.2, inward.z * 1.2]} raycast={() => null}>
+          <cylinderGeometry args={[radius, mouthRadius, 2.4, 24]} />
+          <meshStandardMaterial color="#d5dbe1" metalness={0.2} roughness={0.4} />
+        </mesh>
+      ) : null}
+      {style === "forstner" ? (
+        <mesh quaternion={mouth} raycast={() => null}>
+          <ringGeometry args={[radius * 0.96, radius * 1.12, 28]} />
+          <meshBasicMaterial color="#1a120c" side={THREE.DoubleSide} polygonOffset polygonOffsetFactor={-5} polygonOffsetUnits={-5} />
+        </mesh>
+      ) : null}
       <mesh quaternion={barrel} position={[inward.x * (hole.depth / 2), inward.y * (hole.depth / 2), inward.z * (hole.depth / 2)]} raycast={() => null}>
         <cylinderGeometry args={[radius * 0.92, radius * 0.92, hole.depth, 20]} />
         <meshBasicMaterial color="#1a120c" />
@@ -102,13 +136,20 @@ function HoleMark({ piece, hole }: { piece: Piece; hole: Hole }) {
 function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "down" | "move") {
   event.stopPropagation();
   const tool = useUi.getState().tool;
+  const hit = readHit(event, piece);
+  if (kind === "down" && tool === "saw" && useUi.getState().sawMode === "curve" && hit?.face === "top") {
+    event.stopPropagation();
+    const points = useUi.getState().curvePoints;
+    useUi.getState().setCurvePoints([...points, { u: hit.u, v: hit.v }]);
+    useUi.getState().select(piece.id);
+    return;
+  }
   if (kind === "down" && (tool === "select" || tool === "saw")) {
     useUi.getState().select(piece.id);
     return;
   }
-  const hit = readHit(event, piece);
   if (!hit) return;
-  if (tool === "drill" || tool === "screw") useUi.getState().setHover(hit);
+  if (tool === "drill" || tool === "screw" || tool === "router" || tool === "hardware") useUi.getState().setHover(hit);
   if (kind === "move") return;
   if (tool === "drill") {
     const ui = useUi.getState();
@@ -117,21 +158,75 @@ function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "do
       u: hit.u,
       v: hit.v,
       diameter: ui.drillDiameter,
-      depth: ui.drillDepth,
-      through: ui.drillThrough,
+      depth: ui.drillStyle === "hole-saw" ? 999 : ui.drillDepth,
+      through: ui.drillThrough || ui.drillStyle === "hole-saw",
+      style: ui.drillStyle,
+      secondaryDiameter: ui.drillStyle === "countersink" ? ui.countersinkDiameter : undefined,
     });
     if (result.ok) toast.success(result.message ?? "Hole drilled");
     else toast.error(result.message);
     useUi.getState().select(piece.id);
     return;
   }
-  if (tool === "screw") placeScrew(event, piece, hit);
+  if (tool === "screw") {
+    placeScrew(event, piece, hit);
+    return;
+  }
+  if (tool === "router") {
+    const ui = useUi.getState();
+    const result = ui.routerKind === "profile"
+      ? useProject.getState().addProfile(piece.id, ui.profile, ui.profileEdge, ui.profileRadius)
+      : useProject.getState().addRoute(piece.id, {
+          kind: ui.routerKind,
+          face: hit.face,
+          u: hit.u,
+          v: hit.v,
+          length: ui.routerLength,
+          width: ui.routerWidth,
+          depth: ui.routerDepth,
+          edge: ui.profileEdge,
+        });
+    if (result.ok) toast.success(result.message ?? "Routed");
+    else toast.error(result.message);
+    useUi.getState().select(piece.id);
+    return;
+  }
+  if (tool === "joint") {
+    const ui = useUi.getState();
+    if (!ui.jointFirst) {
+      useUi.getState().setJointFirst({ pieceId: piece.id, face: hit.face, u: hit.u, v: hit.v });
+      toast.success(`Marked ${piece.name}. Click the other piece.`);
+      return;
+    }
+    if (ui.jointFirst.pieceId === piece.id) {
+      toast("Click the other piece, not this one again.");
+      return;
+    }
+    const along = hit.face === "left" || hit.face === "right" ? hit.u : hit.v;
+    const secondFace = (ui.jointKind === "mortise-tenon" || ui.jointKind === "dovetail") && hit.face !== "start" && hit.face !== "end"
+      ? along < piece.length / 2 ? "start" : "end"
+      : hit.face;
+    const result = useProject.getState().join(ui.jointKind, ui.jointFirst.pieceId, ui.jointFirst.face, ui.jointFirst, piece.id, secondFace, hit, ui.drillDiameter);
+    if (result.ok) toast.success(result.message ?? "Joint cut");
+    else toast.error(result.message);
+    useUi.getState().setJointFirst(null);
+    return;
+  }
+  if (tool === "hardware") {
+    const result = useProject.getState().addHardware(useUi.getState().hardwareId, piece.id, hit.face, hit);
+    if (result.ok) toast.success(result.message ?? "Hardware placed");
+    else toast.error(result.message);
+    useUi.getState().select(piece.id);
+  }
 }
 
 function placeScrew(event: ThreeEvent<PointerEvent>, piece: Piece, hit: HoverHit) {
-  const length = useUi.getState().screwLength;
+  const ui = useUi.getState();
+  const length = ui.screwLength;
   const normal = new THREE.Vector3(...hit.normal).normalize();
+  const pocket = ui.fastenerKind === "pocket-screw";
   const direction = normal.clone().negate();
+  if (pocket) direction.applyAxisAngle(new THREE.Vector3(1, 0, 0), (15 * Math.PI) / 180);
   const origin = event.point.clone().addScaledVector(direction, 0.4);
   const raycaster = new THREE.Raycaster(origin, direction, 0, length + 80);
   const hits = raycaster.intersectObjects([...pieceMeshes.values()], false);
@@ -149,13 +244,30 @@ function placeScrew(event: ThreeEvent<PointerEvent>, piece: Piece, hit: HoverHit
   const localPosition = group.worldToLocal(event.point.clone());
   const localDirection = direction.clone().transformDirection(new THREE.Matrix4().copy(group.matrixWorld).invert());
   const embed = length - other.distance;
+  const kind = ui.fastenerKind;
+  if (kind === "glue") {
+    const glued = useProject.getState().addScrew({
+      type: "glue",
+      pieceAId: piece.id,
+      pieceBId: String(other.object.userData.pieceId),
+      localPosition: [localPosition.x, localPosition.y, localPosition.z],
+      localDirection: [localDirection.x, localDirection.y, localDirection.z],
+      diameter: 0,
+      length: 0,
+    });
+    if (glued.ok) toast.success(glued.message ?? "Glued");
+    else toast.error(glued.message);
+    return;
+  }
   const result = useProject.getState().addScrew({
+    type: kind,
     pieceAId: piece.id,
     pieceBId: String(other.object.userData.pieceId),
     localPosition: [localPosition.x, localPosition.y, localPosition.z],
     localDirection: [localDirection.x, localDirection.y, localDirection.z],
-    diameter: useUi.getState().screwDiameter,
+    diameter: ui.screwDiameter,
     length,
+    angle: pocket ? 15 : undefined,
   });
   if (result.ok) toast.success(`${result.message ?? "Screwed."} About ${Math.round(embed)} mm of thread in the second piece.`);
   else toast.error(result.message);

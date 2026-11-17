@@ -1,6 +1,7 @@
+import { describePiece } from "./features.ts";
 import { pointLengths } from "./geometry.ts";
 import { formatMm } from "./math.ts";
-import type { Board, Fastener, Piece } from "./types.ts";
+import type { Board, Fastener, HardwareItem, Piece } from "./types.ts";
 
 export interface CutPart {
   pieceId: string;
@@ -13,6 +14,7 @@ export interface CutPart {
   longPoint: number;
   shortPoint: number;
   holes: number;
+  notes: string;
   spanStart: number;
   spanEnd: number;
 }
@@ -70,6 +72,7 @@ export function cutList(boards: Board[], pieces: Piece[]): CutBoard[] {
           longPoint: points.long,
           shortPoint: points.short,
           holes: piece.holes.length,
+          notes: describePiece(piece),
           spanStart: piece.spanStart,
           spanEnd: piece.spanEnd,
         } satisfies CutPart;
@@ -91,7 +94,7 @@ export function cutList(boards: Board[], pieces: Piece[]): CutBoard[] {
   });
 }
 
-export function shoppingList(boards: Board[]): { lines: ShopLine[]; total: number } {
+export function shoppingList(boards: Board[], hardware: HardwareItem[] = []): { lines: ShopLine[]; total: number } {
   const groups = new Map<string, ShopLine>();
   for (const board of boards) {
     const key = `${board.stockId}|${board.length}|${board.price}`;
@@ -114,7 +117,29 @@ export function shoppingList(boards: Board[]): { lines: ShopLine[]; total: numbe
       });
     }
   }
-  const lines = [...groups.values()].sort((a, b) => a.species.localeCompare(b.species) || a.name.localeCompare(b.name) || a.length - b.length);
+  const hardwareGroups = new Map<string, ShopLine>();
+  for (const item of hardware) {
+    const key = `hw|${item.catalogId}|${item.price}`;
+    const existing = hardwareGroups.get(key);
+    if (existing) {
+      existing.quantity += 1;
+      existing.total += item.price;
+    } else {
+      hardwareGroups.set(key, {
+        key,
+        name: item.name,
+        species: "Hardware",
+        thickness: item.depth,
+        width: item.width,
+        length: item.height,
+        sheet: false,
+        quantity: 1,
+        unitPrice: item.price,
+        total: item.price,
+      });
+    }
+  }
+  const lines = [...groups.values(), ...hardwareGroups.values()].sort((a, b) => a.species.localeCompare(b.species) || a.name.localeCompare(b.name) || a.length - b.length);
   const total = lines.reduce((sum, line) => sum + line.total, 0);
   return { lines, total };
 }
@@ -125,7 +150,7 @@ export function fastenerList(fasteners: Fastener[], pieces: Piece[]): FastenerLi
   for (const fastener of fasteners) {
     const diameter = trimNumber(fastener.diameter);
     const length = Math.round(fastener.length);
-    const key = `${diameter}×${length}`;
+    const key = fastener.type === "glue" ? "Glue joint" : fastener.type === "pocket-screw" ? `Pocket ${diameter}×${length}` : fastener.type === "bolt" ? `Bolt M${diameter}×${length}` : `${diameter}×${length}`;
     const joint = `${names.get(fastener.pieceAId) ?? "?"} → ${names.get(fastener.pieceBId) ?? "?"}`;
     const existing = groups.get(key);
     if (existing) {

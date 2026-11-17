@@ -32,9 +32,12 @@ import { cn } from "cn";
 
 const tools: Array<{ id: ToolId; label: string; hint: string; key: string }> = [
   { id: "select", label: "Move", hint: "Select, move and rotate", key: "1" },
-  { id: "saw", label: "Saw", hint: "Crosscut or rip, with kerf", key: "2" },
-  { id: "drill", label: "Drill", hint: "Bore a hole in a face", key: "3" },
-  { id: "screw", label: "Screw", hint: "Join two touching pieces", key: "4" },
+  { id: "saw", label: "Saw", hint: "Crosscut, rip, taper or curve", key: "2" },
+  { id: "drill", label: "Drill", hint: "Twist, countersink, Forstner, hole saw", key: "3" },
+  { id: "router", label: "Router", hint: "Dados, grooves, rebates, edge profiles", key: "5" },
+  { id: "joint", label: "Joint", hint: "Mortise and tenon, half-lap, dovetail, dowels", key: "6" },
+  { id: "screw", label: "Fasten", hint: "Screws, pocket screws, bolts and glue", key: "4" },
+  { id: "hardware", label: "Hardware", hint: "Hinges, slides and pulls", key: "7" },
 ];
 
 export function Toolbar() {
@@ -186,7 +189,7 @@ export function Toolbar() {
 function ToolGlyph({ id }: { id: ToolId }) {
   if (id === "saw") return <SawIcon className="size-4" />;
   if (id === "drill") return <DrillIcon className="size-4" />;
-  if (id === "screw") return <ScrewIcon className="size-4" />;
+  if (id === "screw" || id === "joint" || id === "hardware" || id === "router") return <ScrewIcon className="size-4" />;
   return <Move3D className="size-4" />;
 }
 

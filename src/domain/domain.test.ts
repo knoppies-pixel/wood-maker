@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { defaultCatalog, parseCatalog, parseCatalogCsv } from "./catalog.ts";
 import { sampleFrame } from "./example.ts";
 import { buildMesh, faceSnapDelta, gridSnapDelta, localToWorld, translatePiece, worldToLocal } from "./geometry.ts";
+import { curveCut, keptOutline, planJoint, shapeDefaults, taperPiece } from "./features.ts";
 import { v } from "./math.ts";
 import { addStockPiece, connectedIds, crosscut, kerfAlong, rip } from "./operations.ts";
 import { cutList, shoppingList } from "./reports.ts";
@@ -24,6 +25,7 @@ function blankPiece(patch: Partial<Piece> = {}): Piece {
     position: [0, 19, 0],
     rotation: [0, 0, 0],
     holes: [],
+    ...shapeDefaults(76),
     spanStart: 0,
     spanEnd: 1000,
     ...patch,
@@ -255,5 +257,61 @@ describe("geometry agreement with three.js", () => {
       expect(hits.length).toBeGreaterThan(0);
       expect(hits[0]?.distance).toBeLessThan(screw.length);
     }
+  });
+});
+
+describe("shaped cuts and joints", () => {
+  it("consumes more board length when the saw is bevelled", () => {
+    expect(kerfAlong(3, 0, 45)).toBeCloseTo(3 * Math.SQRT2);
+    const result = crosscut(blankPiece(), 400, 0, 3, 45);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.pieces[0].bevelEnd).toBe(45);
+    expect(result.pieces[1].bevelStart).toBe(45);
+    expect(result.pieces[0].length + result.pieces[1].length + kerfAlong(3, 0, 45)).toBeCloseTo(1000);
+  });
+
+  it("tapers inside the existing width", () => {
+    const result = taperPiece(blankPiece(), 76, 38);
+    expect("piece" in result).toBe(true);
+    if (!("piece" in result)) return;
+    expect(result.piece.widthStart).toBe(76);
+    expect(result.piece.widthEnd).toBe(38);
+    const tooWide = taperPiece(blankPiece(), 90, 40);
+    expect("error" in tooWide).toBe(true);
+  });
+
+  it("keeps the side opposite the waste of a bandsaw path", () => {
+    const piece = blankPiece({ width: 100, length: 200, widthStart: 100, widthEnd: 100 });
+    const outline = keptOutline(piece, [
+      { u: 50, v: 0 },
+      { u: 70, v: 100 },
+      { u: 50, v: 200 },
+    ], "left");
+    expect("outline" in outline).toBe(true);
+    if (!("outline" in outline)) return;
+    const cut = curveCut(piece, [
+      { u: 50, v: 0 },
+      { u: 70, v: 100 },
+      { u: 50, v: 200 },
+    ], "left");
+    expect("piece" in cut).toBe(true);
+    if (!("piece" in cut)) return;
+    expect(cut.piece.outline?.length).toBeGreaterThan(3);
+  });
+
+  it("pairs a mortise with a tenon", () => {
+    const stile = blankPiece({ id: "stile", width: 69, thickness: 22, length: 400, widthStart: 69, widthEnd: 69 });
+    const rail = blankPiece({ id: "rail", width: 69, thickness: 22, length: 300, widthStart: 69, widthEnd: 69, position: [80, 11, 0] });
+    const plan = planJoint("mortise-tenon", stile, "right", { u: 200, v: 11 }, rail, "start");
+    expect("pieces" in plan).toBe(true);
+    if (!("pieces" in plan)) return;
+    const mortise = plan.pieces.find((item) => item.id === "stile")?.joinery[0];
+    const tenon = plan.pieces.find((item) => item.id === "rail")?.joinery[0];
+    expect(mortise?.kind).toBe("mortise");
+    expect(tenon?.kind).toBe("tenon");
+    expect(mortise?.pairId).toBe(tenon?.pairId);
+    expect(mortise?.width).toBe(tenon?.width);
+    expect(mortise?.depth).toBe(tenon?.depth);
   });
 });

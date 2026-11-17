@@ -19,6 +19,7 @@ import { cn } from "cn";
 export function Viewport() {
   const pieces = useProject((state) => state.pieces);
   const tool = useUi((state) => state.tool);
+  const sawMode = useUi((state) => state.sawMode);
   const selection = useUi((state) => state.selection);
   useUi((state) => state.sceneEpoch);
   const [resetSignal, setResetSignal] = useState(0);
@@ -63,7 +64,8 @@ export function Viewport() {
           <PieceView key={piece.id} piece={piece} />
         ))}
         <Fasteners />
-        {tool === "saw" && selected ? <SawPreview piece={selected} /> : null}
+        {tool === "saw" && selected && (sawMode === "crosscut" || sawMode === "rip") ? <SawPreview piece={selected} /> : null}
+        {tool === "saw" && sawMode === "curve" && selected ? <CurvePreview piece={selected} /> : null}
         <Ghosts />
         {tool === "select" && selected ? <MoveGizmo pieceId={selected.id} /> : null}
         <OrbitControls makeDefault enableDamping dampingFactor={0.12} maxPolarAngle={Math.PI / 2 - 0.03} minDistance={80} maxDistance={16000} />
@@ -122,7 +124,7 @@ function MoveGizmo({ pieceId }: { pieceId: string }) {
       space={space}
       rotationSnap={snapRotate && mode === "rotate" ? THREE.MathUtils.degToRad(15) : null}
       onMouseDown={() => {
-        const ids = connectedIds(useProject.getState().fasteners, pieceId);
+        const ids = connectedIds(useProject.getState().fasteners, pieceId, useProject.getState().pieces);
         const start = new Map<string, { position: THREE.Vector3; quaternion: THREE.Quaternion }>();
         for (const id of ids) {
           const group = pieceGroups.get(id);
@@ -207,10 +209,11 @@ function MoveGizmo({ pieceId }: { pieceId: string }) {
 function SawPreview({ piece }: { piece: Piece }) {
   const distance = useUi((state) => state.sawDistance);
   const mitre = useUi((state) => state.sawMitre);
+  const bevel = useUi((state) => state.sawBevel);
   const from = useUi((state) => state.sawFrom);
   const mode = useUi((state) => state.sawMode);
   const kerf = useProject((state) => state.kerf);
-  const consumed = mode === "rip" ? kerf : kerfAlong(kerf, mitre);
+  const consumed = mode === "rip" ? kerf : kerfAlong(kerf, mitre, bevel);
   const span = mode === "rip" ? piece.width : piece.length;
   const fromStart = mode === "rip" || from === "start" ? distance : piece.length - distance - consumed;
   const valid = fromStart >= MIN_PART_MM && span - fromStart - consumed >= MIN_PART_MM;
@@ -236,7 +239,7 @@ function SawPreview({ piece }: { piece: Piece }) {
       </mesh>
       <mesh
         position={marker}
-        rotation={mode === "crosscut" ? [0, mitre * DEG, 0] : [0, Math.PI / 2, 0]}
+        rotation={mode === "crosscut" ? [bevel * DEG, mitre * DEG, 0] : [0, Math.PI / 2, 0]}
         onPointerDown={(event) => {
           event.stopPropagation();
           drag.current = true;
@@ -257,6 +260,20 @@ function SawPreview({ piece }: { piece: Piece }) {
       <Html position={[marker[0], piece.thickness / 2 + 28, marker[2]]} center style={{ pointerEvents: "none" }}>
         <div className="nums rounded-full bg-[#3a2718] px-2 py-0.5 text-xs font-semibold text-[#f6efe4]">{formatMm(distance)} mm</div>
       </Html>
+    </group>
+  );
+}
+
+function CurvePreview({ piece }: { piece: Piece }) {
+  const points = useUi((state) => state.curvePoints);
+  return (
+    <group position={piece.position} rotation={piece.rotation}>
+      {points.map((point, index) => (
+        <mesh key={`${point.u}-${point.v}-${index}`} position={[point.u - piece.width / 2, piece.thickness / 2 + 2, point.v - piece.length / 2]} raycast={() => null}>
+          <sphereGeometry args={[4, 12, 12]} />
+          <meshBasicMaterial color="#c2410c" />
+        </mesh>
+      ))}
     </group>
   );
 }
@@ -338,6 +355,9 @@ function ToolDock() {
         {tool === "saw" ? <SawDock piece={piece} /> : null}
         {tool === "drill" ? <DrillDock /> : null}
         {tool === "screw" ? <ScrewDock /> : null}
+        {tool === "router" ? <RouterDock /> : null}
+        {tool === "joint" ? <JointDock /> : null}
+        {tool === "hardware" ? <HardwareDock /> : null}
       </div>
     </div>
   );
@@ -371,9 +391,10 @@ function SawDock({ piece }: { piece: Piece | undefined }) {
   const from = useUi((state) => state.sawFrom);
   const distance = useUi((state) => state.sawDistance);
   const mitre = useUi((state) => state.sawMitre);
+  const bevel = useUi((state) => state.sawBevel);
   const kerf = useProject((state) => state.kerf);
   const span = piece ? (mode === "rip" ? piece.width : piece.length) : 0;
-  const consumed = piece && mode === "crosscut" ? kerfAlong(kerf, mitre) : kerf;
+  const consumed = piece && mode === "crosscut" ? kerfAlong(kerf, mitre, bevel) : kerf;
   const max = piece ? Math.max(MIN_PART_MM, span - consumed - MIN_PART_MM) : MIN_PART_MM;
   const head = mode === "rip" || from === "start" ? distance : piece ? piece.length - distance - consumed : 0;
   const tail = piece ? span - head - consumed : 0;
@@ -383,7 +404,7 @@ function SawDock({ piece }: { piece: Piece | undefined }) {
       toast.error("Select a piece to cut.");
       return;
     }
-    const result = useProject.getState().cutPiece(piece.id, mode, head, mode === "crosscut" ? mitre : 0);
+    const result = useProject.getState().cutPiece(piece.id, mode === "rip" ? "rip" : "crosscut", head, mode === "crosscut" ? mitre : 0, bevel);
     if (!result.ok) toast.error(result.message);
     else {
       toast.success(result.message ?? "Cut");
@@ -396,39 +417,97 @@ function SawDock({ piece }: { piece: Piece | undefined }) {
       <div className="flex flex-wrap items-center gap-2">
         <Toggle on={mode === "crosscut"} onClick={() => useUi.getState().setSawMode("crosscut")}>Crosscut</Toggle>
         <Toggle on={mode === "rip"} onClick={() => useUi.getState().setSawMode("rip")}>Rip</Toggle>
+        <Toggle on={mode === "taper"} onClick={() => useUi.getState().setSawMode("taper")}>Taper</Toggle>
+        <Toggle on={mode === "curve"} onClick={() => useUi.getState().setSawMode("curve")}>Curve</Toggle>
         {mode === "crosscut" ? (
           <Toggle on={from === "end"} onClick={() => useUi.getState().setSawFrom(from === "start" ? "end" : "start")}>
             {from === "start" ? "From reference end" : "From far end"}
           </Toggle>
         ) : null}
-        <span className="nums text-sm font-semibold">{piece ? `${formatMm(distance)} mm` : "No piece"}</span>
+        {mode === "crosscut" || mode === "rip" ? <span className="nums text-sm font-semibold">{piece ? `${formatMm(distance)} mm` : "No piece"}</span> : null}
       </div>
-      <Slider
-        min={MIN_PART_MM}
-        max={Math.max(MIN_PART_MM + 1, max)}
-        step={1}
-        value={[clamp(distance, MIN_PART_MM, max)]}
-        onValueChange={(value) => useUi.getState().setSawDistance(value[0] ?? distance)}
-        disabled={!piece}
-      />
-      {mode === "crosscut" ? (
-        <label className="flex items-center gap-3 text-xs text-muted-foreground">
-          Mitre {formatMm(mitre, 0)}°
-          <Slider min={-60} max={60} step={1} value={[mitre]} onValueChange={(value) => useUi.getState().setSawMitre(value[0] ?? 0)} />
-        </label>
+      {mode === "crosscut" || mode === "rip" ? (
+        <Slider
+          min={MIN_PART_MM}
+          max={Math.max(MIN_PART_MM + 1, max)}
+          step={1}
+          value={[clamp(distance, MIN_PART_MM, max)]}
+          onValueChange={(value) => useUi.getState().setSawDistance(value[0] ?? distance)}
+          disabled={!piece}
+        />
       ) : null}
+      {mode === "crosscut" ? (
+        <>
+          <label className="flex items-center gap-3 text-xs text-muted-foreground">
+            Mitre {formatMm(mitre, 0)}°
+            <Slider min={-60} max={60} step={1} value={[mitre]} onValueChange={(value) => useUi.getState().setSawMitre(value[0] ?? 0)} />
+          </label>
+          <label className="flex items-center gap-3 text-xs text-muted-foreground">
+            Bevel {formatMm(bevel, 0)}°
+            <Slider min={-60} max={60} step={1} value={[bevel]} onValueChange={(value) => useUi.getState().setSawBevel(value[0] ?? 0)} />
+          </label>
+        </>
+      ) : null}
+      {mode === "taper" ? <TaperControls piece={piece} /> : null}
+      {mode === "curve" ? <CurveControls piece={piece} /> : null}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="nums text-xs text-muted-foreground">
-          {piece
-            ? mode === "rip"
-              ? `Left ${formatMm(head)} mm · kerf ${formatMm(consumed)} · right ${formatMm(tail)} mm`
-              : `Keep ${formatMm(head)} mm · kerf ${formatMm(consumed)} along the board · offcut ${formatMm(tail)} mm`
-            : "Click the piece you want to cut. The brass dot is the reference end."}
+          {piece && mode === "rip"
+            ? `Left ${formatMm(head)} mm · kerf ${formatMm(consumed)} · right ${formatMm(tail)} mm`
+            : piece && mode === "crosscut"
+              ? `Keep ${formatMm(head)} mm · kerf ${formatMm(consumed)} along the board · offcut ${formatMm(tail)} mm`
+              : mode === "taper"
+                ? "Narrow one or both ends. The taper stays inside the board."
+                : "Click the top face to draw the cut. Start and finish on an edge."}
         </p>
-        <Button size="sm" disabled={!piece} onClick={cut}>
-          Cut
-        </Button>
+        {mode === "crosscut" || mode === "rip" ? (
+          <Button size="sm" disabled={!piece} onClick={cut}>
+            Cut
+          </Button>
+        ) : null}
       </div>
+    </div>
+  );
+}
+
+function TaperControls({ piece }: { piece: Piece | undefined }) {
+  const start = useUi((state) => state.taperStart);
+  const end = useUi((state) => state.taperEnd);
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-xs text-muted-foreground">Start {formatMm(start)} mm</span>
+      <Slider className="w-28" min={5} max={piece?.width ?? 80} step={1} value={[start]} onValueChange={(value) => useUi.getState().setTaperStart(value[0] ?? start)} />
+      <span className="text-xs text-muted-foreground">End {formatMm(end)} mm</span>
+      <Slider className="w-28" min={5} max={piece?.width ?? 80} step={1} value={[end]} onValueChange={(value) => useUi.getState().setTaperEnd(value[0] ?? end)} />
+      <Button size="sm" disabled={!piece} onClick={() => {
+        if (!piece) return;
+        const result = useProject.getState().taper(piece.id, start, end);
+        if (result.ok) toast.success(result.message ?? "Tapered");
+        else toast.error(result.message);
+      }}>Taper</Button>
+    </div>
+  );
+}
+
+function CurveControls({ piece }: { piece: Piece | undefined }) {
+  const points = useUi((state) => state.curvePoints);
+  const waste = useUi((state) => state.curveWaste);
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="nums text-xs">{points.length} points</span>
+      <Toggle on={waste === "left"} onClick={() => useUi.getState().setCurveWaste(waste === "left" ? "right" : "left")}>
+        Waste {waste}
+      </Toggle>
+      <Button size="sm" variant="outline" onClick={() => useUi.getState().setCurvePoints(points.slice(0, -1))}>Undo point</Button>
+      <Button size="sm" variant="ghost" onClick={() => useUi.getState().setCurvePoints([])}>Clear</Button>
+      <Button size="sm" disabled={!piece || points.length < 2} onClick={() => {
+        if (!piece) return;
+        const result = useProject.getState().curve(piece.id, points, waste);
+        if (result.ok) {
+          toast.success(result.message ?? "Cut");
+          useUi.getState().setCurvePoints([]);
+        } else toast.error(result.message);
+      }}>Cut curve</Button>
     </div>
   );
 }
@@ -437,8 +516,16 @@ function DrillDock() {
   const diameter = useUi((state) => state.drillDiameter);
   const depth = useUi((state) => state.drillDepth);
   const through = useUi((state) => state.drillThrough);
+  const style = useUi((state) => state.drillStyle);
+  const countersink = useUi((state) => state.countersinkDiameter);
   return (
     <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-1">
+        <Toggle on={style === "twist"} onClick={() => useUi.getState().setDrillStyle("twist")}>Twist</Toggle>
+        <Toggle on={style === "countersink"} onClick={() => useUi.getState().setDrillStyle("countersink")}>Countersink</Toggle>
+        <Toggle on={style === "forstner"} onClick={() => useUi.getState().setDrillStyle("forstner")}>Forstner</Toggle>
+        <Toggle on={style === "hole-saw"} onClick={() => useUi.getState().setDrillStyle("hole-saw")}>Hole saw</Toggle>
+      </div>
       <div className="flex flex-wrap items-center gap-1">
         {[3, 4, 5, 6, 8, 10, 15, 20, 35].map((size) => (
           <Toggle key={size} on={diameter === size} onClick={() => useUi.getState().setDrillDiameter(size)}>
@@ -454,7 +541,15 @@ function DrillDock() {
         Depth {through ? "through" : `${formatMm(depth)} mm`}
         <Slider min={2} max={80} step={1} disabled={through} value={[depth]} onValueChange={(value) => useUi.getState().setDrillDepth(value[0] ?? depth)} />
       </label>
-      <p className="text-xs text-muted-foreground">Click a face. The hole is measured from the left and from the reference end, and stored on the piece.</p>
+      {style === "countersink" ? (
+        <label className="flex items-center gap-3 text-xs text-muted-foreground">
+          Mouth ⌀{formatMm(countersink)}
+          <Slider min={diameter + 2} max={40} step={1} value={[countersink]} onValueChange={(value) => useUi.getState().setCountersinkDiameter(value[0] ?? countersink)} />
+        </label>
+      ) : null}
+      <p className="text-xs text-muted-foreground">
+        {style === "hole-saw" ? "A hole saw cuts through and leaves the plug as its own piece." : style === "forstner" ? "Forstner bits leave a flat-bottomed hole and a rim." : style === "countersink" ? "The countersink is the cone the screw head sits in." : "Click a face. The hole is stored on the piece."}
+      </p>
     </div>
   );
 }
@@ -462,9 +557,16 @@ function DrillDock() {
 function ScrewDock() {
   const diameter = useUi((state) => state.screwDiameter);
   const length = useUi((state) => state.screwLength);
+  const kind = useUi((state) => state.fastenerKind);
   const presets = [30, 40, 50, 60, 70, 80, 90, 100];
   return (
     <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap items-center gap-1">
+        <Toggle on={kind === "screw"} onClick={() => useUi.getState().setFastenerKind("screw")}>Screw</Toggle>
+        <Toggle on={kind === "pocket-screw"} onClick={() => useUi.getState().setFastenerKind("pocket-screw")}>Pocket</Toggle>
+        <Toggle on={kind === "bolt"} onClick={() => useUi.getState().setFastenerKind("bolt")}>Bolt</Toggle>
+        <Toggle on={kind === "glue"} onClick={() => useUi.getState().setFastenerKind("glue")}>Glue</Toggle>
+      </div>
       <div className="flex flex-wrap items-center gap-1">
         {[3.5, 4, 4.5, 5, 6].map((size) => (
           <Toggle key={size} on={diameter === size} onClick={() => useUi.getState().setScrewDiameter(size)}>
@@ -480,8 +582,93 @@ function ScrewDock() {
         ))}
       </div>
       <p className="text-xs text-muted-foreground">
-        {diameter}×{length} mm. Click the outside face so the screw travels into the piece behind it.
+        {kind === "glue"
+          ? "Click the face that touches the other piece. Glue has no head, but the parts move together."
+          : kind === "pocket-screw"
+            ? `${diameter}×${length} mm at 15°. Click the face near the joint.`
+            : kind === "bolt"
+              ? `M${diameter} × ${length} mm. The bolt goes through into the piece behind.`
+              : `${diameter}×${length} mm. Click the outside face so the screw reaches the piece behind.`}
       </p>
+    </div>
+  );
+}
+
+function RouterDock() {
+  const kind = useUi((state) => state.routerKind);
+  const width = useUi((state) => state.routerWidth);
+  const depth = useUi((state) => state.routerDepth);
+  const profile = useUi((state) => state.profile);
+  const edge = useUi((state) => state.profileEdge);
+  const radius = useUi((state) => state.profileRadius);
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap gap-1">
+        <Toggle on={kind === "dado"} onClick={() => useUi.getState().setRouterKind("dado")}>Dado</Toggle>
+        <Toggle on={kind === "groove"} onClick={() => useUi.getState().setRouterKind("groove")}>Groove</Toggle>
+        <Toggle on={kind === "rebate"} onClick={() => useUi.getState().setRouterKind("rebate")}>Rebate</Toggle>
+        <Toggle on={kind === "profile"} onClick={() => useUi.getState().setRouterKind("profile")}>Edge</Toggle>
+      </div>
+      {kind === "profile" ? (
+        <div className="flex flex-wrap items-center gap-1">
+          <Toggle on={profile === "round-over"} onClick={() => useUi.getState().setProfile("round-over")}>Round-over</Toggle>
+          <Toggle on={profile === "chamfer"} onClick={() => useUi.getState().setProfile("chamfer")}>Chamfer</Toggle>
+          <Toggle on={profile === "cove"} onClick={() => useUi.getState().setProfile("cove")}>Cove</Toggle>
+          {(["left", "right", "start", "end"] as const).map((side) => (
+            <Toggle key={side} on={edge === side} onClick={() => useUi.getState().setProfileEdge(side)}>{side}</Toggle>
+          ))}
+          <span className="text-xs text-muted-foreground">R{formatMm(radius)}</span>
+          <Slider className="w-28" min={2} max={16} step={1} value={[radius]} onValueChange={(value) => useUi.getState().setProfileRadius(value[0] ?? radius)} />
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+          <span>Width {formatMm(width)}</span>
+          <Slider className="w-24" min={3} max={30} step={1} value={[width]} onValueChange={(value) => useUi.getState().setRouterWidth(value[0] ?? width)} />
+          <span>Depth {formatMm(depth)}</span>
+          <Slider className="w-24" min={1} max={18} step={1} value={[depth]} onValueChange={(value) => useUi.getState().setRouterDepth(value[0] ?? depth)} />
+        </div>
+      )}
+      <p className="text-xs text-muted-foreground">Click a face. A dado runs across the grain, a groove with it, a rebate steps an edge.</p>
+    </div>
+  );
+}
+
+function JointDock() {
+  const kind = useUi((state) => state.jointKind);
+  const first = useUi((state) => state.jointFirst);
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap gap-1">
+        <Toggle on={kind === "mortise-tenon"} onClick={() => useUi.getState().setJointKind("mortise-tenon")}>Mortise & tenon</Toggle>
+        <Toggle on={kind === "half-lap"} onClick={() => useUi.getState().setJointKind("half-lap")}>Half-lap</Toggle>
+        <Toggle on={kind === "dovetail"} onClick={() => useUi.getState().setJointKind("dovetail")}>Dovetail</Toggle>
+        <Toggle on={kind === "dowels"} onClick={() => useUi.getState().setJointKind("dowels")}>Dowels</Toggle>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {first ? "Now click the mating face." : kind === "mortise-tenon" ? "Click the mortise face, then the end that gets the tenon." : kind === "dovetail" ? "Click the tail end, then the pin end." : "Click the first face, then the face it meets."}
+      </p>
+    </div>
+  );
+}
+
+function HardwareDock() {
+  const selected = useUi((state) => state.hardwareId);
+  const offers = [
+    ["butt-hinge-60", "Hinge 60"],
+    ["butt-hinge-75", "Hinge 75"],
+    ["slide-350", "Slide 350"],
+    ["slide-450", "Slide 450"],
+    ["pull-128", "Bar pull"],
+    ["knob-30", "Knob"],
+  ] as const;
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap gap-1">
+        {offers.map(([id, label]) => (
+          <Toggle key={id} on={selected === id} onClick={() => useUi.getState().setHardwareId(id)}>{label}</Toggle>
+        ))}
+      </div>
+      <p className="text-xs text-muted-foreground">Click a face to place it. Hinges and slides note a neighbouring piece when one is close. Prices land on the shopping list.</p>
     </div>
   );
 }
