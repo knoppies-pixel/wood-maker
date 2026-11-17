@@ -1,0 +1,299 @@
+{
+  "items": [
+    {
+      "id": "pine-22x44",
+      "name": "PAR Pine 22×44",
+      "species": "SA Pine",
+      "thickness": 22,
+      "width": 44,
+      "lengths": [
+        { "length": 1800, "price": 34 },
+        { "length": 2400, "price": 44 },
+        { "length": 3000, "price": 55 }
+      ]
+    },
+    {
+      "id": "pine-22x69",
+      "name": "PAR Pine 22×69",
+      "species": "SA Pine",
+      "thickness": 22,
+      "width": 69,
+      "lengths": [
+        { "length": 1800, "price": 52 },
+        { "length": 2400, "price": 68 },
+        { "length": 3000, "price": 84 }
+      ]
+    },
+    {
+      "id": "pine-22x94",
+      "name": "PAR Pine 22×94",
+      "species": "SA Pine",
+      "thickness": 22,
+      "width": 94,
+      "lengths": [
+        { "length": 1800, "price": 72 },
+        { "length": 2400, "price": 95 },
+        { "length": 3000, "price": 118 }
+      ]
+    },
+    {
+      "id": "pine-22x144",
+      "name": "PAR Pine 22×144",
+      "species": "SA Pine",
+      "thickness": 22,
+      "width": 144,
+      "lengths": [
+        { "length": 2400, "price": 152 },
+        { "length": 3000, "price": 188 }
+      ]
+    },
+    {
+      "id": "pine-38x38",
+      "name": "PAR Pine 38×38",
+      "species": "SA Pine",
+      "thickness": 38,
+      "width": 38,
+      "lengths": [
+        { "length": 1800, "price": 48 },
+        { "length": 2400, "price": 62 },
+        { "length": 3000, "price": 78 }
+      ]
+    },
+    {
+      "id": "pine-38x76",
+      "name": "PAR Pine 38×76",
+      "species": "SA Pine",
+      "thickness": 38,
+      "width": 76,
+      "lengths": [
+        { "length": 1800, "price": 105 },
+        { "length": 2400, "price": 138 },
+        { "length": 3000, "price": 172 }
+      ]
+    },
+    {
+      "id": "pine-38x114",
+      "name": "PAR Pine 38×114",
+      "species": "SA Pine",
+      "thickness": 38,
+      "width": 114,
+      "lengths": [
+        { "length": 2400, "price": 205 },
+        { "length": 3000, "price": 255 }
+      ]
+    },
+    {
+      "id": "pine-38x152",
+      "name": "PAR Pine 38×152",
+      "species": "SA Pine",
+      "thickness": 38,
+      "width": 152,
+      "lengths": [
+        { "length": 2400, "price": 268 },
+        { "length": 3000, "price": 332 }
+      ]
+    },
+    {
+      "id": "pine-50x76",
+      "name": "PAR Pine 50×76",
+      "species": "SA Pine",
+      "thickness": 50,
+      "width": 76,
+      "lengths": [
+        { "length": 2400, "price": 185 },
+        { "length": 3000, "price": 230 }
+      ]
+    },
+    {
+      "id": "pine-76x76",
+      "name": "PAR Pine 76×76",
+      "species": "SA Pine",
+      "thickness": 76,
+      "width": 76,
+      "lengths": [
+        { "length": 2400, "price": 255 },
+        { "length": 3000, "price": 318 }
+      ]
+    },
+    {
+      "id": "meranti-21x44",
+      "name": "PAR Meranti 21×44",
+      "species": "Meranti",
+      "thickness": 21,
+      "width": 44,
+      "lengths": [
+        { "length": 2100, "price": 92 },
+        { "length": 3000, "price": 128 }
+      ]
+    },
+    {
+      "id": "meranti-21x69",
+      "name": "PAR Meranti 21×69",
+      "species": "Meranti",
+      "thickness": 21,
+      "width": 69,
+      "lengths": [
+        { "length": 2100, "price": 135 },
+        { "length": 3000, "price": 188 }
+      ]
+    },
+    {
+      "id": "meranti-21x94",
+      "name": "PAR Meranti 21×94",
+      "species": "Meranti",
+      "thickness": 21,
+      "width": 94,
+      "lengths": [
+        { "length": 2100, "price": 185 },
+        { "length": 3000, "price": 258 }
+      ]
+    },
+    {
+      "id": "meranti-21x144",
+      "name": "PAR Meranti 21×144",
+      "species": "Meranti",
+      "thickness": 21,
+      "width": 144,
+      "lengths": [
+        { "length": 2100, "price": 275 },
+        { "length": 3000, "price": 385 }
+      ]
+    },
+    {
+      "id": "meranti-44x44",
+      "name": "PAR Meranti 44×44",
+      "species": "Meranti",
+      "thickness": 44,
+      "width": 44,
+      "lengths": [
+        { "length": 2100, "price": 155 },
+        { "length": 3000, "price": 218 }
+      ]
+    },
+    {
+      "id": "meranti-44x69",
+      "name": "PAR Meranti 44×69",
+      "species": "Meranti",
+      "thickness": 44,
+      "width": 69,
+      "lengths": [
+        { "length": 2100, "price": 225 },
+        { "length": 3000, "price": 315 }
+      ]
+    },
+    {
+      "id": "meranti-44x94",
+      "name": "PAR Meranti 44×94",
+      "species": "Meranti",
+      "thickness": 44,
+      "width": 94,
+      "lengths": [
+        { "length": 2100, "price": 305 },
+        { "length": 3000, "price": 428 }
+      ]
+    },
+    {
+      "id": "saligna-32x32",
+      "name": "Saligna 32×32",
+      "species": "Saligna",
+      "thickness": 32,
+      "width": 32,
+      "lengths": [
+        { "length": 1800, "price": 32 },
+        { "length": 2400, "price": 42 }
+      ]
+    },
+    {
+      "id": "saligna-44x44",
+      "name": "Saligna 44×44",
+      "species": "Saligna",
+      "thickness": 44,
+      "width": 44,
+      "lengths": [
+        { "length": 2400, "price": 78 },
+        { "length": 3000, "price": 96 }
+      ]
+    },
+    {
+      "id": "ply-6",
+      "name": "Plywood 6 mm",
+      "species": "Plywood",
+      "thickness": 6,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [{ "length": 2440, "price": 195 }]
+    },
+    {
+      "id": "ply-9",
+      "name": "Plywood 9 mm",
+      "species": "Plywood",
+      "thickness": 9,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [{ "length": 2440, "price": 275 }]
+    },
+    {
+      "id": "ply-12",
+      "name": "Plywood 12 mm",
+      "species": "Plywood",
+      "thickness": 12,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [{ "length": 2440, "price": 365 }]
+    },
+    {
+      "id": "ply-16",
+      "name": "Plywood 16 mm",
+      "species": "Plywood",
+      "thickness": 16,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [{ "length": 2440, "price": 545 }]
+    },
+    {
+      "id": "ply-18",
+      "name": "Plywood 18 mm",
+      "species": "Plywood",
+      "thickness": 18,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [{ "length": 2440, "price": 615 }]
+    },
+    {
+      "id": "mdf-12",
+      "name": "MDF 12 mm",
+      "species": "MDF",
+      "thickness": 12,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [{ "length": 2440, "price": 295 }]
+    },
+    {
+      "id": "mdf-16",
+      "name": "MDF 16 mm",
+      "species": "MDF",
+      "thickness": 16,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [{ "length": 2440, "price": 410 }]
+    },
+    {
+      "id": "mdf-18",
+      "name": "MDF 18 mm",
+      "species": "MDF",
+      "thickness": 18,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [{ "length": 2440, "price": 465 }]
+    },
+    {
+      "id": "supawood-16",
+      "name": "Supawood 16 mm",
+      "species": "Supawood",
+      "thickness": 16,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [{ "length": 2440, "price": 335 }]
+    }
+  ]
+}
