@@ -1,6 +1,7 @@
 import { describePiece } from "./features.ts";
 import { pointLengths } from "./geometry.ts";
 import { formatMm } from "./math.ts";
+import { instanceCount } from "./modifiers.ts";
 import type { Board, Fastener, HardwareItem, Piece } from "./types.ts";
 
 export interface CutPart {
@@ -14,6 +15,7 @@ export interface CutPart {
   longPoint: number;
   shortPoint: number;
   holes: number;
+  quantity: number;
   notes: string;
   spanStart: number;
   spanEnd: number;
@@ -72,6 +74,7 @@ export function cutList(boards: Board[], pieces: Piece[]): CutBoard[] {
           longPoint: points.long,
           shortPoint: points.short,
           holes: piece.holes.length,
+          quantity: instanceCount(piece),
           notes: describePiece(piece),
           spanStart: piece.spanStart,
           spanEnd: piece.spanEnd,
@@ -94,14 +97,15 @@ export function cutList(boards: Board[], pieces: Piece[]): CutBoard[] {
   });
 }
 
-export function shoppingList(boards: Board[], hardware: HardwareItem[] = []): { lines: ShopLine[]; total: number } {
+export function shoppingList(boards: Board[], hardware: HardwareItem[] = [], pieces: Piece[] = []): { lines: ShopLine[]; total: number } {
   const groups = new Map<string, ShopLine>();
   for (const board of boards) {
     const key = `${board.stockId}|${board.length}|${board.price}`;
+    const needed = boardsNeeded(board, pieces);
     const existing = groups.get(key);
     if (existing) {
-      existing.quantity += 1;
-      existing.total += board.price;
+      existing.quantity += needed;
+      existing.total = existing.unitPrice * existing.quantity;
     } else {
       groups.set(key, {
         key,
@@ -111,9 +115,9 @@ export function shoppingList(boards: Board[], hardware: HardwareItem[] = []): { 
         width: board.width,
         length: board.length,
         sheet: board.sheet,
-        quantity: 1,
+        quantity: needed,
         unitPrice: board.price,
-        total: board.price,
+        total: board.price * needed,
       });
     }
   }
@@ -152,9 +156,11 @@ export function fastenerList(fasteners: Fastener[], pieces: Piece[]): FastenerLi
     const length = Math.round(fastener.length);
     const key = fastener.type === "glue" ? "Glue joint" : fastener.type === "pocket-screw" ? `Pocket ${diameter}×${length}` : fastener.type === "bolt" ? `Bolt M${diameter}×${length}` : `${diameter}×${length}`;
     const joint = `${names.get(fastener.pieceAId) ?? "?"} → ${names.get(fastener.pieceBId) ?? "?"}`;
+    const host = pieces.find((item) => item.id === fastener.pieceAId);
+    const copies = host ? instanceCount(host) : 1;
     const existing = groups.get(key);
     if (existing) {
-      existing.quantity += 1;
+      existing.quantity += copies;
       existing.joints.push(joint);
     } else {
       groups.set(key, {
@@ -162,7 +168,7 @@ export function fastenerList(fasteners: Fastener[], pieces: Piece[]): FastenerLi
         label: key,
         diameter: fastener.diameter,
         length: fastener.length,
-        quantity: 1,
+        quantity: copies,
         joints: [joint],
       });
     }
@@ -192,6 +198,13 @@ function unionLength(spans: Array<{ start: number; end: number }>): number {
   }
   if (cursor !== -Infinity) total += end - cursor;
   return total;
+}
+
+function boardsNeeded(board: Board, pieces: Piece[]): number {
+  const mine = pieces.filter((piece) => piece.boardId === board.id);
+  if (mine.length === 0) return 1;
+  const millimetres = mine.reduce((sum, piece) => sum + piece.length * instanceCount(piece), 0);
+  return Math.max(1, Math.ceil(millimetres / board.length));
 }
 
 function trimNumber(n: number): string {

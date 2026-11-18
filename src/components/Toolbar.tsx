@@ -1,7 +1,6 @@
 import {
   Download,
   FolderOpen,
-  Magnet,
   Move3D,
   PanelLeft,
   PanelRight,
@@ -44,8 +43,6 @@ export function Toolbar() {
   const name = useProject((state) => state.name);
   const tool = useUi((state) => state.tool);
   const setTool = useUi((state) => state.setTool);
-  const snapGrid = useUi((state) => state.snapGrid);
-  const snapFaces = useUi((state) => state.snapFaces);
   const fileRef = useRef<HTMLInputElement>(null);
   const canUndo = useStore(useProject.temporal, (state) => state.pastStates.length > 0);
   const canRedo = useStore(useProject.temporal, (state) => state.futureStates.length > 0);
@@ -76,18 +73,19 @@ export function Toolbar() {
   }
 
   return (
-    <header className="z-30 flex flex-wrap items-center gap-2 border-b bg-card/85 px-3 py-2 backdrop-blur-md">
+    <header className="z-30 flex flex-wrap items-center gap-2 border-b bg-card px-3 py-1.5">
       <div className="mr-1 flex items-center gap-2">
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => useUi.getState().setStockOpen(!useUi.getState().stockOpen)} aria-label="Stock library">
           <PanelLeft />
         </Button>
+        <span className="grid size-7 place-items-center rounded-md bg-primary text-[12px] font-bold tracking-tight text-primary-foreground">B</span>
         <div>
-          <div className="font-display text-[1.35rem] leading-none tracking-tight">Benchwork</div>
-          <div className="text-[11px] text-muted-foreground">Design from the board</div>
+          <div className="text-[15px] leading-none font-semibold tracking-tight">Benchwork</div>
+          <div className="mt-0.5 text-[10px] tracking-[0.16em] text-muted-foreground uppercase">Workshop</div>
         </div>
       </div>
 
-      <div className="mx-auto flex items-center gap-1 rounded-xl border bg-background/80 p-1">
+      <div className="mx-auto flex items-center gap-0.5 rounded-lg border border-border bg-background/70 p-0.5">
         {tools.map((item) => (
           <Tooltip key={item.id}>
             <TooltipTrigger asChild>
@@ -119,12 +117,7 @@ export function Toolbar() {
         <IconButton label="Redo" disabled={!canRedo} onClick={() => useProject.temporal.getState().redo()}>
           <Redo2 />
         </IconButton>
-        <IconButton label={snapGrid ? "Grid snap on" : "Grid snap off"} pressed={snapGrid} onClick={() => useUi.getState().setSnapGrid(!snapGrid)}>
-          <Move3D />
-        </IconButton>
-        <IconButton label={snapFaces ? "Face snap on" : "Face snap off"} pressed={snapFaces} onClick={() => useUi.getState().setSnapFaces(!snapFaces)}>
-          <Magnet />
-        </IconButton>
+        <SnapToggles />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">Project</Button>
@@ -215,6 +208,46 @@ function IconButton({
       </TooltipTrigger>
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
+  );
+}
+
+function SnapToggles() {
+  const grid = useUi((state) => state.snapGrid);
+  const faces = useUi((state) => state.snapFaces);
+  const vertices = useUi((state) => state.snapVertices);
+  const midpoints = useUi((state) => state.snapMidpoints);
+  const edges = useUi((state) => state.snapEdges);
+  const centres = useUi((state) => state.snapCentres);
+  const marks = useUi((state) => state.snapMarks);
+  const dimensions = useUi((state) => state.snapDimensions);
+  const items = [
+    ["Vtx", "Vertices", vertices, (on: boolean) => useUi.getState().setSnapVertices(on)],
+    ["Mid", "Edge midpoints", midpoints, (on: boolean) => useUi.getState().setSnapMidpoints(on)],
+    ["Edge", "Edges", edges, (on: boolean) => useUi.getState().setSnapEdges(on)],
+    ["Ctr", "Face centres", centres, (on: boolean) => useUi.getState().setSnapCentres(on)],
+    ["Face", "Faces, for butting pieces", faces, (on: boolean) => useUi.getState().setSnapFaces(on)],
+    ["Grid", "Grid", grid, (on: boolean) => useUi.getState().setSnapGrid(on)],
+    ["Mark", "Pencil marks", marks, (on: boolean) => useUi.getState().setSnapMarks(on)],
+    ["Dim", "Dimension points", dimensions, (on: boolean) => useUi.getState().setSnapDimensions(on)],
+  ] as const;
+  return (
+    <div className="hidden items-center gap-0.5 rounded-lg border bg-background/70 p-0.5 lg:flex">
+      {items.map(([label, hint, on, set]) => (
+        <Tooltip key={label}>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              aria-pressed={on}
+              onClick={() => set(!on)}
+              className={cn("rounded-md px-1.5 py-1 text-[10px] font-semibold tracking-wide", on ? "bg-secondary text-foreground ring-1 ring-primary/80" : "text-muted-foreground hover:bg-muted")}
+            >
+              {label}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>{hint}. Hold Ctrl to suspend snapping.</TooltipContent>
+        </Tooltip>
+      ))}
+    </div>
   );
 }
 

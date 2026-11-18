@@ -19,6 +19,9 @@ export interface HoverHit {
   v: number;
   point: Vec3Tuple;
   normal: Vec3Tuple;
+  edge: "left" | "right" | "start" | "end";
+  snap: string | null;
+  valid: boolean;
 }
 
 interface UiState {
@@ -29,6 +32,13 @@ interface UiState {
   snapGrid: boolean;
   snapFaces: boolean;
   snapRotate: boolean;
+  snapVertices: boolean;
+  snapMidpoints: boolean;
+  snapEdges: boolean;
+  snapCentres: boolean;
+  snapMarks: boolean;
+  snapDimensions: boolean;
+  ctrlDown: boolean;
   gridSize: number;
   sawDistance: number;
   sawMitre: number;
@@ -70,6 +80,13 @@ interface UiState {
   setSnapGrid: (on: boolean) => void;
   setSnapFaces: (on: boolean) => void;
   setSnapRotate: (on: boolean) => void;
+  setSnapVertices: (on: boolean) => void;
+  setSnapMidpoints: (on: boolean) => void;
+  setSnapEdges: (on: boolean) => void;
+  setSnapCentres: (on: boolean) => void;
+  setSnapMarks: (on: boolean) => void;
+  setSnapDimensions: (on: boolean) => void;
+  setCtrlDown: (down: boolean) => void;
   setGridSize: (size: number) => void;
   setSawDistance: (distance: number) => void;
   setSawMitre: (mitre: number) => void;
@@ -114,6 +131,13 @@ export const useUi = create<UiState>((set) => ({
   snapGrid: true,
   snapFaces: true,
   snapRotate: true,
+  snapVertices: true,
+  snapMidpoints: true,
+  snapEdges: true,
+  snapCentres: true,
+  snapMarks: true,
+  snapDimensions: true,
+  ctrlDown: false,
   gridSize: 10,
   sawDistance: 300,
   sawMitre: 0,
@@ -155,6 +179,13 @@ export const useUi = create<UiState>((set) => ({
   setSnapGrid: (snapGrid) => set({ snapGrid }),
   setSnapFaces: (snapFaces) => set({ snapFaces }),
   setSnapRotate: (snapRotate) => set({ snapRotate }),
+  setSnapVertices: (snapVertices) => set({ snapVertices }),
+  setSnapMidpoints: (snapMidpoints) => set({ snapMidpoints }),
+  setSnapEdges: (snapEdges) => set({ snapEdges }),
+  setSnapCentres: (snapCentres) => set({ snapCentres }),
+  setSnapMarks: (snapMarks) => set({ snapMarks }),
+  setSnapDimensions: (snapDimensions) => set({ snapDimensions }),
+  setCtrlDown: (ctrlDown) => set({ ctrlDown }),
   setGridSize: (gridSize) => set({ gridSize }),
   setSawDistance: (sawDistance) => set({ sawDistance }),
   setSawMitre: (sawMitre) => set({ sawMitre }),

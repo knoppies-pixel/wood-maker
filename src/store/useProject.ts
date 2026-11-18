@@ -17,7 +17,7 @@ import {
 import { emptyProject, loadStoredProject } from "../domain/project-io.ts";
 import type { FaceId, Fastener, FastenerType, Finish, Hole, Piece, ProjectData, RouterCut, StockItem, Vec3Tuple, XZPoint } from "../domain/types.ts";
 
-type Snapshot = Pick<ProjectData, "name" | "kerf" | "catalog" | "boards" | "pieces" | "fasteners" | "hardware">;
+type Snapshot = Pick<ProjectData, "name" | "kerf" | "catalog" | "boards" | "pieces" | "fasteners" | "hardware" | "dimensions">;
 
 export type ActionResult = { ok: true; message?: string; selectId?: string } | { ok: false; message: string };
 
@@ -35,6 +35,16 @@ interface ProjectState extends Snapshot {
   setFinish: (pieceId: string, finish: Finish) => void;
   removeRoute: (pieceId: string, routeId: string) => void;
   removeHardware: (hardwareId: string) => void;
+  duplicatePiece: (pieceId: string) => ActionResult;
+  resizePiece: (pieceId: string, size: { length?: number; width?: number; thickness?: number }) => void;
+  addMark: (pieceId: string, mark: Omit<import("../domain/types.ts").PencilMark, "id">) => void;
+  removeMark: (pieceId: string, markId: string) => void;
+  addModifier: (pieceId: string, modifier: import("../domain/types.ts").WoodModifier) => void;
+  toggleModifier: (pieceId: string, modifierId: string, enabled: boolean) => void;
+  removeModifier: (pieceId: string, modifierId: string) => void;
+  reorderModifier: (pieceId: string, modifierId: string, direction: -1 | 1) => void;
+  addDimension: (note: Omit<import("../domain/types.ts").DimensionNote, "id">) => void;
+  removeDimension: (id: string) => void;
   removeHole: (pieceId: string, holeId: string) => void;
   removeFastener: (fastenerId: string) => void;
   deletePiece: (pieceId: string) => void;
@@ -63,6 +73,7 @@ export const useProject = create<ProjectState>()(
       pieces: restored.pieces,
       fasteners: restored.fasteners,
       hardware: restored.hardware ?? [],
+      dimensions: restored.dimensions ?? [],
 
       addStock: (stockId, length) => {
         const stock = get().catalog.find((item) => item.id === stockId);
@@ -187,6 +198,97 @@ export const useProject = create<ProjectState>()(
 
       removeHardware: (hardwareId) => set({ hardware: get().hardware.filter((item) => item.id !== hardwareId) }),
 
+      duplicatePiece: (pieceId) => {
+        const piece = get().pieces.find((item) => item.id === pieceId);
+        if (!piece) return { ok: false, message: "Select a piece to duplicate." };
+        const copy = clonePiece(piece, 40);
+        set({ pieces: [...get().pieces, copy] });
+        return { ok: true, selectId: copy.id, message: `Duplicated ${piece.name}.` };
+      },
+
+      resizePiece: (pieceId, size) => {
+        set({
+          pieces: get().pieces.map((piece) => {
+            if (piece.id !== pieceId) return piece;
+            const length = clampSize(size.length ?? piece.length);
+            const width = clampSize(size.width ?? piece.width);
+            const thickness = clampSize(size.thickness ?? piece.thickness);
+            const scaleX = piece.width ? width / piece.width : 1;
+            return {
+              ...piece,
+              length,
+              width,
+              thickness,
+              widthStart: (piece.widthStart || piece.width) * scaleX,
+              widthEnd: (piece.widthEnd || piece.width) * scaleX,
+              position: [piece.position[0], thickness / 2, piece.position[2]] as Vec3Tuple,
+            };
+          }),
+        });
+      },
+
+      addMark: (pieceId, mark) => {
+        set({
+          pieces: get().pieces.map((piece) =>
+            piece.id === pieceId ? { ...piece, marks: [...(piece.marks ?? []), { ...mark, id: uid("mark") }] } : piece,
+          ),
+        });
+      },
+
+      removeMark: (pieceId, markId) => {
+        set({
+          pieces: get().pieces.map((piece) =>
+            piece.id === pieceId ? { ...piece, marks: (piece.marks ?? []).filter((mark) => mark.id !== markId) } : piece,
+          ),
+        });
+      },
+
+      addModifier: (pieceId, modifier) => {
+        set({
+          pieces: get().pieces.map((piece) =>
+            piece.id === pieceId ? { ...piece, modifiers: [...(piece.modifiers ?? []), modifier] } : piece,
+          ),
+        });
+      },
+
+      toggleModifier: (pieceId, modifierId, enabled) => {
+        set({
+          pieces: get().pieces.map((piece) =>
+            piece.id === pieceId
+              ? { ...piece, modifiers: (piece.modifiers ?? []).map((modifier) => (modifier.id === modifierId ? { ...modifier, enabled } : modifier)) }
+              : piece,
+          ),
+        });
+      },
+
+      removeModifier: (pieceId, modifierId) => {
+        set({
+          pieces: get().pieces.map((piece) =>
+            piece.id === pieceId ? { ...piece, modifiers: (piece.modifiers ?? []).filter((modifier) => modifier.id !== modifierId) } : piece,
+          ),
+        });
+      },
+
+      reorderModifier: (pieceId, modifierId, direction) => {
+        set({
+          pieces: get().pieces.map((piece) => {
+            if (piece.id !== pieceId) return piece;
+            const modifiers = [...(piece.modifiers ?? [])];
+            const index = modifiers.findIndex((modifier) => modifier.id === modifierId);
+            const next = index + direction;
+            if (index < 0 || next < 0 || next >= modifiers.length) return piece;
+            const [item] = modifiers.splice(index, 1);
+            if (!item) return piece;
+            modifiers.splice(next, 0, item);
+            return { ...piece, modifiers };
+          }),
+        });
+      },
+
+      addDimension: (note) => set({ dimensions: [...get().dimensions, { ...note, id: uid("dim") }] }),
+
+      removeDimension: (id) => set({ dimensions: get().dimensions.filter((note) => note.id !== id) }),
+
       removeHole: (pieceId, holeId) => {
         set({
           pieces: get().pieces.map((piece) =>
@@ -242,6 +344,7 @@ export const useProject = create<ProjectState>()(
           pieces: project.pieces,
           fasteners: project.fasteners,
           hardware: project.hardware ?? [],
+          dimensions: project.dimensions ?? [],
         });
       },
 
@@ -254,6 +357,7 @@ export const useProject = create<ProjectState>()(
           pieces: [],
           fasteners: [],
           hardware: [],
+          dimensions: [],
         });
       },
 
@@ -266,6 +370,7 @@ export const useProject = create<ProjectState>()(
           pieces: frame.pieces,
           fasteners: frame.fasteners,
           hardware: frame.hardware ?? [],
+          dimensions: frame.dimensions ?? [],
         });
       },
 
@@ -280,6 +385,7 @@ export const useProject = create<ProjectState>()(
         pieces: get().pieces,
         fasteners: get().fasteners,
         hardware: get().hardware,
+        dimensions: get().dimensions,
       }),
     }),
     {
@@ -292,12 +398,14 @@ export const useProject = create<ProjectState>()(
         pieces: state.pieces,
         fasteners: state.fasteners,
         hardware: state.hardware,
+        dimensions: state.dimensions,
       }),
       equality: (past, current) =>
         past.boards === current.boards &&
         past.pieces === current.pieces &&
         past.fasteners === current.fasteners &&
         past.hardware === current.hardware &&
+        past.dimensions === current.dimensions &&
         past.catalog === current.catalog &&
         past.name === current.name &&
         past.kerf === current.kerf,
@@ -312,6 +420,26 @@ export function assemblyOf(pieceId: string | null): string[] {
 
 function sameTuple(a: Vec3Tuple, b: Vec3Tuple): boolean {
   return Math.abs(a[0] - b[0]) < 0.05 && Math.abs(a[1] - b[1]) < 0.05 && Math.abs(a[2] - b[2]) < 0.05;
+}
+
+function clonePiece(piece: Piece, offset: number): Piece {
+  const stamp = (prefix: string) => uid(prefix);
+  return {
+    ...piece,
+    id: stamp("piece"),
+    name: `${piece.name} copy`,
+    position: [piece.position[0] + offset, piece.position[1], piece.position[2]],
+    holes: piece.holes.map((hole) => ({ ...hole, id: stamp("hole") })),
+    marks: (piece.marks ?? []).map((mark) => ({ ...mark, id: stamp("mark") })),
+    modifiers: (piece.modifiers ?? []).map((modifier) => ({ ...modifier, id: stamp("mod") })),
+    routes: (piece.routes ?? []).map((route) => ({ ...route, id: stamp("route") })),
+    profiles: (piece.profiles ?? []).map((profile) => ({ ...profile, id: stamp("profile") })),
+    joinery: [],
+  };
+}
+
+function clampSize(value: number): number {
+  return Math.min(6000, Math.max(5, value));
 }
 
 function trim(n: number): string {

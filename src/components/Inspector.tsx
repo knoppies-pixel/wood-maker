@@ -32,7 +32,7 @@ export function Inspector() {
   return (
     <aside
       className={cn(
-        "z-20 w-[340px] shrink-0 flex-col border-l bg-card/92 backdrop-blur-sm",
+        "z-20 w-[340px] shrink-0 flex-col border-l bg-card",
         open ? "flex" : "hidden lg:flex",
         "max-lg:absolute max-lg:inset-y-0 max-lg:right-0 max-lg:shadow-2xl",
       )}

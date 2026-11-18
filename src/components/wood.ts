@@ -50,27 +50,36 @@ function texture(canvas: HTMLCanvasElement): THREE.CanvasTexture {
 
 function paintFace(look: Look): HTMLCanvasElement {
   const canvas = document.createElement("canvas");
-  canvas.width = 256;
-  canvas.height = 256;
+  canvas.width = 512;
+  canvas.height = 512;
   const ctx = canvas.getContext("2d");
   if (!ctx) return canvas;
   ctx.fillStyle = look.base;
-  ctx.fillRect(0, 0, 256, 256);
+  ctx.fillRect(0, 0, 512, 512);
   if (look.edge === "mdf" || look.edge === "chip") {
-    speck(ctx, look.edge === "chip" ? 40 : 90, look.dark, 0.18);
+    speck(ctx, look.edge === "chip" ? 90 : 180, look.dark, 0.2);
+    grainNoise(ctx, 10);
     return canvas;
   }
-  for (let i = 0; i < 46; i += 1) {
-    const y = (i * 29 + (i % 5) * 7) % 256;
-    ctx.strokeStyle = i % 4 === 0 ? look.dark : look.light;
-    ctx.globalAlpha = 0.18 + (i % 5) * 0.06;
-    ctx.lineWidth = i % 6 === 0 ? 2.4 : 1;
+  for (let i = 0; i < 90; i += 1) {
+    const y = (i * 23 + (i % 5) * 11) % 512;
+    ctx.strokeStyle = i % 5 === 0 ? look.dark : look.light;
+    ctx.globalAlpha = 0.12 + (i % 6) * 0.05;
+    ctx.lineWidth = i % 7 === 0 ? 2.2 : 0.7;
     ctx.beginPath();
     ctx.moveTo(0, y);
-    ctx.bezierCurveTo(70, y + ((i % 7) - 3), 160, y - ((i % 5) - 2), 256, y + ((i % 4) - 1.5));
+    ctx.bezierCurveTo(140, y + ((i % 9) - 4) * 2, 340, y - ((i % 7) - 3) * 2, 512, y + ((i % 5) - 2));
     ctx.stroke();
   }
+  ctx.globalAlpha = 0.18;
+  ctx.fillStyle = look.dark;
+  for (let i = 0; i < 40; i += 1) {
+    const x = (i * 97) % 512;
+    const y = (i * 53) % 512;
+    ctx.fillRect(x, y, 18 + (i % 5) * 6, 1);
+  }
   ctx.globalAlpha = 1;
+  grainNoise(ctx, 8);
   return canvas;
 }
 
@@ -123,6 +132,66 @@ function paintEdge(look: Look): HTMLCanvasElement {
   }
   ctx.globalAlpha = 1;
   return canvas;
+}
+
+export interface ShopMaps {
+  benchFace: THREE.CanvasTexture;
+  benchEdge: THREE.CanvasTexture;
+  pegboard: THREE.CanvasTexture;
+}
+
+let shopCache: ShopMaps | null = null;
+
+export function shopMaps(): ShopMaps {
+  if (shopCache) return shopCache;
+  const face = texture(paintBenchFace());
+  face.repeat.set(2.4, 1.2);
+  const edge = texture(paintEdge({ base: "#e4d0ae", dark: "#b08958", light: "#f3e6cf", edge: "ply" }));
+  edge.repeat.set(1, 8);
+  const peg = texture(paintPegboard());
+  peg.repeat.set(1, 1);
+  shopCache = { benchFace: face, benchEdge: edge, pegboard: peg };
+  return shopCache;
+}
+
+function paintBenchFace(): HTMLCanvasElement {
+  return paintFace({ base: "#e6d2b0", dark: "#8d6840", light: "#f7ead2", edge: "grain" });
+}
+
+function paintPegboard(): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+  ctx.fillStyle = "#5a5854";
+  ctx.fillRect(0, 0, 256, 256);
+  const step = 32;
+  for (let y = step / 2; y < 256; y += step) {
+    for (let x = step / 2; x < 256; x += step) {
+      ctx.beginPath();
+      ctx.fillStyle = "#2c2a28";
+      ctx.arc(x, y, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.fillStyle = "#7a7772";
+      ctx.arc(x - 0.8, y - 0.8, 1.1, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  return canvas;
+}
+
+function grainNoise(ctx: CanvasRenderingContext2D, amount: number): void {
+  const image = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+  const data = image.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const n = ((i * 13) % (amount * 2 + 1)) - amount;
+    data[i] = Math.max(0, Math.min(255, (data[i] ?? 0) + n));
+    data[i + 1] = Math.max(0, Math.min(255, (data[i + 1] ?? 0) + n));
+    data[i + 2] = Math.max(0, Math.min(255, (data[i + 2] ?? 0) + Math.round(n * 0.7)));
+  }
+  ctx.putImageData(image, 0, 0);
 }
 
 function speck(ctx: CanvasRenderingContext2D, count: number, color: string, alpha: number): void {

@@ -112,6 +112,7 @@ export function sampleFrame(catalog: StockItem[]): ProjectData {
     boards: [board],
     pieces: [left, right, bottom, top],
     hardware: [],
+    dimensions: [],
     fasteners: [
       screw(left, -half, bottomZ, 1, bottom),
       screw(left, -half, topZ, 1, top),

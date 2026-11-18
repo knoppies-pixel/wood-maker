@@ -149,6 +149,8 @@ export interface Piece {
   profiles: EdgeProfile[];
   joinery: JoineryFeature[];
   finish: Finish;
+  marks: PencilMark[];
+  modifiers: WoodModifier[];
   /**
    * Interval this part still occupies on the purchased board's length.
    * Kerf gaps are not included. Rips share a span.
@@ -204,6 +206,56 @@ export interface ProjectData {
   pieces: Piece[];
   fasteners: Fastener[];
   hardware: HardwareItem[];
+  dimensions: DimensionNote[];
+}
+
+export interface FacePoint {
+  u: number;
+  v: number;
+}
+
+export interface PencilMark {
+  id: string;
+  face: FaceId;
+  kind: "freehand" | "line";
+  points: FacePoint[];
+  label?: string;
+}
+
+export type ModifierAxis = "x" | "y" | "z";
+
+export type WoodModifier =
+  | {
+      id: string;
+      type: "array";
+      enabled: boolean;
+      layout: "linear" | "radial";
+      count: number;
+      /** Centre-to-centre step in mm. Ignored when fitLength is set. */
+      spacing: number;
+      axis: ModifierAxis;
+      fitLength: number | null;
+    }
+  | {
+      id: string;
+      type: "mirror";
+      enabled: boolean;
+      axis: ModifierAxis;
+      /** Edge places a touching copy. Centre flips through the piece origin. */
+      across: "edge" | "centre";
+    };
+
+export interface AnchorPoint {
+  pieceId: string;
+  face: FaceId;
+  u: number;
+  v: number;
+}
+
+export interface DimensionNote {
+  id: string;
+  a: AnchorPoint;
+  b: AnchorPoint;
 }
 
 export const MIN_PART_MM = 5;

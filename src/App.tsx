@@ -120,11 +120,25 @@ function useHotkeys() {
       }
       const tools = { "1": "select", "2": "saw", "3": "drill", "4": "screw", "5": "router", "6": "joint", "7": "hardware" } as const;
       if (key in tools) useUi.getState().setTool(tools[key as keyof typeof tools]);
-      if (key === "escape") useUi.getState().setTool("select");
+      if (event.key === "Control") useUi.getState().setCtrlDown(true);
+      if (key === "escape") {
+        useUi.getState().setHover(null);
+        useUi.getState().setJointFirst(null);
+        useUi.getState().setCurvePoints([]);
+        useUi.getState().setTool("select");
+        useUi.getState().select(null);
+      }
       if (key === "t") useUi.getState().setTransformMode("translate");
       if (key === "r") useUi.getState().setTransformMode("rotate");
     }
+    function onKeyUp(event: KeyboardEvent) {
+      if (event.key === "Control") useUi.getState().setCtrlDown(false);
+    }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keyup", onKeyUp);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("keyup", onKeyUp);
+    };
   }, []);
 }

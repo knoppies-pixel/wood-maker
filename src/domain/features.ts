@@ -44,7 +44,7 @@ export const FINISH_PRESETS: Finish[] = [
   { grain: "length", treatment: "paint", color: "#7d8c74", label: "Sage paint" },
 ];
 
-export function shapeDefaults(width: number): Pick<Piece, "bevelStart" | "bevelEnd" | "widthStart" | "widthEnd" | "outline" | "routes" | "profiles" | "joinery" | "finish"> {
+export function shapeDefaults(width: number): Pick<Piece, "bevelStart" | "bevelEnd" | "widthStart" | "widthEnd" | "outline" | "routes" | "profiles" | "joinery" | "finish" | "marks" | "modifiers"> {
   return {
     bevelStart: 0,
     bevelEnd: 0,
@@ -55,6 +55,8 @@ export function shapeDefaults(width: number): Pick<Piece, "bevelStart" | "bevelE
     profiles: [],
     joinery: [],
     finish: { ...BARE_FINISH },
+    marks: [],
+    modifiers: [],
   };
 }
 
@@ -71,6 +73,8 @@ export function normalizePiece(piece: Piece): Piece {
     routes: piece.routes ?? [],
     profiles: piece.profiles ?? [],
     joinery: piece.joinery ?? [],
+    marks: piece.marks ?? [],
+    modifiers: piece.modifiers ?? [],
     finish: piece.finish ?? { ...BARE_FINISH },
     holes: (piece.holes ?? []).map((hole) => ({ ...hole, style: hole.style ?? "twist" })),
   };

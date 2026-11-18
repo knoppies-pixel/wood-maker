@@ -3,6 +3,8 @@ import type { ThreeEvent } from "@react-three/fiber";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import * as THREE from "three";
+import { canPlaceHole } from "../domain/operations.ts";
+import { nearestPieceEdge, routeFits, snapFaceHit, stationFromHit } from "../domain/picking.ts";
 import { buildMesh, faceUvFromLocal, holeLocalPoint, inwardNormal } from "../domain/geometry.ts";
 import type { Hole, Piece } from "../domain/types.ts";
 import { useProject } from "../store/useProject.ts";
@@ -66,9 +68,9 @@ export function PieceView({ piece }: { piece: Piece }) {
           if (hover?.pieceId === piece.id) useUi.getState().setHover(null);
         }}
       >
-        <meshStandardMaterial attach="material-0" map={faceMap} color={tint} roughness={piece.finish?.treatment === "paint" ? 0.45 : 0.86} metalness={0} emissive={selected ? "#6a3b16" : "#000000"} emissiveIntensity={selected ? 0.12 : 0} />
-        <meshStandardMaterial attach="material-1" map={maps.edge} color={tint} roughness={0.92} metalness={0} />
-        {(selected || mate) && <Edges threshold={20} color={selected ? "#7a3414" : "#c4844a"} />}
+        <meshStandardMaterial attach="material-0" map={faceMap} color={tint} roughness={piece.finish?.treatment === "paint" ? 0.42 : 0.78} metalness={0.02} emissive={selected ? "#e26a1a" : "#000000"} emissiveIntensity={selected ? 0.16 : 0} />
+        <meshStandardMaterial attach="material-1" map={maps.edge} color={tint} roughness={0.86} metalness={0} />
+        {(selected || mate) && <Edges threshold={20} color={selected ? "#f08a2a" : "#d7b98a"} />}
       </mesh>
       {(piece.holes ?? []).map((hole) => (
         <HoleMark key={hole.id} piece={piece} hole={hole} />
@@ -137,6 +139,15 @@ function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "do
   event.stopPropagation();
   const tool = useUi.getState().tool;
   const hit = readHit(event, piece);
+  if (hit && (tool === "saw" || tool === "drill" || tool === "screw" || tool === "router" || tool === "hardware" || tool === "joint")) {
+    useUi.getState().setHover(hit);
+  }
+  const sawMode = useUi.getState().sawMode;
+  if (kind === "move" && tool === "saw" && hit && (sawMode === "crosscut" || sawMode === "rip")) {
+    const station = stationFromHit(piece, hit.face, hit.u, hit.v, sawMode);
+    useUi.getState().setSawDistance(Math.max(1, station));
+    return;
+  }
   if (kind === "down" && tool === "saw" && useUi.getState().sawMode === "curve" && hit?.face === "top") {
     event.stopPropagation();
     const points = useUi.getState().curvePoints;
@@ -149,7 +160,6 @@ function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "do
     return;
   }
   if (!hit) return;
-  if (tool === "drill" || tool === "screw" || tool === "router" || tool === "hardware") useUi.getState().setHover(hit);
   if (kind === "move") return;
   if (tool === "drill") {
     const ui = useUi.getState();
@@ -175,7 +185,7 @@ function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "do
   if (tool === "router") {
     const ui = useUi.getState();
     const result = ui.routerKind === "profile"
-      ? useProject.getState().addProfile(piece.id, ui.profile, ui.profileEdge, ui.profileRadius)
+      ? useProject.getState().addProfile(piece.id, ui.profile, hit.edge, ui.profileRadius)
       : useProject.getState().addRoute(piece.id, {
           kind: ui.routerKind,
           face: hit.face,
@@ -184,7 +194,7 @@ function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "do
           length: ui.routerLength,
           width: ui.routerWidth,
           depth: ui.routerDepth,
-          edge: ui.profileEdge,
+          edge: hit.edge,
         });
     if (result.ok) toast.success(result.message ?? "Routed");
     else toast.error(result.message);
@@ -281,14 +291,55 @@ function readHit(event: ThreeEvent<PointerEvent>, piece: Piece): HoverHit | null
   const local = parent.worldToLocal(event.point.clone());
   const uv = faceUvFromLocal(piece, { x: local.x, y: local.y, z: local.z }, { x: face.normal.x, y: face.normal.y, z: face.normal.z });
   if (!uv) return null;
+  const ui = useUi.getState();
+  const snapping = ui.ctrlDown ? false : true;
+  const snapped = snapFaceHit(
+    piece,
+    uv.face,
+    uv.u,
+    uv.v,
+    {
+      enabled: snapping,
+      vertices: ui.snapVertices,
+      midpoints: ui.snapMidpoints,
+      edges: ui.snapEdges,
+      centres: ui.snapCentres,
+      grid: ui.snapGrid,
+      marks: ui.snapMarks,
+      gridSize: ui.gridSize,
+    },
+    piece.marks ?? [],
+    (useProject.getState().dimensions ?? [])
+      .flatMap((note) => [note.a, note.b])
+      .filter((anchor) => anchor.pieceId === piece.id && anchor.face === uv.face)
+      .map((anchor) => ({ u: anchor.u, v: anchor.v })),
+  );
+  const edge = snapped.snap ? snapped.edge : nearestPieceEdge(piece, uv.face, snapped.u, snapped.v);
+  const tool = ui.tool;
+  let valid = true;
+  if (tool === "router") valid = ui.routerKind === "profile" ? ui.profileRadius < piece.thickness / 2 : routeFits(piece, ui.routerDepth);
+  if (tool === "drill") {
+    valid = canPlaceHole(piece, {
+      face: uv.face,
+      u: snapped.u,
+      v: snapped.v,
+      diameter: ui.drillDiameter,
+      depth: ui.drillStyle === "hole-saw" ? piece.thickness : ui.drillDepth,
+    }) === null;
+  }
   const worldNormal = face.normal.clone().transformDirection(event.object.matrixWorld);
+  const placed = holeLocalPoint(piece, uv.face, snapped.u, snapped.v);
+  const world = parent.localToWorld(new THREE.Vector3(placed.x, placed.y, placed.z));
   return {
     pieceId: piece.id,
     face: uv.face,
-    u: uv.u,
-    v: uv.v,
-    point: [event.point.x, event.point.y, event.point.z],
+    u: snapped.u,
+    v: snapped.v,
+    point: [world.x, world.y, world.z],
     normal: [worldNormal.x, worldNormal.y, worldNormal.z],
+    edge,
+    snap: snapped.snap,
+    valid,
   };
 }
 

@@ -14,6 +14,7 @@ import { MIN_PART_MM, type Piece, type Vec3Tuple } from "../domain/types.ts";
 import { useProject } from "../store/useProject.ts";
 import { useUi, type DragPose } from "../store/useUi.ts";
 import { PieceView, pieceGroups } from "./PieceView.tsx";
+import { shopMaps } from "./wood.ts";
 import { cn } from "cn";
 
 export function Viewport() {
@@ -30,36 +31,53 @@ export function Viewport() {
   }, [pieces, selection]);
 
   return (
-    <div className="relative min-w-0 flex-1 bg-[#e7dcc8]">
+    <div className="relative min-w-0 flex-1 bg-[#6f6a63]">
       <Canvas
         dpr={[1, 1.75]}
         shadows
         camera={{ position: [980, 760, 1280], fov: 38, near: 8, far: 20000 }}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
+        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
         onPointerMissed={(event) => {
           if (event.type === "click" && useUi.getState().tool === "select") useUi.getState().select(null);
         }}
+        onCreated={({ gl }) => {
+          gl.shadowMap.type = THREE.PCFSoftShadowMap;
+        }}
       >
-        <color attach="background" args={["#e7dcc8"]} />
-        <hemisphereLight args={["#f8f3e8", "#b89a74", 0.8]} />
-        <ambientLight intensity={0.28} />
-        <directionalLight position={[1800, 3200, 1400]} intensity={1.55} />
-        <directionalLight position={[-1600, 800, -900]} intensity={0.32} color="#f0d2a4" />
+        <color attach="background" args={["#8a847b"]} />
+        <hemisphereLight args={["#f4efe6", "#5c564e", 0.45]} />
+        <ambientLight intensity={0.18} />
+        <directionalLight
+          position={[640, 1680, 820]}
+          intensity={2.6}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-camera-near={200}
+          shadow-camera-far={4200}
+          shadow-camera-left={-1600}
+          shadow-camera-right={1600}
+          shadow-camera-top={1400}
+          shadow-camera-bottom={-1400}
+          shadow-bias={-0.0006}
+        />
+        <directionalLight position={[-900, 700, -500]} intensity={0.35} color="#d9c7a4" />
+        <Workshop />
         <Grid
           args={[10, 10]}
           cellSize={100}
-          cellThickness={0.6}
-          cellColor="#c9b79a"
+          cellThickness={0.55}
+          cellColor="#6a5a46"
           sectionSize={500}
-          sectionThickness={1.25}
-          sectionColor="#8d7358"
-          fadeDistance={8000}
-          fadeStrength={1.5}
+          sectionThickness={1}
+          sectionColor="#3d3228"
+          fadeDistance={1600}
+          fadeStrength={1.8}
           infiniteGrid
-          position={[0, -0.4, 0]}
+          position={[0, 0.6, 80]}
           raycast={() => null}
         />
-        <ContactShadows position={[0, 0, 0]} opacity={0.32} scale={8000} blur={2.2} far={700} color="#3a291c" resolution={1024} />
+        <ContactShadows position={[0, 0.4, 80]} opacity={0.42} scale={2400} blur={2.4} far={280} color="#1c1814" resolution={512} />
         {pieces.map((piece) => (
           <PieceView key={piece.id} piece={piece} />
         ))}
@@ -74,25 +92,89 @@ export function Viewport() {
 
       {pieces.length === 0 ? (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
-          <div className="max-w-sm rounded-2xl border bg-card/90 px-5 py-4 text-center shadow-sm backdrop-blur-sm">
-            <div className="font-display text-2xl">The bench is clear</div>
-            <p className="mt-1 text-sm text-muted-foreground">Choose a length on the left. It arrives full size, and you shape it with the saw, drill and screws.</p>
+          <div className="max-w-sm overflow-hidden rounded-lg border bg-card/92 text-center shadow-lg backdrop-blur-sm">
+            <div className="birch-rule" />
+            <div className="px-5 py-4">
+              <div className="font-display text-xl">The bench is clear</div>
+              <p className="mt-1 text-sm text-muted-foreground">Choose a length on the left. It arrives full size, and you shape it with the saw, drill and screws.</p>
+            </div>
           </div>
         </div>
       ) : null}
 
-      <div className="pointer-events-none absolute top-3 left-3 rounded-full border bg-card/85 px-3 py-1 text-xs text-muted-foreground shadow-sm backdrop-blur-sm">
-        Grid 100 mm · bold lines 500 mm · all units mm
+      <div className="pointer-events-none absolute top-3 left-3 rounded-md border bg-card/90 px-2.5 py-1 text-xs text-muted-foreground shadow-sm backdrop-blur-sm">
+        Grid <span className="nums">100</span> mm · bold lines <span className="nums">500</span> mm
       </div>
       <button
         type="button"
-        className="absolute top-3 right-3 rounded-full border bg-card/85 px-3 py-1 text-xs shadow-sm backdrop-blur-sm hover:bg-accent"
+        className="absolute top-3 right-3 rounded-md border bg-card/90 px-2.5 py-1 text-xs shadow-sm backdrop-blur-sm hover:bg-accent hover:text-accent-foreground"
         onClick={() => setResetSignal((value) => value + 1)}
       >
         Reset view
       </button>
       <ToolDock />
     </div>
+  );
+}
+
+function Workshop() {
+  const maps = shopMaps();
+  const legs: Array<[number, number]> = [
+    [-980, -390],
+    [980, -390],
+    [-980, 550],
+    [980, 550],
+  ];
+  return (
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -780, 200]} receiveShadow>
+        <planeGeometry args={[9000, 7000]} />
+        <meshStandardMaterial color="#4e4a45" roughness={0.96} />
+      </mesh>
+      <mesh position={[0, 780, -1680]} receiveShadow>
+        <planeGeometry args={[6400, 2400]} />
+        <meshStandardMaterial color="#8f897f" roughness={0.94} />
+      </mesh>
+      <mesh position={[0, 28, -1672]}>
+        <boxGeometry args={[6400, 56, 10]} />
+        <meshStandardMaterial color="#5a564f" roughness={0.8} metalness={0.05} />
+      </mesh>
+      <mesh position={[-40, 460, -640]}>
+        <planeGeometry args={[1500, 720]} />
+        <meshStandardMaterial map={maps.pegboard} roughness={0.72} metalness={0.08} />
+      </mesh>
+      <mesh position={[-40, 460, -652]}>
+        <boxGeometry args={[1540, 760, 16]} />
+        <meshStandardMaterial color="#6d7176" roughness={0.42} metalness={0.62} />
+      </mesh>
+      <mesh position={[-40, 90, -630]}>
+        <boxGeometry args={[1500, 12, 18]} />
+        <meshStandardMaterial color="#e2b122" roughness={0.4} metalness={0.35} />
+      </mesh>
+      <mesh position={[0, -18, 80]} castShadow receiveShadow>
+        <boxGeometry args={[2200, 36, 1100]} />
+        <meshStandardMaterial attach="material-0" map={maps.benchEdge} roughness={0.7} />
+        <meshStandardMaterial attach="material-1" map={maps.benchEdge} roughness={0.7} />
+        <meshStandardMaterial attach="material-2" map={maps.benchFace} roughness={0.58} metalness={0.02} />
+        <meshStandardMaterial attach="material-3" map={maps.benchEdge} roughness={0.75} />
+        <meshStandardMaterial attach="material-4" map={maps.benchEdge} roughness={0.7} />
+        <meshStandardMaterial attach="material-5" map={maps.benchEdge} roughness={0.7} />
+      </mesh>
+      <mesh position={[0, 1.2, 622]} raycast={() => null}>
+        <boxGeometry args={[2200, 2.2, 10]} />
+        <meshStandardMaterial color="#e26a1a" roughness={0.45} />
+      </mesh>
+      <mesh position={[0, -52, 80]}>
+        <boxGeometry args={[2120, 28, 1020]} />
+        <meshStandardMaterial color="#6a6e73" roughness={0.38} metalness={0.7} />
+      </mesh>
+      {legs.map(([x, z]) => (
+        <mesh key={`${x}:${z}`} position={[x, -390, z]} castShadow>
+          <boxGeometry args={[46, 700, 46]} />
+          <meshStandardMaterial color="#5e6266" roughness={0.4} metalness={0.72} />
+        </mesh>
+      ))}
+    </group>
   );
 }
 
@@ -257,8 +339,16 @@ function SawPreview({ piece }: { piece: Piece }) {
         <planeGeometry args={mode === "rip" ? [piece.length + 36, piece.thickness + 36] : [piece.width + 36, piece.thickness + 36]} />
         <meshBasicMaterial color={valid ? "#c2410c" : "#7f1d1d"} transparent opacity={0.5} side={THREE.DoubleSide} depthWrite={false} />
       </mesh>
+      <mesh position={marker} rotation={mode === "crosscut" ? [Math.PI / 2, mitre * DEG, 0] : [0, 0, Math.PI / 2]} raycast={() => null}>
+        <cylinderGeometry args={[72, 72, Math.max(consumed, 2.4), 28]} />
+        <meshStandardMaterial color={valid ? "#d5dbe2" : "#e07070"} metalness={0.55} roughness={0.35} transparent opacity={0.8} />
+      </mesh>
+      <mesh position={[piece.width / 2 + 10, piece.thickness / 2 + 1, (-piece.length / 2 + marker[2]) / 2]} raycast={() => null}>
+        <boxGeometry args={[2, 2, Math.max(4, Math.abs(marker[2] + piece.length / 2))]} />
+        <meshBasicMaterial color="#f0d48a" />
+      </mesh>
       <Html position={[marker[0], piece.thickness / 2 + 28, marker[2]]} center style={{ pointerEvents: "none" }}>
-        <div className="nums rounded-full bg-[#3a2718] px-2 py-0.5 text-xs font-semibold text-[#f6efe4]">{formatMm(distance)} mm</div>
+        <div className="nums rounded-full bg-[#3a2718] px-2 py-0.5 text-xs font-semibold text-[#f6efe4]">{formatMm(distance)} mm from the reference end</div>
       </Html>
     </group>
   );
@@ -284,26 +374,113 @@ function Ghosts() {
   const diameter = useUi((state) => state.drillDiameter);
   const depth = useUi((state) => state.drillDepth);
   const through = useUi((state) => state.drillThrough);
+  const routerKind = useUi((state) => state.routerKind);
+  const routerWidth = useUi((state) => state.routerWidth);
+  const routerDepth = useUi((state) => state.routerDepth);
+  const radius = useUi((state) => state.profileRadius);
   const piece = useProject((state) => state.pieces.find((item) => item.id === hover?.pieceId));
-  if (!hover || !piece || (tool !== "drill" && tool !== "screw")) return null;
-  if (tool === "screw") {
-    return (
-      <mesh position={hover.point} raycast={() => null}>
-        <sphereGeometry args={[6, 16, 16]} />
-        <meshBasicMaterial color="#d7dde3" transparent opacity={0.85} />
+  if (!hover || !piece) return null;
+  const tint = hover.valid ? "#e8a04a" : "#e05050";
+  const normal = new THREE.Vector3(...hover.normal).normalize();
+  const inward = normal.clone().negate();
+  let ghost = null;
+  if (tool === "drill") {
+    const size = faceSize(piece, hover.face);
+    const holeDepth = through ? size.depth : Math.min(depth, size.depth);
+    const center = new THREE.Vector3(...hover.point).addScaledVector(inward, holeDepth / 2);
+    const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), inward);
+    ghost = (
+      <group>
+        <mesh position={center} quaternion={quaternion} raycast={() => null}>
+          <cylinderGeometry args={[diameter / 2, diameter / 2, Math.max(holeDepth, 1), 20]} />
+          <meshBasicMaterial color={tint} transparent opacity={0.45} />
+        </mesh>
+        <mesh position={hover.point} quaternion={quaternion} raycast={() => null}>
+          <cylinderGeometry args={[diameter, diameter * 0.72, 3, 20]} />
+          <meshStandardMaterial color="#d5dbe2" metalness={0.4} roughness={0.4} transparent opacity={0.8} />
+        </mesh>
+      </group>
+    );
+  } else if (tool === "router") {
+    ghost = routerKind === "profile"
+      ? <ProfileGhost piece={piece} edge={hover.edge} radius={radius} tint={tint} />
+      : <RouteGhost piece={piece} kind={routerKind} edge={hover.edge} u={hover.u} v={hover.v} width={routerWidth} depth={routerDepth} tint={tint} />;
+  } else if (tool === "screw" || tool === "joint" || tool === "hardware") {
+    const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), inward);
+    ghost = (
+      <mesh position={hover.point} quaternion={quaternion} raycast={() => null}>
+        <cylinderGeometry args={[tool === "hardware" ? 16 : 5, tool === "hardware" ? 16 : 5, tool === "joint" ? 18 : 12, 16]} />
+        <meshBasicMaterial color={tint} transparent opacity={0.55} />
       </mesh>
     );
   }
-  const size = faceSize(piece, hover.face);
-  const holeDepth = through ? size.depth : Math.min(depth, size.depth);
-  const normal = new THREE.Vector3(...hover.normal).normalize();
-  const inward = normal.clone().negate();
-  const center = new THREE.Vector3(...hover.point).addScaledVector(inward, holeDepth / 2);
-  const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), inward);
   return (
-    <mesh position={center} quaternion={quaternion} raycast={() => null}>
-      <cylinderGeometry args={[diameter / 2, diameter / 2, Math.max(holeDepth, 1), 20]} />
-      <meshBasicMaterial color="#9a3412" transparent opacity={0.45} />
+    <group>
+      {ghost}
+      {hover.snap ? (
+        <Html position={hover.point} center style={{ pointerEvents: "none" }}>
+          <div className="rounded-full bg-[#1c1915] px-2 py-0.5 text-[11px] font-medium text-[#f6efe4]">{hover.snap}</div>
+        </Html>
+      ) : null}
+    </group>
+  );
+}
+
+function RouteGhost({
+  piece,
+  kind,
+  edge,
+  u,
+  v,
+  width,
+  depth,
+  tint,
+}: {
+  piece: Piece;
+  kind: "dado" | "groove" | "rebate";
+  edge: "left" | "right" | "start" | "end";
+  u: number;
+  v: number;
+  width: number;
+  depth: number;
+  tint: string;
+}) {
+  const y = piece.thickness / 2 - depth / 2;
+  const position: [number, number, number] = kind === "groove"
+    ? [-piece.width / 2 + u, y, 0]
+    : kind === "rebate"
+      ? [
+          edge === "left" ? -piece.width / 2 + width / 2 : edge === "right" ? piece.width / 2 - width / 2 : 0,
+          y,
+          edge === "start" ? -piece.length / 2 + width / 2 : edge === "end" ? piece.length / 2 - width / 2 : 0,
+        ]
+      : [0, y, -piece.length / 2 + v];
+  const size: [number, number, number] = kind === "groove"
+    ? [width, depth, piece.length]
+    : kind === "rebate" && (edge === "left" || edge === "right")
+      ? [width, depth, piece.length]
+      : kind === "rebate"
+        ? [piece.width, depth, width]
+        : [piece.width, depth, width];
+  return (
+    <mesh position={position} raycast={() => null}>
+      <boxGeometry args={size} />
+      <meshBasicMaterial color={tint} transparent opacity={0.45} />
+    </mesh>
+  );
+}
+
+function ProfileGhost({ piece, edge, radius, tint }: { piece: Piece; edge: "left" | "right" | "start" | "end"; radius: number; tint: string }) {
+  const along = edge === "left" || edge === "right";
+  const position: [number, number, number] = [
+    edge === "left" ? -piece.width / 2 : edge === "right" ? piece.width / 2 : 0,
+    piece.thickness / 2,
+    edge === "start" ? -piece.length / 2 : edge === "end" ? piece.length / 2 : 0,
+  ];
+  return (
+    <mesh position={position} rotation={along ? [0, 0, Math.PI / 2] : [Math.PI / 2, 0, 0]} raycast={() => null}>
+      <cylinderGeometry args={[radius, radius, along ? piece.length : piece.width, 16]} />
+      <meshBasicMaterial color={tint} transparent opacity={0.45} />
     </mesh>
   );
 }
@@ -350,7 +527,9 @@ function ToolDock() {
   const piece = useProject((state) => state.pieces.find((item) => item.id === selection));
   return (
     <div className="absolute inset-x-3 bottom-3 flex justify-center">
-      <div className="pointer-events-auto w-full max-w-xl rounded-2xl border bg-card/95 p-3 shadow-lg backdrop-blur-md">
+      <div className="pointer-events-auto w-full max-w-xl overflow-hidden rounded-lg border bg-card/95 shadow-lg backdrop-blur-md">
+        <div className="birch-rule" />
+        <div className="p-3">
         {tool === "select" ? <SelectDock /> : null}
         {tool === "saw" ? <SawDock piece={piece} /> : null}
         {tool === "drill" ? <DrillDock /> : null}
@@ -358,6 +537,7 @@ function ToolDock() {
         {tool === "router" ? <RouterDock /> : null}
         {tool === "joint" ? <JointDock /> : null}
         {tool === "hardware" ? <HardwareDock /> : null}
+        </div>
       </div>
     </div>
   );
@@ -599,7 +779,6 @@ function RouterDock() {
   const width = useUi((state) => state.routerWidth);
   const depth = useUi((state) => state.routerDepth);
   const profile = useUi((state) => state.profile);
-  const edge = useUi((state) => state.profileEdge);
   const radius = useUi((state) => state.profileRadius);
   return (
     <div className="flex flex-col gap-2">
@@ -614,10 +793,7 @@ function RouterDock() {
           <Toggle on={profile === "round-over"} onClick={() => useUi.getState().setProfile("round-over")}>Round-over</Toggle>
           <Toggle on={profile === "chamfer"} onClick={() => useUi.getState().setProfile("chamfer")}>Chamfer</Toggle>
           <Toggle on={profile === "cove"} onClick={() => useUi.getState().setProfile("cove")}>Cove</Toggle>
-          {(["left", "right", "start", "end"] as const).map((side) => (
-            <Toggle key={side} on={edge === side} onClick={() => useUi.getState().setProfileEdge(side)}>{side}</Toggle>
-          ))}
-          <span className="text-xs text-muted-foreground">R{formatMm(radius)}</span>
+          <span className="text-xs text-muted-foreground">R{formatMm(radius)} · edge under the cursor</span>
           <Slider className="w-28" min={2} max={16} step={1} value={[radius]} onValueChange={(value) => useUi.getState().setProfileRadius(value[0] ?? radius)} />
         </div>
       ) : (
@@ -628,7 +804,7 @@ function RouterDock() {
           <Slider className="w-24" min={1} max={18} step={1} value={[depth]} onValueChange={(value) => useUi.getState().setRouterDepth(value[0] ?? depth)} />
         </div>
       )}
-      <p className="text-xs text-muted-foreground">Click a face. A dado runs across the grain, a groove with it, a rebate steps an edge.</p>
+      <p className="text-xs text-muted-foreground">Hover to see the cut. A dado, groove, rebate or edge profile lands on the face or edge under the cursor. Red means it will not fit.</p>
     </div>
   );
 }

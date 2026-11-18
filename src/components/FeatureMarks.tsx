@@ -51,7 +51,7 @@ function RouteMark({ piece, route }: { piece: Piece; route: RouterCut }) {
     );
   }
   return (
-    <mesh position={[0, y, -piece.length / 2 + route.v + route.width / 2]} raycast={() => null}>
+    <mesh position={[0, y, -piece.length / 2 + route.v]} raycast={() => null}>
       <boxGeometry args={[piece.width + 0.6, route.depth + 0.2, route.width]} />
       <meshBasicMaterial color="#4a3022" />
     </mesh>

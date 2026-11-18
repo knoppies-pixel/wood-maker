@@ -1,6 +1,6 @@
 import { parseCatalog } from "./catalog.ts";
 import { normalizePiece } from "./features.ts";
-import type { Board, Fastener, FastenerType, HardwareItem, Hole, Piece, ProjectData, StockItem, Vec3Tuple } from "./types.ts";
+import type { Board, DimensionNote, Fastener, FastenerType, HardwareItem, Hole, Piece, ProjectData, StockItem, Vec3Tuple } from "./types.ts";
 
 const STORAGE_KEY = "benchwork.project.v1";
 
@@ -16,6 +16,7 @@ export function emptyProject(catalog: StockItem[]): ProjectData {
     pieces: [],
     fasteners: [],
     hardware: [],
+    dimensions: [],
   };
 }
 
@@ -48,6 +49,7 @@ export function parseProject(input: unknown, fallbackCatalog: StockItem[]): { pr
       pieces,
       fasteners,
       hardware,
+      dimensions: Array.isArray(record.dimensions) ? record.dimensions.filter(isDimension) : [],
     },
   };
 }
@@ -116,6 +118,12 @@ function isFastener(value: unknown): value is Fastener {
   const fastener = value as Fastener;
   const kinds: FastenerType[] = ["screw", "pocket-screw", "bolt", "glue"];
   return kinds.includes(fastener.type) && typeof fastener.pieceAId === "string" && typeof fastener.pieceBId === "string" && isTuple(fastener.localPosition) && isTuple(fastener.localDirection);
+}
+
+function isDimension(value: unknown): value is DimensionNote {
+  if (!value || typeof value !== "object") return false;
+  const note = value as DimensionNote;
+  return typeof note.id === "string" && typeof note.a?.pieceId === "string" && typeof note.b?.pieceId === "string";
 }
 
 function isHardware(value: unknown): value is HardwareItem {

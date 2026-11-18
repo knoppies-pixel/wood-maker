@@ -51,11 +51,13 @@ export function StockPanel() {
   return (
     <aside
       className={cn(
-        "z-20 w-[300px] shrink-0 flex-col border-r border-border/80 bg-card/90 backdrop-blur-sm",
+        "z-20 w-[300px] shrink-0 flex-col border-r bg-card",
         open ? "flex" : "hidden lg:flex",
         "max-lg:absolute max-lg:inset-y-0 max-lg:left-0 max-lg:shadow-2xl",
       )}
     >
+      <div className="pegboard h-7 border-b border-border/80" aria-hidden />
+      <div className="birch-rule" />
       <div className="border-b px-4 py-3">
         <div className="font-display text-lg leading-none">Stock</div>
         <p className="mt-1 text-xs leading-snug text-muted-foreground">Pick a length. It lands on the bench full size, in millimetres.</p>
@@ -79,7 +81,7 @@ export function StockPanel() {
                 </div>
                 <div className="flex flex-col gap-2">
                   {group.items.map((item) => (
-                    <article key={item.id} className="rounded-xl border bg-background/70 px-3 py-2.5">
+                    <article key={item.id} className="rounded-lg border bg-background/60 px-3 py-2.5">
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <div className="text-sm font-semibold">{item.name}</div>
@@ -95,7 +97,7 @@ export function StockPanel() {
                             key={length.length}
                             type="button"
                             onClick={() => add(item, length.length)}
-                            className="nums rounded-lg border bg-card px-2 py-1 text-left transition-colors hover:border-primary/40 hover:bg-accent"
+                            className="nums rounded-md border bg-card px-2 py-1 text-left transition-colors hover:border-primary hover:bg-muted"
                           >
                             <div className="text-xs font-semibold">{length.length} mm</div>
                             <div className="text-[11px] text-muted-foreground">{formatZar(length.price)}</div>
