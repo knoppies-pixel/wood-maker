@@ -585,6 +585,11 @@ export function rayDistanceOnAxis(piece: Piece, rayOrigin: Vec3, rayDir: Vec3, a
   return clamp(t, 0, span);
 }
 
+/** Keep the underside where it was when the thickness changes, so a stacked piece does not drop to the bench. */
+export function keepBottom(positionY: number, oldThickness: number, newThickness: number): number {
+  return positionY - oldThickness / 2 + newThickness / 2;
+}
+
 export function placementFor(existing: Piece[], width: number, thickness: number): Vec3Tuple {
   if (existing.length === 0) return [0, thickness / 2, 0];
   let maxX = -Infinity;

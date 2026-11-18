@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { faceSize, localToWorld, rayDistanceOnAxis, snapTranslation } from "../domain/geometry.ts";
 import { HARDWARE_CATALOG } from "../domain/features.ts";
+import { offsetOnFace } from "../domain/marks.ts";
 import { faceExtent } from "../domain/modifiers.ts";
 import { holeLocalPoint } from "../domain/geometry.ts";
 import { DEG, clamp, formatMm } from "../domain/math.ts";
 import { connectedIds, kerfAlong } from "../domain/operations.ts";
+import { profileLocal, profileTarget, routeLocalBox } from "../domain/picking.ts";
 import { MIN_PART_MM, type Piece, type Vec3Tuple } from "../domain/types.ts";
 import { useProject } from "../store/useProject.ts";
 import { useUi, type DragPose } from "../store/useUi.ts";
@@ -38,7 +40,7 @@ export function Viewport() {
   }, [pieces, selection]);
 
   return (
-    <div className="relative min-w-0 flex-1 bg-[#6f6a63]">
+    <div className="relative min-w-0 flex-1 bg-[#6f6a63]" onContextMenu={(event) => event.preventDefault()}>
       <Canvas
         dpr={[1, 1.75]}
         shadows
@@ -84,7 +86,7 @@ export function Viewport() {
           position={[0, 0.6, 80]}
           raycast={() => null}
         />
-        <ContactShadows position={[0, 0.4, 80]} opacity={0.42} scale={2400} blur={2.4} far={280} color="#1c1814" resolution={512} />
+        <ContactShadows frames={1} position={[0, 0.4, 80]} opacity={0.42} scale={2400} blur={2.4} far={280} color="#1c1814" resolution={512} />
         {pieces.map((piece) => (
           <PieceView key={piece.id} piece={piece} />
         ))}
@@ -94,7 +96,15 @@ export function Viewport() {
         <Ghosts />
         <DimensionNotes />
         {tool === "select" && selected && !modal ? <MoveGizmo pieceId={selected.id} /> : null}
-        <OrbitControls makeDefault enableDamping dampingFactor={0.12} maxPolarAngle={Math.PI / 2 - 0.03} minDistance={80} maxDistance={16000} />
+        <OrbitControls
+          makeDefault
+          enableDamping
+          dampingFactor={0.12}
+          maxPolarAngle={Math.PI / 2 - 0.03}
+          minDistance={80}
+          maxDistance={16000}
+        />
+        <CameraButtons />
         <ViewRig signal={resetSignal} />
         <ViewBridge />
         <ModalPointer />
@@ -312,6 +322,17 @@ function ModalPointer() {
       window.removeEventListener("pointerup", onUp);
     };
   }, [modal?.op, modal?.pieceId, camera, gl, controls]);
+  return null;
+}
+
+function CameraButtons() {
+  const controls = useThree((state) => state.controls) as OrbitControlsImpl | null;
+  useEffect(() => {
+    if (!controls) return;
+    controls.mouseButtons.LEFT = -1 as unknown as THREE.MOUSE;
+    controls.mouseButtons.MIDDLE = THREE.MOUSE.ROTATE;
+    controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
+  }, [controls]);
   return null;
 }
 
@@ -546,9 +567,13 @@ function Ghosts() {
       </group>
     );
   } else if (tool === "router") {
-    ghost = routerKind === "profile"
-      ? <ProfileGhost piece={piece} edge={hover.edge} radius={radius} tint={tint} />
-      : <RouteGhost piece={piece} kind={routerKind} edge={hover.edge} u={hover.u} v={hover.v} width={routerWidth} depth={routerDepth} tint={tint} />;
+    ghost = (
+      <group position={piece.position} rotation={piece.rotation}>
+        {routerKind === "profile"
+          ? <ProfileGhost piece={piece} face={hover.face} u={hover.u} v={hover.v} radius={radius} tint={tint} />
+          : <RouteGhost piece={piece} kind={routerKind} face={hover.face} edge={hover.edge} u={hover.u} v={hover.v} width={routerWidth} depth={routerDepth} tint={tint} />}
+      </group>
+    );
   } else if (tool === "screw") {
     const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), inward);
     const length = useUi.getState().screwLength;
@@ -610,7 +635,6 @@ function LayoutGhost({ piece, hover, tint }: { piece: Piece; hover: NonNullable<
   const mode = useUi((state) => state.measureMode);
   const degrees = useUi((state) => state.angleDegrees);
   const offset = useUi((state) => state.offsetMm);
-  const edge = useUi((state) => state.offsetEdge);
   const draft = useUi((state) => state.pencilDraft);
   if (tool === "measure" && mode === "tape" && anchor) {
     const host = useProject.getState().pieces.find((item) => item.id === anchor.pieceId);
@@ -639,12 +663,9 @@ function LayoutGhost({ piece, hover, tint }: { piece: Piece; hover: NonNullable<
     return <group position={piece.position} rotation={piece.rotation}><LineBridge a={start} b={end} color={tint} /></group>;
   }
   if (tool === "measure" && mode === "offset") {
-    const size = faceExtent(hover.face, piece);
-    const along = edge === "left" || edge === "right";
-    const u = edge === "left" ? offset : edge === "right" ? size.u - offset : 0;
-    const v = edge === "start" ? offset : edge === "end" ? size.v - offset : 0;
-    const a = facePoint(piece, hover.face, along ? { u, v: 0 } : { u: 0, v });
-    const b = facePoint(piece, hover.face, along ? { u, v: size.v } : { u: size.u, v });
+    const line = offsetOnFace(hover.face, piece, hover.u, hover.v, offset);
+    const a = facePoint(piece, hover.face, line[0] ?? hover);
+    const b = facePoint(piece, hover.face, line[1] ?? hover);
     return <group position={piece.position} rotation={piece.rotation}><LineBridge a={a} b={b} color={tint} /></group>;
   }
   if (tool === "pencil" && draft && draft[0]) {
@@ -671,6 +692,7 @@ function LineBridge({ a, b, color }: { a: Vec3Tuple; b: Vec3Tuple; color: string
 function RouteGhost({
   piece,
   kind,
+  face,
   edge,
   u,
   v,
@@ -680,6 +702,7 @@ function RouteGhost({
 }: {
   piece: Piece;
   kind: "dado" | "groove" | "rebate";
+  face: Piece["holes"][number]["face"];
   edge: "left" | "right" | "start" | "end";
   u: number;
   v: number;
@@ -687,41 +710,20 @@ function RouteGhost({
   depth: number;
   tint: string;
 }) {
-  const y = piece.thickness / 2 - depth / 2;
-  const position: [number, number, number] = kind === "groove"
-    ? [-piece.width / 2 + u, y, 0]
-    : kind === "rebate"
-      ? [
-          edge === "left" ? -piece.width / 2 + width / 2 : edge === "right" ? piece.width / 2 - width / 2 : 0,
-          y,
-          edge === "start" ? -piece.length / 2 + width / 2 : edge === "end" ? piece.length / 2 - width / 2 : 0,
-        ]
-      : [0, y, -piece.length / 2 + v];
-  const size: [number, number, number] = kind === "groove"
-    ? [width, depth, piece.length]
-    : kind === "rebate" && (edge === "left" || edge === "right")
-      ? [width, depth, piece.length]
-      : kind === "rebate"
-        ? [piece.width, depth, width]
-        : [piece.width, depth, width];
+  const box = routeLocalBox(piece, { kind, face, edge, u, v, width, depth }, 0.15);
   return (
-    <mesh position={position} raycast={() => null}>
-      <boxGeometry args={size} />
+    <mesh position={box.position} raycast={() => null}>
+      <boxGeometry args={box.size} />
       <meshBasicMaterial color={tint} transparent opacity={0.45} />
     </mesh>
   );
 }
 
-function ProfileGhost({ piece, edge, radius, tint }: { piece: Piece; edge: "left" | "right" | "start" | "end"; radius: number; tint: string }) {
-  const along = edge === "left" || edge === "right";
-  const position: [number, number, number] = [
-    edge === "left" ? -piece.width / 2 : edge === "right" ? piece.width / 2 : 0,
-    piece.thickness / 2,
-    edge === "start" ? -piece.length / 2 : edge === "end" ? piece.length / 2 : 0,
-  ];
+function ProfileGhost({ piece, face, u, v, radius, tint }: { piece: Piece; face: Piece["holes"][number]["face"]; u: number; v: number; radius: number; tint: string }) {
+  const target = profileLocal(piece, profileTarget(piece, face, u, v));
   return (
-    <mesh position={position} rotation={along ? [0, 0, Math.PI / 2] : [Math.PI / 2, 0, 0]} raycast={() => null}>
-      <cylinderGeometry args={[radius, radius, along ? piece.length : piece.width, 16]} />
+    <mesh position={target.position} rotation={target.alongLength ? [Math.PI / 2, 0, 0] : [0, 0, Math.PI / 2]} raycast={() => null}>
+      <cylinderGeometry args={[radius, radius, target.alongLength ? piece.length : piece.width, 16]} />
       <meshBasicMaterial color={tint} transparent opacity={0.45} />
     </mesh>
   );
@@ -769,7 +771,7 @@ function ToolDock() {
   const piece = useProject((state) => state.pieces.find((item) => item.id === selection));
   return (
     <div className="absolute inset-x-3 bottom-3 flex justify-center">
-      <div className="pointer-events-auto w-full max-w-xl overflow-hidden rounded-lg border bg-card/95 shadow-lg backdrop-blur-md">
+      <div className="pointer-events-auto max-h-[46vh] w-full max-w-xl overflow-y-auto rounded-lg border bg-card/95 shadow-lg backdrop-blur-md">
         <div className="birch-rule" />
         <div className="p-3">
         {tool === "select" ? <SelectDock /> : null}
@@ -1078,8 +1080,8 @@ function StatusLine() {
   const tool = useUi((state) => state.tool);
   const modal = useUi((state) => state.modal);
   const hints: Record<string, string> = {
-    select: "G grab · R rotate · S scale · arrows nudge · F frames",
-    saw: "Hover sets the cut · both lengths show on the board · Enter cuts",
+    select: "Middle mouse orbits · Shift+middle pans · wheel zooms · G R S",
+    saw: "Click the board to cut · both lengths show on the blade · Enter cuts too",
     drill: "Ghost hole follows the face under the cursor · red will not fit",
     screw: "Ghost fastener · red means it does not reach a second piece",
     router: "Edge and face come from the cursor, not a fixed side",
@@ -1089,7 +1091,7 @@ function StatusLine() {
     measure: "Tape keeps a dimension · speed square and combination square mark the face",
   };
   return (
-    <div className="pointer-events-none absolute bottom-[7.5rem] left-3 max-w-md rounded-md border bg-card/92 px-2.5 py-1 text-xs text-muted-foreground shadow-sm">
+    <div className="pointer-events-none absolute top-12 left-3 max-w-md rounded-md border bg-card/92 px-2.5 py-1 text-xs text-muted-foreground shadow-sm">
       <span className="nums text-foreground">{modal ? modalLabel(modal) : tool}</span>
       <span className="mx-2 text-border">·</span>
       {modal ? "X Y Z locks an axis. Type a value and press Enter. Esc cancels." : hints[tool]}

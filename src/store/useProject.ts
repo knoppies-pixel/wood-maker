@@ -4,7 +4,7 @@ import { defaultCatalog } from "../domain/catalog.ts";
 import { sampleFrame } from "../domain/example.ts";
 import { uid } from "../domain/math.ts";
 import { circleOutline, curveCut, edgeProfile, HARDWARE_CATALOG, placeHardware, planJoint, routeCut, taperPiece } from "../domain/features.ts";
-import { localToWorld } from "../domain/geometry.ts";
+import { keepBottom, localToWorld } from "../domain/geometry.ts";
 import { localCopies } from "../domain/modifiers.ts";
 import {
   addStockPiece,
@@ -29,7 +29,7 @@ interface ProjectState extends Snapshot {
   curve: (pieceId: string, points: Array<{ u: number; v: number }>, waste: "left" | "right") => ActionResult;
   drillHole: (pieceId: string, input: Omit<Hole, "id">) => ActionResult;
   addRoute: (pieceId: string, input: Omit<RouterCut, "id">) => ActionResult;
-  addProfile: (pieceId: string, profile: "round-over" | "chamfer" | "cove", edge: "left" | "right" | "start" | "end", radius: number) => ActionResult;
+  addProfile: (pieceId: string, profile: "round-over" | "chamfer" | "cove", edge: "left" | "right" | "start" | "end", radius: number, side?: "top" | "bottom") => ActionResult;
   join: (kind: "mortise-tenon" | "half-lap" | "dovetail" | "dowels", firstId: string, firstFace: FaceId, firstUv: { u: number; v: number }, secondId: string, secondFace: FaceId, secondUv: { u: number; v: number }, dowelDiameter?: number) => ActionResult;
   addScrew: (input: Omit<Fastener, "id" | "type"> & { type?: FastenerType }) => ActionResult;
   addHardware: (catalogId: string, pieceId: string, face: FaceId, uv: { u: number; v: number }) => ActionResult;
@@ -152,13 +152,13 @@ export const useProject = create<ProjectState>()(
         return { ok: true, message: `${input.kind[0].toUpperCase()}${input.kind.slice(1)} cut, ${trim(input.width)} mm wide and ${trim(input.depth)} mm deep.` };
       },
 
-      addProfile: (pieceId, profile, edge, radius) => {
+      addProfile: (pieceId, profile, edge, radius, side = "top") => {
         const piece = get().pieces.find((item) => item.id === pieceId);
         if (!piece) return { ok: false, message: "Select a piece for the edge profile." };
-        const result = edgeProfile({ profile, edge, radius }, piece.thickness);
+        const result = edgeProfile({ profile, edge, radius, side }, piece.thickness);
         if ("error" in result) return { ok: false, message: result.error };
         set({ pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, profiles: [...(item.profiles ?? []), result.profile] } : item)) });
-        return { ok: true, message: `${profile} on the ${edge} edge.` };
+        return { ok: true, message: `${profile} on the ${side} ${edge} arris.` };
       },
 
       join: (kind, firstId, firstFace, firstUv, secondId, secondFace, secondUv, dowelDiameter = 8) => {
@@ -225,7 +225,7 @@ export const useProject = create<ProjectState>()(
               thickness,
               widthStart: (piece.widthStart || piece.width) * scaleX,
               widthEnd: (piece.widthEnd || piece.width) * scaleX,
-              position: [piece.position[0], thickness / 2, piece.position[2]] as Vec3Tuple,
+              position: [piece.position[0], keepBottom(piece.position[1], piece.thickness, thickness), piece.position[2]] as Vec3Tuple,
             };
           }),
         });

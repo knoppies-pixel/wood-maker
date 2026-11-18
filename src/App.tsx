@@ -30,7 +30,7 @@ export default function App() {
           <Inspector />
         </div>
       </div>
-      <Toaster position="bottom-center" />
+      <Toaster position="top-center" />
       <CheatSheet />
     </TooltipProvider>
   );
@@ -55,7 +55,6 @@ function useAutosave() {
 function useSawDefaults() {
   const selection = useUi((state) => state.selection);
   const sawMode = useUi((state) => state.sawMode);
-  const sawBevel = useUi((state) => state.sawBevel);
   useEffect(() => {
     const piece = useProject.getState().pieces.find((item) => item.id === selection);
     if (!piece) return;
@@ -66,10 +65,10 @@ function useSawDefaults() {
       ui.setSawDistance(clamp(Math.round(piece.width / 2), MIN_PART_MM, Math.max(MIN_PART_MM, max)));
       return;
     }
-    const consumed = kerfAlong(kerf, ui.sawMitre, sawBevel);
+    const consumed = kerfAlong(kerf, ui.sawMitre, ui.sawBevel);
     const max = piece.length - consumed - MIN_PART_MM;
     ui.setSawDistance(clamp(Math.round(piece.length / 2), MIN_PART_MM, Math.max(MIN_PART_MM, max)));
-  }, [selection, sawMode, sawBevel]);
+  }, [selection, sawMode]);
 }
 
 const toolKeys: Record<string, ToolId> = {

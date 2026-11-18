@@ -3,10 +3,10 @@ import type { ThreeEvent } from "@react-three/fiber";
 import { useLayoutEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import * as THREE from "three";
-import { canPlaceHole } from "../domain/operations.ts";
-import { nearestPieceEdge, routeFits, snapFaceHit, stationFromHit } from "../domain/picking.ts";
+import { canPlaceHole, kerfAlong } from "../domain/operations.ts";
+import { nearestPieceEdge, profileTarget, routeFits, sawDistanceFromStation, snapFaceHit, stationFromHit } from "../domain/picking.ts";
 import { faceExtent, localCopies } from "../domain/modifiers.ts";
-import { parallelMark } from "../domain/marks.ts";
+import { offsetOnFace } from "../domain/marks.ts";
 import { buildMesh, faceUvFromLocal, holeLocalPoint, inwardNormal } from "../domain/geometry.ts";
 import type { Hole, PencilMark, Piece } from "../domain/types.ts";
 import { useProject } from "../store/useProject.ts";
@@ -160,9 +160,11 @@ function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "do
     return;
   }
   const sawMode = useUi.getState().sawMode;
-  if (kind === "move" && tool === "saw" && hit && (sawMode === "crosscut" || sawMode === "rip")) {
-    const station = stationFromHit(piece, hit.face, hit.u, hit.v, sawMode);
-    useUi.getState().setSawDistance(Math.max(1, station));
+  if (tool === "saw" && hit && (sawMode === "crosscut" || sawMode === "rip") && (kind === "move" || kind === "down")) {
+    rememberSawStation(piece, hit.face, hit.u, hit.v, sawMode);
+    if (kind === "move") return;
+    useUi.getState().select(piece.id);
+    commitSaw(piece);
     return;
   }
   if (kind === "down" && tool === "saw" && useUi.getState().sawMode === "curve" && hit?.face === "top") {
@@ -201,8 +203,9 @@ function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "do
   }
   if (tool === "router") {
     const ui = useUi.getState();
+    const arris = profileTarget(piece, hit.face, hit.u, hit.v);
     const result = ui.routerKind === "profile"
-      ? useProject.getState().addProfile(piece.id, ui.profile, hit.edge, ui.profileRadius)
+      ? useProject.getState().addProfile(piece.id, ui.profile, arris.edge, ui.profileRadius, arris.side)
       : useProject.getState().addRoute(piece.id, {
           kind: ui.routerKind,
           face: hit.face,
@@ -444,9 +447,34 @@ function measure(piece: Piece, hit: HoverHit): void {
     toast.success(`${ui.angleDegrees}° marked on the face.`);
     return;
   }
-  const points = parallelMark(hit.face, piece, ui.offsetEdge, ui.offsetMm);
+  const edge = nearestPieceEdge(piece, hit.face, hit.u, hit.v);
+  useUi.getState().setOffsetEdge(edge);
+  const points = offsetOnFace(hit.face, piece, hit.u, hit.v, ui.offsetMm);
   useProject.getState().addMark(piece.id, { face: hit.face, kind: "line", points, label: `${ui.offsetMm} mm` });
-  toast.success(`Offset ${ui.offsetMm} mm from the ${ui.offsetEdge} edge.`);
+  toast.success(`Offset ${ui.offsetMm} mm from the nearest edge.`);
+}
+
+function rememberSawStation(piece: Piece, face: Piece["holes"][number]["face"], u: number, v: number, mode: "crosscut" | "rip"): void {
+  const ui = useUi.getState();
+  const station = stationFromHit(piece, face, u, v, mode);
+  const kerf = useProject.getState().kerf;
+  const consumed = mode === "crosscut" ? kerfAlong(kerf, ui.sawMitre, ui.sawBevel) : kerf;
+  const distance = sawDistanceFromStation(piece.length, mode, ui.sawFrom, station, consumed);
+  useUi.getState().setSawDistance(Math.max(1, distance));
+}
+
+function commitSaw(piece: Piece): void {
+  const ui = useUi.getState();
+  if (ui.sawMode !== "crosscut" && ui.sawMode !== "rip") return;
+  const kerf = useProject.getState().kerf;
+  const consumed = ui.sawMode === "crosscut" ? kerfAlong(kerf, ui.sawMitre, ui.sawBevel) : kerf;
+  const distance = ui.sawMode === "rip" || ui.sawFrom === "start" ? ui.sawDistance : piece.length - ui.sawDistance - consumed;
+  const result = useProject.getState().cutPiece(piece.id, ui.sawMode === "rip" ? "rip" : "crosscut", distance, ui.sawMode === "crosscut" ? ui.sawMitre : 0, ui.sawBevel);
+  if (!result.ok) toast.error(result.message);
+  else {
+    toast.success(result.message ?? "Cut");
+    if (result.selectId) useUi.getState().select(result.selectId);
+  }
 }
 
 function nearestMark(piece: Piece, hit: HoverHit): PencilMark | null {

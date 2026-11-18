@@ -13,6 +13,7 @@ import type { WoodModifier } from "../domain/types.ts";
 import { Switch } from "@/components/ui/switch";
 import { FINISH_PRESETS } from "../domain/features.ts";
 import { DEG, formatMm, formatZar } from "../domain/math.ts";
+import { axisExtent } from "../domain/modifiers.ts";
 import { connectedIds } from "../domain/operations.ts";
 import { cutList, fastenerList, profileLabel, shoppingList } from "../domain/reports.ts";
 import type { Piece, Vec3Tuple } from "../domain/types.ts";
@@ -203,6 +204,7 @@ function ModifierStack({ piece }: { piece: Piece }) {
   const [spacing, setSpacing] = useStateNumber(80);
   const [axis, setAxis] = useStateAxis("x");
   const [layout, setLayout] = useState<"linear" | "radial">("linear");
+  const [across, setAcross] = useState<"edge" | "centre">("edge");
   const [targetId, setTargetId] = useState(others[0]?.id ?? "");
   const modifiers = piece.modifiers ?? [];
 
@@ -243,6 +245,7 @@ function ModifierStack({ piece }: { piece: Piece }) {
               <div className="mt-1 grid grid-cols-2 gap-1">
                 <CommitNumber label="Count" value={modifier.count} min={1} max={24} suffix="" onCommit={(value) => useProject.getState().updateModifier(piece.id, { ...modifier, count: value })} />
                 <CommitNumber label="Spacing" value={modifier.spacing} min={1} max={2000} onCommit={(value) => useProject.getState().updateModifier(piece.id, { ...modifier, spacing: value })} />
+                <CommitNumber label="Fit length" value={modifier.fitLength ?? 0} min={0} max={6000} onCommit={(value) => useProject.getState().updateModifier(piece.id, { ...modifier, fitLength: value > 0 ? value : null })} />
               </div>
             ) : null}
             {modifier.type === "space" ? (
@@ -259,9 +262,10 @@ function ModifierStack({ piece }: { piece: Piece }) {
           <option value="y">Through thickness</option>
           <option value="z">Along length</option>
         </select>
-        <Button size="xs" variant="secondary" onClick={() => add({ id: uid("mod"), type: "array", enabled: true, layout, count: arrayCount, spacing, axis, fitLength: null })}>Array</Button>
+        <Button size="xs" variant="secondary" onClick={() => add({ id: uid("mod"), type: "array", enabled: true, layout, count: arrayCount, spacing: layout === "linear" ? Math.max(spacing, axisExtent(piece, axis) + 8) : spacing, axis, fitLength: null })}>Array</Button>
         <Button size="xs" variant="ghost" onClick={() => setLayout(layout === "linear" ? "radial" : "linear")}>{layout}</Button>
-        <Button size="xs" variant="secondary" onClick={() => add({ id: uid("mod"), type: "mirror", enabled: true, axis, across: "edge" })}>Mirror</Button>
+        <Button size="xs" variant="ghost" onClick={() => setAcross(across === "edge" ? "centre" : "edge")}>{across === "edge" ? "From edge" : "Through centre"}</Button>
+        <Button size="xs" variant="secondary" onClick={() => add({ id: uid("mod"), type: "mirror", enabled: true, axis, across })}>Mirror</Button>
         <Button
           size="xs"
           variant="secondary"

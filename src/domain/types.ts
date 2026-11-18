@@ -81,6 +81,8 @@ export interface EdgeProfile {
   id: string;
   profile: ProfileName;
   edge: "left" | "right" | "start" | "end";
+  /** Which arris of that edge. Older files omit this and mean the top. */
+  side?: "top" | "bottom";
   radius: number;
 }
 

@@ -40,6 +40,20 @@ export function snapFacePoint(piece: Piece, face: FaceId, u: number, v: number, 
   return { u, v, label: null };
 }
 
+/** A combination-square line, offset from the nearest boundary of the face under the cursor. */
+export function offsetOnFace(face: FaceId, piece: Piece, u: number, v: number, offset: number): FacePoint[] {
+  const size = faceExtent(face, piece);
+  const toU0 = u;
+  const toU1 = size.u - u;
+  const toV0 = v;
+  const toV1 = size.v - v;
+  const nearest = Math.min(toU0, toU1, toV0, toV1);
+  if (nearest === toU0) return parallelMark(face, piece, "left", offset);
+  if (nearest === toU1) return parallelMark(face, piece, "right", offset);
+  if (nearest === toV0) return parallelMark(face, piece, "start", offset);
+  return parallelMark(face, piece, "end", offset);
+}
+
 export function parallelMark(face: FaceId, piece: Piece, edge: "left" | "right" | "start" | "end", offset: number): FacePoint[] {
   const size = faceExtent(face, piece);
   const clamped = Math.max(0, Math.min(offset, edge === "left" || edge === "right" ? size.u : size.v));

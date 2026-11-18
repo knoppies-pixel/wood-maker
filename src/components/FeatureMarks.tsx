@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 import { holeLocalPoint, inwardNormal } from "../domain/geometry.ts";
+import { profileLocal, routeLocalBox } from "../domain/picking.ts";
 import type { EdgeProfile, HardwareItem, JoineryFeature, Piece, RouterCut } from "../domain/types.ts";
 
 export function FeatureMarks({ piece }: { piece: Piece }) {
@@ -30,52 +31,31 @@ export function HardwareMarks({ piece, items }: { piece: Piece; items: HardwareI
 }
 
 function RouteMark({ piece, route }: { piece: Piece; route: RouterCut }) {
-  const y = (piece.thickness / 2 - route.depth / 2) * (route.face === "bottom" ? -1 : 1);
-  if (route.kind === "groove") {
-    return (
-      <mesh position={[-piece.width / 2 + route.u, y, 0]} raycast={() => null}>
-        <boxGeometry args={[route.width, route.depth + 0.2, piece.length + 0.6]} />
-        <meshBasicMaterial color="#4a3022" />
-      </mesh>
-    );
-  }
-  if (route.kind === "rebate") {
-    const alongX = route.edge === "left" || route.edge === "right";
-    const x = route.edge === "left" ? -piece.width / 2 + route.width / 2 : route.edge === "right" ? piece.width / 2 - route.width / 2 : 0;
-    const z = route.edge === "start" ? -piece.length / 2 + route.width / 2 : route.edge === "end" ? piece.length / 2 - route.width / 2 : 0;
-    return (
-      <mesh position={[x, y, z]} raycast={() => null}>
-        <boxGeometry args={alongX ? [route.width, route.depth + 0.2, piece.length + 0.6] : [piece.width + 0.6, route.depth + 0.2, route.width]} />
-        <meshBasicMaterial color="#4a3022" />
-      </mesh>
-    );
-  }
+  const box = routeLocalBox(piece, route, 0.2);
   return (
-    <mesh position={[0, y, -piece.length / 2 + route.v]} raycast={() => null}>
-      <boxGeometry args={[piece.width + 0.6, route.depth + 0.2, route.width]} />
+    <mesh position={box.position} raycast={() => null}>
+      <boxGeometry args={box.size} />
       <meshBasicMaterial color="#4a3022" />
     </mesh>
   );
 }
 
 function ProfileMark({ piece, profile }: { piece: Piece; profile: EdgeProfile }) {
-  const y = piece.thickness / 2 - profile.radius * 0.35;
-  const alongLength = profile.edge === "left" || profile.edge === "right";
-  const x = profile.edge === "left" ? -piece.width / 2 : profile.edge === "right" ? piece.width / 2 : 0;
-  const z = profile.edge === "start" ? -piece.length / 2 : profile.edge === "end" ? piece.length / 2 : 0;
-  const length = alongLength ? piece.length : piece.width;
-  const rotation: [number, number, number] = alongLength ? [0, 0, Math.PI / 2] : [Math.PI / 2, 0, 0];
+  const placed = profileLocal(piece, profile);
+  const length = placed.alongLength ? piece.length : piece.width;
+  const sign = profile.side === "bottom" ? -1 : 1;
+  const rotation: [number, number, number] = placed.alongLength ? [Math.PI / 2, 0, 0] : [0, 0, Math.PI / 2];
   if (profile.profile === "chamfer") {
     return (
-      <mesh position={[x, piece.thickness / 2, z]} rotation={[0, alongLength ? 0 : Math.PI / 2, Math.PI / 4]} raycast={() => null}>
+      <mesh position={placed.position} rotation={[0, placed.alongLength ? 0 : Math.PI / 2, sign * Math.PI / 4]} raycast={() => null}>
         <boxGeometry args={[profile.radius * 1.4, profile.radius * 0.4, length]} />
         <meshStandardMaterial color="#d7b48a" roughness={0.7} />
       </mesh>
     );
   }
   return (
-    <mesh position={[x, y, z]} rotation={rotation} raycast={() => null}>
-      <cylinderGeometry args={[profile.radius, profile.radius, length, profile.profile === "cove" ? 16 : 20, 1, false, 0, Math.PI]} />
+    <mesh position={placed.position} rotation={rotation} raycast={() => null}>
+      <cylinderGeometry args={[profile.radius, profile.radius, length, profile.profile === "cove" ? 16 : 20, 1, false, sign < 0 ? Math.PI : 0, Math.PI]} />
       <meshStandardMaterial color={profile.profile === "cove" ? "#6b4630" : "#e4c89a"} roughness={0.72} />
     </mesh>
   );

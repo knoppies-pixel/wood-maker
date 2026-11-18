@@ -40,7 +40,7 @@ function arrayCopies(piece: Piece, copies: LocalCopy[], modifier: Extract<WoodMo
         const angle = (index / count) * Math.PI * 2;
         next.push({
           position: [
-            copy.position[0] + Math.cos(angle) * modifier.spacing,
+            copy.position[0] + (Math.cos(angle) - 1) * modifier.spacing,
             copy.position[1],
             copy.position[2] + Math.sin(angle) * modifier.spacing,
           ],

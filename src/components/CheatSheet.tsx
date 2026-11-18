@@ -15,10 +15,11 @@ const rows: Array<[string, string]> = [
   ["Type a number, Enter", "150 mm, 45°, or a scale factor"],
   ["Arrows / Shift+arrows", "Nudge 1 mm / 10 mm"],
   ["Numpad 1 / 3 / 7", "Front, side, top"],
-  ["Numpad 5", "Orthographic view"],
+  ["Numpad 5", "Flatten the view"],
   ["F or .", "Frame the selection"],
   ["N", "Show or hide properties"],
-  ["Enter", "Make the saw cut"],
+  ["Enter or click", "Make the saw cut"],
+  ["Middle mouse", "Orbit. Shift+middle pans. Right mouse pans. Wheel zooms"],
   ["Ctrl (hold)", "Suspend snapping"],
   ["?", "This sheet"],
 ];

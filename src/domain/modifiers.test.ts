@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { shapeDefaults } from "./features.ts";
-import { angleMark, parallelMark, snapFacePoint } from "./marks.ts";
+import { angleMark, offsetOnFace, parallelMark, snapFacePoint } from "./marks.ts";
 import { instanceCount, localCopies } from "./modifiers.ts";
 import { cutList, fastenerList, shoppingList } from "./reports.ts";
 import type { Board, Fastener, Piece } from "./types.ts";
@@ -73,9 +73,24 @@ describe("modifiers", () => {
     expect(snap.u).toBeCloseTo(50);
     const square = parallelMark("top", board, "start", 32);
     expect(square[0]?.v).toBeCloseTo(32);
+    const fromCursor = offsetOnFace("top", board, 12, 80, 20);
+    expect(fromCursor[0]?.u).toBeCloseTo(20);
+    const fromEnd = offsetOnFace("left", board, 180, 4, 6);
+    expect(fromEnd[0]?.v).toBeCloseTo(6);
     expect(square[1]?.u).toBeCloseTo(100);
     const angle = angleMark(board, "top", 45);
     expect(angle[1]?.u).toBeCloseTo(angle[1]?.v ?? 0);
+  });
+
+  it("keeps the original piece put when a radial array spins around it", () => {
+    const source = piece({
+      modifiers: [{ id: "r", type: "array", enabled: true, layout: "radial", count: 4, spacing: 200, axis: "y", fitLength: null }],
+    });
+    const copies = localCopies(source, [source]);
+    expect(copies).toHaveLength(4);
+    expect(copies[0]?.position).toEqual([0, 0, 0]);
+    expect(copies[1]?.position[0]).toBeCloseTo(-200);
+    expect(copies[1]?.position[2]).toBeCloseTo(200);
   });
 
   it("spaces extra copies evenly between two pieces", () => {

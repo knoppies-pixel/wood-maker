@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { defaultCatalog, parseCatalog, parseCatalogCsv } from "./catalog.ts";
 import { sampleFrame } from "./example.ts";
-import { buildMesh, faceSnapDelta, gridSnapDelta, localToWorld, translatePiece, worldToLocal } from "./geometry.ts";
+import { buildMesh, faceSnapDelta, gridSnapDelta, keepBottom, localToWorld, translatePiece, worldToLocal } from "./geometry.ts";
 import { curveCut, keptOutline, planJoint, shapeDefaults, taperPiece } from "./features.ts";
 import { v } from "./math.ts";
 import { addStockPiece, connectedIds, crosscut, kerfAlong, rip } from "./operations.ts";
@@ -313,5 +313,10 @@ describe("shaped cuts and joints", () => {
     expect(mortise?.pairId).toBe(tenon?.pairId);
     expect(mortise?.width).toBe(tenon?.width);
     expect(mortise?.depth).toBe(tenon?.depth);
+  });
+
+  it("keeps a stacked piece's underside when the thickness changes", () => {
+    expect(keepBottom(19, 38, 22)).toBeCloseTo(11);
+    expect(keepBottom(80, 38, 22)).toBeCloseTo(72);
   });
 });

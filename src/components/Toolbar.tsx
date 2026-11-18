@@ -34,7 +34,7 @@ import { cn } from "cn";
 
 const tools: Array<{ id: ToolId; label: string; hint: string; key: string }> = [
   { id: "select", label: "Move", hint: "Select. G grab, R rotate, S scale", key: "V" },
-  { id: "saw", label: "Saw", hint: "Crosscut, rip, taper or curve. Enter cuts", key: "K" },
+  { id: "saw", label: "Saw", hint: "Crosscut, rip, taper or curve. Click the board or press Enter", key: "K" },
   { id: "drill", label: "Drill", hint: "Twist, countersink, Forstner, hole saw", key: "D" },
   { id: "router", label: "Router", hint: "Dado, groove, rebate or the edge under the cursor", key: "T" },
   { id: "joint", label: "Joint", hint: "Mortise and tenon, half-lap, dovetail, dowels", key: "J" },
@@ -78,7 +78,7 @@ export function Toolbar() {
   }
 
   return (
-    <header className="z-30 flex flex-wrap items-center gap-2 border-b bg-card px-3 py-1.5">
+    <header className="z-30 flex items-center gap-2 overflow-x-auto border-b bg-card px-3 py-1.5">
       <div className="mr-1 flex items-center gap-2">
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => useUi.getState().setStockOpen(!useUi.getState().stockOpen)} aria-label="Stock library">
           <PanelLeft />
