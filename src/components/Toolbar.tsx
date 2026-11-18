@@ -23,6 +23,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -32,17 +35,42 @@ import { useProject } from "../store/useProject.ts";
 import { useUi, type ToolId } from "../store/useUi.ts";
 import { cn } from "cn";
 
+const examples = [
+  { file: "stackable-sawhorse.json", label: "Stackable sawhorse" },
+  { file: "mitre-saw-workbench.json", label: "Mitre saw workbench" },
+] as const;
+
 const tools: Array<{ id: ToolId; label: string; hint: string; key: string }> = [
   { id: "select", label: "Move", hint: "Select. G grab, R rotate, S scale", key: "V" },
-  { id: "saw", label: "Saw", hint: "Crosscut, rip, taper or curve. Click the board or press Enter", key: "K" },
+  { id: "saw", label: "Saw", hint: "Crosscut, rip, taper, curve or plunge. Click the board or press Enter", key: "K" },
   { id: "drill", label: "Drill", hint: "Twist, countersink, Forstner, hole saw", key: "D" },
   { id: "router", label: "Router", hint: "Dado, groove, rebate or the edge under the cursor", key: "T" },
   { id: "joint", label: "Joint", hint: "Mortise and tenon, half-lap, dovetail, dowels", key: "J" },
   { id: "screw", label: "Fasten", hint: "Screws, pocket screws, bolts and glue", key: "Y" },
-  { id: "hardware", label: "Hardware", hint: "Hinges, slides and pulls", key: "H" },
+  { id: "hardware", label: "Hardware", hint: "Hinges, slides, brackets, castors and bolts", key: "H" },
   { id: "pencil", label: "Pencil", hint: "Lines and freehand marks that stay on the face", key: "P" },
   { id: "measure", label: "Measure", hint: "Tape, speed square and combination square", key: "M" },
 ];
+
+async function loadExample(file: string, label: string): Promise<void> {
+  try {
+    const response = await fetch(`/examples/${file}`);
+    if (!response.ok) {
+      toast.error("That example is not in this build.");
+      return;
+    }
+    const parsed = parseProject(await response.json(), useProject.getState().catalog);
+    if ("error" in parsed) {
+      toast.error(parsed.error);
+      return;
+    }
+    useProject.getState().replaceProject(parsed.project);
+    useUi.getState().select(null);
+    toast.success(`${label} loaded. Undo puts your previous bench back.`);
+  } catch {
+    toast.error("Could not load that example.");
+  }
+}
 
 export function Toolbar() {
   const name = useProject((state) => state.name);
@@ -156,6 +184,16 @@ export function Toolbar() {
             >
               <RotateCw /> Sample frame
             </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>Examples</DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                {examples.map((example) => (
+                  <DropdownMenuItem key={example.file} onSelect={() => void loadExample(example.file, example.label)}>
+                    {example.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
             <DropdownMenuItem
               variant="destructive"
               onSelect={() => {

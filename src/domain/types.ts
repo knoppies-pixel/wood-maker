@@ -20,6 +20,8 @@ export interface StockItem {
   lengths: StockLength[];
   /** Sheet goods (plywood, MDF): width × length is the face. */
   sheet?: boolean;
+  /** Round stock (dowel, pipe). Diameter is `width`, and thickness matches it. */
+  section?: "rect" | "round";
 }
 
 /** A length bought from the catalogue. Cut parts keep a reference to this board. */
@@ -142,6 +144,10 @@ export interface Piece {
   widthEnd: number;
   /** Bandsaw or jigsaw outline in local XZ. Null keeps the rectangular section. */
   outline: XZPoint[] | null;
+  /** Round stock is a cylinder along local Z. Omitted means a rectangular section. */
+  section?: "rect" | "round";
+  /** Through-holes and edge notches left by a plunge or jigsaw cut. */
+  openings?: Opening[];
   /** World position of the piece centre, mm. */
   position: Vec3Tuple;
   /** Euler XYZ radians, matching three.js. */
@@ -179,7 +185,18 @@ export interface Fastener {
   angle?: number;
 }
 
-export type HardwareKind = "hinge" | "drawer-slide" | "handle";
+export type HardwareKind = "hinge" | "drawer-slide" | "handle" | "bracket" | "castor" | "latch";
+
+/** A rectangular bite from a jigsaw or plunge cut, in local XZ. The centre may sit past an edge, which makes a notch. */
+export interface Opening {
+  id: string;
+  x: number;
+  z: number;
+  /** Along local X. */
+  width: number;
+  /** Along local Z. */
+  length: number;
+}
 
 export interface HardwareItem {
   id: string;

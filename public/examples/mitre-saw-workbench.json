@@ -1,0 +1,5841 @@
+{
+  "format": "benchwork-project",
+  "version": 1,
+  "name": "Mitre saw workbench",
+  "units": "mm",
+  "kerf": 3,
+  "catalog": [
+    {
+      "id": "pine-22x44",
+      "name": "PAR Pine 22×44",
+      "species": "SA Pine",
+      "thickness": 22,
+      "width": 44,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 34
+        },
+        {
+          "length": 2400,
+          "price": 44
+        },
+        {
+          "length": 3000,
+          "price": 55
+        }
+      ]
+    },
+    {
+      "id": "pine-22x69",
+      "name": "PAR Pine 22×69",
+      "species": "SA Pine",
+      "thickness": 22,
+      "width": 69,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 52
+        },
+        {
+          "length": 2400,
+          "price": 68
+        },
+        {
+          "length": 3000,
+          "price": 84
+        }
+      ]
+    },
+    {
+      "id": "pine-22x94",
+      "name": "PAR Pine 22×94",
+      "species": "SA Pine",
+      "thickness": 22,
+      "width": 94,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 72
+        },
+        {
+          "length": 2400,
+          "price": 95
+        },
+        {
+          "length": 3000,
+          "price": 118
+        }
+      ]
+    },
+    {
+      "id": "pine-22x144",
+      "name": "PAR Pine 22×144",
+      "species": "SA Pine",
+      "thickness": 22,
+      "width": 144,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 152
+        },
+        {
+          "length": 3000,
+          "price": 188
+        }
+      ]
+    },
+    {
+      "id": "pine-38x38",
+      "name": "PAR Pine 38×38",
+      "species": "SA Pine",
+      "thickness": 38,
+      "width": 38,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 48
+        },
+        {
+          "length": 2400,
+          "price": 62
+        },
+        {
+          "length": 3000,
+          "price": 78
+        }
+      ]
+    },
+    {
+      "id": "pine-38x76",
+      "name": "PAR Pine 38×76",
+      "species": "SA Pine",
+      "thickness": 38,
+      "width": 76,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 105
+        },
+        {
+          "length": 2400,
+          "price": 138
+        },
+        {
+          "length": 3000,
+          "price": 172
+        }
+      ]
+    },
+    {
+      "id": "pine-38x114",
+      "name": "PAR Pine 38×114",
+      "species": "SA Pine",
+      "thickness": 38,
+      "width": 114,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 205
+        },
+        {
+          "length": 3000,
+          "price": 255
+        }
+      ]
+    },
+    {
+      "id": "pine-38x152",
+      "name": "PAR Pine 38×152",
+      "species": "SA Pine",
+      "thickness": 38,
+      "width": 152,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 268
+        },
+        {
+          "length": 3000,
+          "price": 332
+        }
+      ]
+    },
+    {
+      "id": "pine-50x76",
+      "name": "PAR Pine 50×76",
+      "species": "SA Pine",
+      "thickness": 50,
+      "width": 76,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 185
+        },
+        {
+          "length": 3000,
+          "price": 230
+        }
+      ]
+    },
+    {
+      "id": "pine-76x76",
+      "name": "PAR Pine 76×76",
+      "species": "SA Pine",
+      "thickness": 76,
+      "width": 76,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 255
+        },
+        {
+          "length": 3000,
+          "price": 318
+        }
+      ]
+    },
+    {
+      "id": "meranti-21x44",
+      "name": "PAR Meranti 21×44",
+      "species": "Meranti",
+      "thickness": 21,
+      "width": 44,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 92
+        },
+        {
+          "length": 3000,
+          "price": 128
+        }
+      ]
+    },
+    {
+      "id": "meranti-21x69",
+      "name": "PAR Meranti 21×69",
+      "species": "Meranti",
+      "thickness": 21,
+      "width": 69,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 135
+        },
+        {
+          "length": 3000,
+          "price": 188
+        }
+      ]
+    },
+    {
+      "id": "meranti-21x94",
+      "name": "PAR Meranti 21×94",
+      "species": "Meranti",
+      "thickness": 21,
+      "width": 94,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 185
+        },
+        {
+          "length": 3000,
+          "price": 258
+        }
+      ]
+    },
+    {
+      "id": "meranti-21x144",
+      "name": "PAR Meranti 21×144",
+      "species": "Meranti",
+      "thickness": 21,
+      "width": 144,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 275
+        },
+        {
+          "length": 3000,
+          "price": 385
+        }
+      ]
+    },
+    {
+      "id": "meranti-44x44",
+      "name": "PAR Meranti 44×44",
+      "species": "Meranti",
+      "thickness": 44,
+      "width": 44,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 155
+        },
+        {
+          "length": 3000,
+          "price": 218
+        }
+      ]
+    },
+    {
+      "id": "meranti-44x69",
+      "name": "PAR Meranti 44×69",
+      "species": "Meranti",
+      "thickness": 44,
+      "width": 69,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 225
+        },
+        {
+          "length": 3000,
+          "price": 315
+        }
+      ]
+    },
+    {
+      "id": "meranti-44x94",
+      "name": "PAR Meranti 44×94",
+      "species": "Meranti",
+      "thickness": 44,
+      "width": 94,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 305
+        },
+        {
+          "length": 3000,
+          "price": 428
+        }
+      ]
+    },
+    {
+      "id": "saligna-32x32",
+      "name": "Saligna 32×32",
+      "species": "Saligna",
+      "thickness": 32,
+      "width": 32,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 32
+        },
+        {
+          "length": 2400,
+          "price": 42
+        }
+      ]
+    },
+    {
+      "id": "saligna-44x44",
+      "name": "Saligna 44×44",
+      "species": "Saligna",
+      "thickness": 44,
+      "width": 44,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 78
+        },
+        {
+          "length": 3000,
+          "price": 96
+        }
+      ]
+    },
+    {
+      "id": "ply-6",
+      "name": "Plywood 6 mm",
+      "species": "Plywood",
+      "thickness": 6,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 195
+        }
+      ]
+    },
+    {
+      "id": "ply-9",
+      "name": "Plywood 9 mm",
+      "species": "Plywood",
+      "thickness": 9,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 275
+        }
+      ]
+    },
+    {
+      "id": "ply-12",
+      "name": "Plywood 12 mm",
+      "species": "Plywood",
+      "thickness": 12,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 365
+        }
+      ]
+    },
+    {
+      "id": "ply-16",
+      "name": "Plywood 16 mm",
+      "species": "Plywood",
+      "thickness": 16,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 545
+        }
+      ]
+    },
+    {
+      "id": "ply-18",
+      "name": "Plywood 18 mm",
+      "species": "Plywood",
+      "thickness": 18,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 615
+        }
+      ]
+    },
+    {
+      "id": "mdf-12",
+      "name": "MDF 12 mm",
+      "species": "MDF",
+      "thickness": 12,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 295
+        }
+      ]
+    },
+    {
+      "id": "mdf-16",
+      "name": "MDF 16 mm",
+      "species": "MDF",
+      "thickness": 16,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 410
+        }
+      ]
+    },
+    {
+      "id": "mdf-18",
+      "name": "MDF 18 mm",
+      "species": "MDF",
+      "thickness": 18,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 465
+        }
+      ]
+    },
+    {
+      "id": "supawood-16",
+      "name": "Supawood 16 mm",
+      "species": "Supawood",
+      "thickness": 16,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 335
+        }
+      ]
+    },
+    {
+      "id": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 112
+        },
+        {
+          "length": 2400,
+          "price": 145
+        },
+        {
+          "length": 3000,
+          "price": 182
+        }
+      ]
+    },
+    {
+      "id": "pine-19x42",
+      "name": "DAR Pine 19×42",
+      "species": "SA Pine",
+      "thickness": 19,
+      "width": 42,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 36
+        },
+        {
+          "length": 2400,
+          "price": 46
+        },
+        {
+          "length": 3000,
+          "price": 58
+        }
+      ]
+    },
+    {
+      "id": "ply-17",
+      "name": "Plywood 17 mm",
+      "species": "Plywood",
+      "thickness": 17,
+      "width": 1200,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 590
+        }
+      ]
+    },
+    {
+      "id": "ply-17-300",
+      "name": "Plywood 17×300",
+      "species": "Plywood",
+      "thickness": 17,
+      "width": 300,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1200,
+          "price": 148
+        }
+      ]
+    },
+    {
+      "id": "pipe-25",
+      "name": "Steel pipe 25 mm",
+      "species": "Steel",
+      "thickness": 25,
+      "width": 25,
+      "sheet": false,
+      "section": "round",
+      "lengths": [
+        {
+          "length": 1200,
+          "price": 95
+        },
+        {
+          "length": 2400,
+          "price": 175
+        }
+      ]
+    }
+  ],
+  "boards": [
+    {
+      "id": "board-5n-9bplb",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-5p-kzw1d",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-5r-rvq88",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-5x-x7lnu",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-63-tn4im",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-6y-dcz33",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-78-sy1i2",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-7l-um1se",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-7y-fgplz",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-88-vf8vb",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-8h-s3by3",
+      "stockId": "ply-17",
+      "name": "Plywood 17 mm",
+      "species": "Plywood",
+      "thickness": 17,
+      "width": 1200,
+      "length": 2400,
+      "price": 590,
+      "sheet": true
+    },
+    {
+      "id": "board-95-g0m3i",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-9d-7c9ul",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-9x-so8lg",
+      "stockId": "ply-17",
+      "name": "Plywood 17 mm",
+      "species": "Plywood",
+      "thickness": 17,
+      "width": 1200,
+      "length": 2400,
+      "price": 590,
+      "sheet": true
+    },
+    {
+      "id": "board-av-8phyz",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "name": "Plywood 17 mm",
+      "species": "Plywood",
+      "thickness": 17,
+      "width": 1200,
+      "length": 2400,
+      "price": 590,
+      "sheet": true
+    },
+    {
+      "id": "board-b9-eu56y",
+      "stockId": "pine-19x42",
+      "name": "DAR Pine 19×42",
+      "species": "SA Pine",
+      "thickness": 19,
+      "width": 42,
+      "length": 2400,
+      "price": 46,
+      "sheet": false
+    },
+    {
+      "id": "board-bf-0v9xy",
+      "stockId": "pine-19x42",
+      "name": "DAR Pine 19×42",
+      "species": "SA Pine",
+      "thickness": 19,
+      "width": 42,
+      "length": 2400,
+      "price": 46,
+      "sheet": false
+    },
+    {
+      "id": "board-bx-huc6m",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-cx-mctfz",
+      "stockId": "pipe-25",
+      "name": "Steel pipe 25 mm",
+      "species": "Steel",
+      "thickness": 25,
+      "width": 25,
+      "length": 1200,
+      "price": 95,
+      "sheet": false
+    },
+    {
+      "id": "board-dw-o5yxy",
+      "stockId": "ply-17",
+      "name": "Plywood 17 mm",
+      "species": "Plywood",
+      "thickness": 17,
+      "width": 1200,
+      "length": 2400,
+      "price": 590,
+      "sheet": true
+    },
+    {
+      "id": "board-fq-uothe",
+      "stockId": "pine-19x42",
+      "name": "DAR Pine 19×42",
+      "species": "SA Pine",
+      "thickness": 19,
+      "width": 42,
+      "length": 2400,
+      "price": 46,
+      "sheet": false
+    },
+    {
+      "id": "board-fs-64u7o",
+      "stockId": "pine-19x42",
+      "name": "DAR Pine 19×42",
+      "species": "SA Pine",
+      "thickness": 19,
+      "width": 42,
+      "length": 2400,
+      "price": 46,
+      "sheet": false
+    }
+  ],
+  "pieces": [
+    {
+      "id": "piece-5o-qv796",
+      "name": "Bottom side",
+      "boardId": "board-5n-9bplb",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -582.5,
+        45,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 2400
+    },
+    {
+      "id": "piece-5q-fqnny",
+      "name": "Bottom side",
+      "boardId": "board-5p-kzw1d",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        582.5,
+        45,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 2400
+    },
+    {
+      "id": "piece-5t-da7p9",
+      "name": "Bottom end",
+      "boardId": "board-5r-rvq88",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 1130,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        45,
+        -1182.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 1130
+    },
+    {
+      "id": "piece-5v-f3p1e",
+      "name": "Bottom end",
+      "boardId": "board-5r-rvq88",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 1130,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        45,
+        1182.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1133,
+      "spanEnd": 2263
+    },
+    {
+      "id": "piece-5z-z934n",
+      "name": "Bottom noggin",
+      "boardId": "board-5x-x7lnu",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 1130,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        45,
+        -497.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 1130
+    },
+    {
+      "id": "piece-61-8ww3v",
+      "name": "Bottom noggin",
+      "boardId": "board-5x-x7lnu",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 1130,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        45,
+        -52.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1133,
+      "spanEnd": 2263
+    },
+    {
+      "id": "piece-65-3k873",
+      "name": "Bottom noggin",
+      "boardId": "board-63-tn4im",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 1130,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        45,
+        547.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 1130
+    },
+    {
+      "id": "piece-6r-hagio",
+      "name": "Leg B",
+      "boardId": "board-63-tn4im",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 863,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-6t-kzsp0",
+          "x": -27.5,
+          "z": -386.5,
+          "width": 35,
+          "length": 90
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -547.5,
+        431.5,
+        -1155
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1133,
+      "spanEnd": 1996
+    },
+    {
+      "id": "piece-70-hjz5w",
+      "name": "Leg E",
+      "boardId": "board-6y-dcz33",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 863,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -547.5,
+        431.5,
+        -595
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 863
+    },
+    {
+      "id": "piece-74-m6bkw",
+      "name": "Leg C",
+      "boardId": "board-6y-dcz33",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 863,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -547.5,
+        431.5,
+        235
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 866,
+      "spanEnd": 1729
+    },
+    {
+      "id": "piece-7a-3vg0v",
+      "name": "Leg D",
+      "boardId": "board-78-sy1i2",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 863,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -547.5,
+        431.5,
+        845
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 863
+    },
+    {
+      "id": "piece-7e-4fkab",
+      "name": "Leg A",
+      "boardId": "board-78-sy1i2",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 863,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-7g-ujz16",
+          "x": -27.5,
+          "z": -386.5,
+          "width": 35,
+          "length": 90
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -547.5,
+        431.5,
+        1155
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 866,
+      "spanEnd": 1729
+    },
+    {
+      "id": "piece-7n-8d9u7",
+      "name": "Leg B",
+      "boardId": "board-7l-um1se",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 863,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-7p-r6gqo",
+          "x": 27.5,
+          "z": -386.5,
+          "width": 35,
+          "length": 90
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        547.5,
+        431.5,
+        -1155
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 863
+    },
+    {
+      "id": "piece-7u-6xoud",
+      "name": "Leg E",
+      "boardId": "board-7l-um1se",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 863,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        547.5,
+        431.5,
+        -595
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 866,
+      "spanEnd": 1729
+    },
+    {
+      "id": "piece-80-axfj5",
+      "name": "Leg C",
+      "boardId": "board-7y-fgplz",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 863,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        547.5,
+        431.5,
+        235
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 863
+    },
+    {
+      "id": "piece-84-qhr65",
+      "name": "Leg D",
+      "boardId": "board-7y-fgplz",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 863,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        547.5,
+        431.5,
+        845
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 866,
+      "spanEnd": 1729
+    },
+    {
+      "id": "piece-8a-c6xkb",
+      "name": "Leg A",
+      "boardId": "board-88-vf8vb",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 863,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-8c-zexp8",
+          "x": 27.5,
+          "z": -386.5,
+          "width": 35,
+          "length": 90
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        547.5,
+        431.5,
+        1155
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 863
+    },
+    {
+      "id": "piece-8i-h7pq4",
+      "name": "Bottom shelf",
+      "boardId": "board-8h-s3by3",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 1200,
+      "length": 2400,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 1200,
+      "widthEnd": 1200,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-8j-apubz",
+          "x": -565,
+          "z": -1155,
+          "width": 70,
+          "length": 96
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        98.5,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 2400
+    },
+    {
+      "id": "piece-96-bbfj6",
+      "name": "Top back rail",
+      "boardId": "board-95-g0m3i",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-97-4rlx8",
+          "x": 20,
+          "z": -682.5,
+          "width": 50,
+          "length": 85
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        582.5,
+        908,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 2400
+    },
+    {
+      "id": "piece-99-zmm75",
+      "name": "Top front rail",
+      "boardId": "board-88-vf8vb",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 1170,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-9b-4y0sj",
+          "x": 20,
+          "z": -67.5,
+          "width": 50,
+          "length": 85
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -582.5,
+        908,
+        -615
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 866,
+      "spanEnd": 2036
+    },
+    {
+      "id": "piece-9f-qh6ty",
+      "name": "Top end rail",
+      "boardId": "board-9d-7c9ul",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 1200,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        908,
+        1182.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 1200
+    },
+    {
+      "id": "piece-9h-m179a",
+      "name": "Top wing return",
+      "boardId": "board-63-tn4im",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 370,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        380,
+        908,
+        -1182.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1999,
+      "spanEnd": 2369
+    },
+    {
+      "id": "piece-9j-byppk",
+      "name": "Top front return",
+      "boardId": "board-6y-dcz33",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 250,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -440,
+        908,
+        -1182.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1732,
+      "spanEnd": 1982
+    },
+    {
+      "id": "piece-9l-9bqv0",
+      "name": "Top far return",
+      "boardId": "board-78-sy1i2",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 400,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -365,
+        908,
+        1182.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1732,
+      "spanEnd": 2132
+    },
+    {
+      "id": "piece-9z-qtoy5",
+      "name": "Main benchtop",
+      "boardId": "board-9x-so8lg",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 1200,
+      "length": 1840,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 1200,
+      "widthEnd": 1200,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-a1-xwsbe",
+          "x": 138,
+          "z": 0,
+          "width": 670,
+          "length": 824
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        961.5,
+        280
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 1840
+    },
+    {
+      "id": "piece-a2-nu80u",
+      "name": "Flip-top panel",
+      "boardId": "board-9x-so8lg",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 670,
+      "length": 824,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 670,
+      "widthEnd": 670,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        138,
+        1319.3958156164476,
+        86.3267368640804
+      ],
+      "rotation": [
+        -1.0122909661567112,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 0
+    },
+    {
+      "id": "piece-aj-dle0q",
+      "name": "Wing top",
+      "boardId": "board-9x-so8lg",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 370,
+      "length": 475,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 370,
+      "widthEnd": 370,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        415,
+        961.5,
+        -962.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1843,
+      "spanEnd": 2318
+    },
+    {
+      "id": "piece-an-gw604",
+      "name": "Wing top",
+      "boardId": "board-9x-so8lg",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 250,
+      "length": 475,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 250,
+      "widthEnd": 250,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -475,
+        961.5,
+        -962.5
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1843,
+      "spanEnd": 2318
+    },
+    {
+      "id": "piece-at-4dtxz",
+      "name": "Saw base rail",
+      "boardId": "board-9d-7c9ul",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 1060,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        200,
+        -1080
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1203,
+      "spanEnd": 2263
+    },
+    {
+      "id": "piece-ax-34cbg",
+      "name": "Saw base rail",
+      "boardId": "board-av-8phyz",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 990,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        200,
+        -470
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 990
+    },
+    {
+      "id": "piece-az-n4jlj",
+      "name": "Saw base end",
+      "boardId": "board-7l-um1se",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 615,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -470,
+        200,
+        -775
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1732,
+      "spanEnd": 2347
+    },
+    {
+      "id": "piece-b1-81jkl",
+      "name": "Saw base end",
+      "boardId": "board-7y-fgplz",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 615,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        470,
+        200,
+        -775
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1732,
+      "spanEnd": 2347
+    },
+    {
+      "id": "piece-b7-zfx3s",
+      "name": "Saw base shelf",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 525,
+      "length": 990,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 525,
+      "widthEnd": 525,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        255,
+        -775
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 990
+    },
+    {
+      "id": "piece-bb-u5jul",
+      "name": "Saw base lip",
+      "boardId": "board-b9-eu56y",
+      "stockId": "pine-19x42",
+      "species": "SA Pine",
+      "profileName": "DAR Pine 19×42",
+      "thickness": 19,
+      "width": 42,
+      "length": 990,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 42,
+      "widthEnd": 42,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        274,
+        -1080
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 990
+    },
+    {
+      "id": "piece-bd-959op",
+      "name": "Saw base lip",
+      "boardId": "board-b9-eu56y",
+      "stockId": "pine-19x42",
+      "species": "SA Pine",
+      "profileName": "DAR Pine 19×42",
+      "thickness": 19,
+      "width": 42,
+      "length": 990,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 42,
+      "widthEnd": 42,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        274,
+        -470
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 993,
+      "spanEnd": 1983
+    },
+    {
+      "id": "piece-bh-5dcmv",
+      "name": "Saw base lip",
+      "boardId": "board-bf-0v9xy",
+      "stockId": "pine-19x42",
+      "species": "SA Pine",
+      "profileName": "DAR Pine 19×42",
+      "thickness": 19,
+      "width": 42,
+      "length": 467,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 42,
+      "widthEnd": 42,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -490,
+        274,
+        -775
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 467
+    },
+    {
+      "id": "piece-bj-szl8q",
+      "name": "Saw base lip",
+      "boardId": "board-bf-0v9xy",
+      "stockId": "pine-19x42",
+      "species": "SA Pine",
+      "profileName": "DAR Pine 19×42",
+      "thickness": 19,
+      "width": 42,
+      "length": 467,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 42,
+      "widthEnd": 42,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        490,
+        274,
+        -775
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 470,
+      "spanEnd": 937
+    },
+    {
+      "id": "piece-bl-60y5k",
+      "name": "Saw cradle rail",
+      "boardId": "board-6y-dcz33",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 370,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -300,
+        860,
+        -1080
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1985,
+      "spanEnd": 2355
+    },
+    {
+      "id": "piece-bn-spjso",
+      "name": "Saw cradle rail",
+      "boardId": "board-88-vf8vb",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 250,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        220,
+        860,
+        -1080
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 2039,
+      "spanEnd": 2289
+    },
+    {
+      "id": "piece-bp-jlxfd",
+      "name": "Saw cradle side",
+      "boardId": "board-av-8phyz",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 560,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-bt-0mxcn",
+          "x": 20,
+          "z": 237.5,
+          "width": 50,
+          "length": 85
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -300,
+        560,
+        -900
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 993,
+      "spanEnd": 1553
+    },
+    {
+      "id": "piece-br-gypow",
+      "name": "Saw cradle side",
+      "boardId": "board-av-8phyz",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 560,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-bv-yvbwi",
+          "x": 20,
+          "z": 237.5,
+          "width": 50,
+          "length": 85
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        220,
+        560,
+        -900
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1556,
+      "spanEnd": 2116
+    },
+    {
+      "id": "piece-bz-u5lts",
+      "name": "Saw cradle rail",
+      "boardId": "board-bx-huc6m",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 300,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -300,
+        700,
+        -720
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 300
+    },
+    {
+      "id": "piece-c1-mwh05",
+      "name": "Saw cradle rail",
+      "boardId": "board-78-sy1i2",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 180,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        220,
+        700,
+        -720
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 2135,
+      "spanEnd": 2315
+    },
+    {
+      "id": "piece-c3-jigcg",
+      "name": "Saw cradle leg",
+      "boardId": "board-bx-huc6m",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 312,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-c7-lnc4q",
+          "x": -27.5,
+          "z": -45,
+          "width": 35,
+          "length": 222
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -420,
+        420,
+        -1080
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 303,
+      "spanEnd": 615
+    },
+    {
+      "id": "piece-c5-jwf5j",
+      "name": "Saw cradle leg",
+      "boardId": "board-bx-huc6m",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 312,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-c9-hzk0e",
+          "x": -27.5,
+          "z": -45,
+          "width": 35,
+          "length": 222
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        400,
+        420,
+        -1080
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 618,
+      "spanEnd": 930
+    },
+    {
+      "id": "piece-cb-o22y9",
+      "name": "Saw cradle leg",
+      "boardId": "board-av-8phyz",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 222,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -420,
+        380,
+        -620
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 2119,
+      "spanEnd": 2341
+    },
+    {
+      "id": "piece-cd-cvhj5",
+      "name": "Saw cradle leg",
+      "boardId": "board-bx-huc6m",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 222,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        400,
+        380,
+        -620
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 933,
+      "spanEnd": 1155
+    },
+    {
+      "id": "piece-cj-pvd7o",
+      "name": "Flip support",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 180,
+      "length": 1130,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 180,
+      "widthEnd": 180,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-cl-7n03l",
+          "x": 0,
+          "z": -290,
+          "width": 25,
+          "length": 100
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        863,
+        40
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 993,
+      "spanEnd": 2123
+    },
+    {
+      "id": "piece-cr-t43ms",
+      "name": "Flip support",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 180,
+      "length": 1130,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 180,
+      "widthEnd": 180,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-ct-0poqm",
+          "x": 0,
+          "z": -290,
+          "width": 25,
+          "length": 100
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        863,
+        440
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 993,
+      "spanEnd": 2123
+    },
+    {
+      "id": "piece-cz-b3nz6",
+      "name": "Flip pipe",
+      "boardId": "board-cx-mctfz",
+      "stockId": "pipe-25",
+      "species": "Steel",
+      "profileName": "Steel pipe 25 mm",
+      "thickness": 25,
+      "width": 25,
+      "length": 875,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 25,
+      "widthEnd": 25,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -290,
+        863,
+        240
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "round",
+      "spanStart": 0,
+      "spanEnd": 875
+    },
+    {
+      "id": "piece-d3-tbgt5",
+      "name": "Rear flip support",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 116.99999999999999,
+      "length": 830,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 116.99999999999999,
+      "widthEnd": 116.99999999999999,
+      "outline": null,
+      "openings": [
+        {
+          "id": "open-d5-5sgfc",
+          "x": 46,
+          "z": -400,
+          "width": 25,
+          "length": 30
+        }
+      ],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        890,
+        240
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 993,
+      "spanEnd": 1823
+    },
+    {
+      "id": "piece-db-2028h",
+      "name": "Flip cleat",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 25.000000000000007,
+      "length": 770,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 25.000000000000007,
+      "widthEnd": 25.000000000000007,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        940,
+        620
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 993,
+      "spanEnd": 1763
+    },
+    {
+      "id": "piece-df-980cq",
+      "name": "Flip cleat",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 25.000000000000004,
+      "length": 770,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 25.000000000000004,
+      "widthEnd": 25.000000000000004,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        850,
+        660
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 770
+    },
+    {
+      "id": "piece-dk-j4rdq",
+      "name": "Flip frame end",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 116.00000000000003,
+      "length": 670,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 116.00000000000003,
+      "widthEnd": 116.00000000000003,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        780,
+        -121.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 670
+    },
+    {
+      "id": "piece-dm-hi6az",
+      "name": "Flip frame end",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 116.00000000000003,
+      "length": 670,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 116.00000000000003,
+      "widthEnd": 116.00000000000003,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        780,
+        681.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 673,
+      "spanEnd": 1343
+    },
+    {
+      "id": "piece-do-ymbck",
+      "name": "Flip frame rail",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 116.00000000000003,
+      "length": 786,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 116.00000000000003,
+      "widthEnd": 116.00000000000003,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -335,
+        780,
+        280
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1346,
+      "spanEnd": 2132
+    },
+    {
+      "id": "piece-ds-qfn36",
+      "name": "Flip frame rail",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 116.00000000000003,
+      "length": 786,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 116.00000000000003,
+      "widthEnd": 116.00000000000003,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        335,
+        780,
+        280
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 786
+    },
+    {
+      "id": "piece-e0-m7ogy",
+      "name": "Saw platform",
+      "boardId": "board-dw-o5yxy",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 670,
+      "length": 824,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 670,
+      "widthEnd": 670,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        138,
+        846.5,
+        280
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 824
+    },
+    {
+      "id": "piece-e4-5tn9e",
+      "name": "Tie-down block",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 100,
+      "length": 250,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 100,
+      "widthEnd": 100,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -112,
+        863.5,
+        100
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 2135,
+      "spanEnd": 2385
+    },
+    {
+      "id": "piece-ea-r971u",
+      "name": "Tie-down block",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 100,
+      "length": 250,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 100,
+      "widthEnd": 100,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        388,
+        863.5,
+        100
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 2126,
+      "spanEnd": 2376
+    },
+    {
+      "id": "piece-eg-geya6",
+      "name": "Tie-down block",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 100,
+      "length": 250,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 100,
+      "widthEnd": 100,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -112,
+        863.5,
+        460
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 2126,
+      "spanEnd": 2376
+    },
+    {
+      "id": "piece-em-2eaqa",
+      "name": "Tie-down block",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 100,
+      "length": 250,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 100,
+      "widthEnd": 100,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        388,
+        863.5,
+        460
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1826,
+      "spanEnd": 2076
+    },
+    {
+      "id": "piece-eu-oi1dy",
+      "name": "Drawer side",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 330.00000000000006,
+      "length": 988,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 330.00000000000006,
+      "widthEnd": 330.00000000000006,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -811.5,
+        560,
+        180
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 988
+    },
+    {
+      "id": "piece-ew-7g7tk",
+      "name": "Drawer side",
+      "boardId": "board-b3-g5lgd",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 330.00000000000006,
+      "length": 988,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 330.00000000000006,
+      "widthEnd": 330.00000000000006,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -308.5,
+        560,
+        180
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 991,
+      "spanEnd": 1979
+    },
+    {
+      "id": "piece-f0-gok2u",
+      "name": "Drawer end",
+      "boardId": "board-9x-so8lg",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 330.00000000000006,
+      "length": 486,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 330.00000000000006,
+      "widthEnd": 330.00000000000006,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -560,
+        560,
+        -305.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1843,
+      "spanEnd": 2329
+    },
+    {
+      "id": "piece-f4-dvic9",
+      "name": "Drawer end",
+      "boardId": "board-dw-o5yxy",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 330,
+      "length": 486,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 330,
+      "widthEnd": 330,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -560,
+        560,
+        665.5
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 827,
+      "spanEnd": 1313
+    },
+    {
+      "id": "piece-f8-r9ly5",
+      "name": "Drawer bottom",
+      "boardId": "board-dw-o5yxy",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 486,
+      "length": 954,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 486,
+      "widthEnd": 486,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -560,
+        404,
+        180
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 954
+    },
+    {
+      "id": "piece-fc-7wd6h",
+      "name": "Drawer front",
+      "boardId": "board-dw-o5yxy",
+      "stockId": "ply-17",
+      "species": "Plywood",
+      "profileName": "Plywood 17 mm",
+      "thickness": 17,
+      "width": 350,
+      "length": 1056,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 350,
+      "widthEnd": 350,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [
+        {
+          "profile": "chamfer",
+          "edge": "left",
+          "side": "top",
+          "radius": 3,
+          "id": "profile-fe-43t5u"
+        },
+        {
+          "profile": "chamfer",
+          "edge": "right",
+          "side": "top",
+          "radius": 3,
+          "id": "profile-ff-a34hw"
+        },
+        {
+          "profile": "chamfer",
+          "edge": "start",
+          "side": "top",
+          "radius": 3,
+          "id": "profile-fg-gq68u"
+        },
+        {
+          "profile": "chamfer",
+          "edge": "end",
+          "side": "top",
+          "radius": 3,
+          "id": "profile-fh-h3ez8"
+        }
+      ],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#2c3338",
+        "label": "Black paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -828,
+        560,
+        180
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 957,
+      "spanEnd": 2013
+    },
+    {
+      "id": "piece-fr-ob4nz",
+      "name": "Edge trim",
+      "boardId": "board-fq-uothe",
+      "stockId": "pine-19x42",
+      "species": "SA Pine",
+      "profileName": "DAR Pine 19×42",
+      "thickness": 19,
+      "width": 42,
+      "length": 2400,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 42,
+      "widthEnd": 42,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -579,
+        980,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 2400
+    },
+    {
+      "id": "piece-ft-ujit9",
+      "name": "Edge trim",
+      "boardId": "board-fs-64u7o",
+      "stockId": "pine-19x42",
+      "species": "SA Pine",
+      "profileName": "DAR Pine 19×42",
+      "thickness": 19,
+      "width": 42,
+      "length": 2400,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 42,
+      "widthEnd": 42,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        579,
+        980,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 2400
+    },
+    {
+      "id": "piece-fu-2xhws",
+      "name": "Edge trim",
+      "boardId": "board-bf-0v9xy",
+      "stockId": "pine-19x42",
+      "species": "SA Pine",
+      "profileName": "DAR Pine 19×42",
+      "thickness": 19,
+      "width": 42,
+      "length": 1130,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 42,
+      "widthEnd": 42,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "bare",
+        "color": "#ffffff",
+        "label": "Bare"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        0,
+        980,
+        1182
+      ],
+      "rotation": [
+        1.5707963267948966,
+        1.5707963267948966,
+        0
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 940,
+      "spanEnd": 2070
+    }
+  ],
+  "fasteners": [
+    {
+      "id": "screw-67-1kx8l",
+      "type": "screw",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-5t-da7p9",
+      "localPosition": [
+        -17,
+        17.5,
+        -1175
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-68-3d5op",
+      "type": "screw",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-5t-da7p9",
+      "localPosition": [
+        17,
+        17.5,
+        -1166.5
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-69-3nk73",
+      "type": "screw",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-5t-da7p9",
+      "localPosition": [
+        -17,
+        -17.5,
+        -1175
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6a-1jngr",
+      "type": "screw",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-5t-da7p9",
+      "localPosition": [
+        17,
+        -17.5,
+        -1166.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6b-q7n7a",
+      "type": "screw",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-5v-f3p1e",
+      "localPosition": [
+        -17,
+        17.5,
+        1166.5
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6c-zajnu",
+      "type": "screw",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-5v-f3p1e",
+      "localPosition": [
+        17,
+        17.5,
+        1175
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6d-ghnds",
+      "type": "screw",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-5v-f3p1e",
+      "localPosition": [
+        -17,
+        -17.5,
+        1166.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6e-3ti23",
+      "type": "screw",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-5v-f3p1e",
+      "localPosition": [
+        17,
+        -17.5,
+        1175
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6f-501qn",
+      "type": "screw",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-5z-z934n",
+      "localPosition": [
+        -17,
+        17.5,
+        -513.5
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6g-rfn9g",
+      "type": "screw",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-5z-z934n",
+      "localPosition": [
+        17,
+        17.5,
+        -481.5
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6h-ztg7n",
+      "type": "screw",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-5z-z934n",
+      "localPosition": [
+        -17,
+        -17.5,
+        -513.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6i-cithg",
+      "type": "screw",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-5z-z934n",
+      "localPosition": [
+        17,
+        -17.5,
+        -481.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6j-87vc0",
+      "type": "screw",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-61-8ww3v",
+      "localPosition": [
+        -17,
+        17.5,
+        -68.5
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6k-cwz44",
+      "type": "screw",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-61-8ww3v",
+      "localPosition": [
+        17,
+        17.5,
+        -36.5
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6l-wyk1b",
+      "type": "screw",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-61-8ww3v",
+      "localPosition": [
+        -17,
+        -17.5,
+        -68.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6m-xa8x6",
+      "type": "screw",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-61-8ww3v",
+      "localPosition": [
+        17,
+        -17.5,
+        -36.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6n-dqpjt",
+      "type": "screw",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-65-3k873",
+      "localPosition": [
+        -17,
+        17.5,
+        531.5
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6o-jehf7",
+      "type": "screw",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-65-3k873",
+      "localPosition": [
+        17,
+        17.5,
+        563.5
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6p-rezao",
+      "type": "screw",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-65-3k873",
+      "localPosition": [
+        -17,
+        -17.5,
+        531.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-6q-mr3vt",
+      "type": "screw",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-65-3k873",
+      "localPosition": [
+        17,
+        -17.5,
+        563.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "bolt-6v-n0t6a",
+      "type": "bolt",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-6r-hagio",
+      "localPosition": [
+        -15,
+        17.5,
+        -1155
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-6w-ws1az",
+      "type": "bolt",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-6r-hagio",
+      "localPosition": [
+        15,
+        17.5,
+        -1155
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-72-sok49",
+      "type": "bolt",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-70-hjz5w",
+      "localPosition": [
+        -15,
+        17.5,
+        -595
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-73-p121s",
+      "type": "bolt",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-70-hjz5w",
+      "localPosition": [
+        15,
+        17.5,
+        -595
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-76-1g6tb",
+      "type": "bolt",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-74-m6bkw",
+      "localPosition": [
+        -15,
+        17.5,
+        235
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-77-p9bbm",
+      "type": "bolt",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-74-m6bkw",
+      "localPosition": [
+        15,
+        17.5,
+        235
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-7c-p71ca",
+      "type": "bolt",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-7a-3vg0v",
+      "localPosition": [
+        -15,
+        17.5,
+        845
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-7d-vgfq7",
+      "type": "bolt",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-7a-3vg0v",
+      "localPosition": [
+        15,
+        17.5,
+        845
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-7i-yqacz",
+      "type": "bolt",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-7e-4fkab",
+      "localPosition": [
+        -15,
+        17.5,
+        1155
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-7j-srlm5",
+      "type": "bolt",
+      "pieceAId": "piece-5o-qv796",
+      "pieceBId": "piece-7e-4fkab",
+      "localPosition": [
+        15,
+        17.5,
+        1155
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-7r-j2bnq",
+      "type": "bolt",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-7n-8d9u7",
+      "localPosition": [
+        -15,
+        -17.5,
+        -1155
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-7s-dogpv",
+      "type": "bolt",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-7n-8d9u7",
+      "localPosition": [
+        15,
+        -17.5,
+        -1155
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-7w-cwjml",
+      "type": "bolt",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-7u-6xoud",
+      "localPosition": [
+        -15,
+        -17.5,
+        -595
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-7x-5hmsn",
+      "type": "bolt",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-7u-6xoud",
+      "localPosition": [
+        15,
+        -17.5,
+        -595
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-82-l8uv3",
+      "type": "bolt",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-80-axfj5",
+      "localPosition": [
+        -15,
+        -17.5,
+        235
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-83-11fe5",
+      "type": "bolt",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-80-axfj5",
+      "localPosition": [
+        15,
+        -17.5,
+        235
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-86-que4s",
+      "type": "bolt",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-84-qhr65",
+      "localPosition": [
+        -15,
+        -17.5,
+        845
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-87-tnc1n",
+      "type": "bolt",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-84-qhr65",
+      "localPosition": [
+        15,
+        -17.5,
+        845
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-8e-s88p0",
+      "type": "bolt",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-8a-c6xkb",
+      "localPosition": [
+        -15,
+        -17.5,
+        1155
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "bolt-8f-jd51z",
+      "type": "bolt",
+      "pieceAId": "piece-5q-fqnny",
+      "pieceBId": "piece-8a-c6xkb",
+      "localPosition": [
+        15,
+        -17.5,
+        1155
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 10,
+      "length": 90
+    },
+    {
+      "id": "screw-93-a3twg",
+      "type": "screw",
+      "pieceAId": "piece-8i-h7pq4",
+      "pieceBId": "piece-5o-qv796",
+      "localPosition": [
+        -520,
+        -8.5,
+        -800
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-94-1oleu",
+      "type": "screw",
+      "pieceAId": "piece-8i-h7pq4",
+      "pieceBId": "piece-5q-fqnny",
+      "localPosition": [
+        520,
+        -8.5,
+        -800
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-9n-3pacl",
+      "type": "screw",
+      "pieceAId": "piece-6r-hagio",
+      "pieceBId": "piece-96-bbfj6",
+      "localPosition": [
+        0,
+        2.5,
+        431.5
+      ],
+      "localDirection": [
+        0,
+        0,
+        -1
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-9o-mldlq",
+      "type": "screw",
+      "pieceAId": "piece-70-hjz5w",
+      "pieceBId": "piece-96-bbfj6",
+      "localPosition": [
+        0,
+        2.5,
+        431.5
+      ],
+      "localDirection": [
+        0,
+        0,
+        -1
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-9p-lqy7a",
+      "type": "screw",
+      "pieceAId": "piece-74-m6bkw",
+      "pieceBId": "piece-96-bbfj6",
+      "localPosition": [
+        0,
+        2.5,
+        431.5
+      ],
+      "localDirection": [
+        0,
+        0,
+        -1
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-9q-9v2di",
+      "type": "screw",
+      "pieceAId": "piece-7a-3vg0v",
+      "pieceBId": "piece-96-bbfj6",
+      "localPosition": [
+        0,
+        2.5,
+        431.5
+      ],
+      "localDirection": [
+        0,
+        0,
+        -1
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-9r-idtg2",
+      "type": "screw",
+      "pieceAId": "piece-7e-4fkab",
+      "pieceBId": "piece-96-bbfj6",
+      "localPosition": [
+        0,
+        2.5,
+        431.5
+      ],
+      "localDirection": [
+        0,
+        0,
+        -1
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-9s-sc9jr",
+      "type": "screw",
+      "pieceAId": "piece-7n-8d9u7",
+      "pieceBId": "piece-96-bbfj6",
+      "localPosition": [
+        0,
+        2.5,
+        431.5
+      ],
+      "localDirection": [
+        0,
+        0,
+        -1
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-9t-lpotk",
+      "type": "screw",
+      "pieceAId": "piece-7u-6xoud",
+      "pieceBId": "piece-96-bbfj6",
+      "localPosition": [
+        0,
+        2.5,
+        431.5
+      ],
+      "localDirection": [
+        0,
+        0,
+        -1
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-9u-qy3l0",
+      "type": "screw",
+      "pieceAId": "piece-80-axfj5",
+      "pieceBId": "piece-96-bbfj6",
+      "localPosition": [
+        0,
+        2.5,
+        431.5
+      ],
+      "localDirection": [
+        0,
+        0,
+        -1
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-9v-fng9g",
+      "type": "screw",
+      "pieceAId": "piece-84-qhr65",
+      "pieceBId": "piece-96-bbfj6",
+      "localPosition": [
+        0,
+        2.5,
+        431.5
+      ],
+      "localDirection": [
+        0,
+        0,
+        -1
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "screw-9w-colxq",
+      "type": "screw",
+      "pieceAId": "piece-8a-c6xkb",
+      "pieceBId": "piece-96-bbfj6",
+      "localPosition": [
+        0,
+        2.5,
+        431.5
+      ],
+      "localDirection": [
+        0,
+        0,
+        -1
+      ],
+      "diameter": 4.5,
+      "length": 60
+    },
+    {
+      "id": "pocket-screw-cf-sp02o",
+      "type": "pocket-screw",
+      "pieceAId": "piece-bl-60y5k",
+      "pieceBId": "piece-bp-jlxfd",
+      "localPosition": [
+        0,
+        17.5,
+        -145
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4,
+      "length": 64
+    },
+    {
+      "id": "pocket-screw-cg-9v0c8",
+      "type": "pocket-screw",
+      "pieceAId": "piece-bn-spjso",
+      "pieceBId": "piece-br-gypow",
+      "localPosition": [
+        0,
+        17.5,
+        -85
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4,
+      "length": 64
+    },
+    {
+      "id": "screw-cn-muhmw",
+      "type": "screw",
+      "pieceAId": "piece-cj-pvd7o",
+      "pieceBId": "piece-9z-qtoy5",
+      "localPosition": [
+        -50,
+        -8.5,
+        -365
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-co-l1qhp",
+      "type": "screw",
+      "pieceAId": "piece-cj-pvd7o",
+      "pieceBId": "piece-9z-qtoy5",
+      "localPosition": [
+        50,
+        -8.5,
+        335
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-cv-f9dky",
+      "type": "screw",
+      "pieceAId": "piece-cr-t43ms",
+      "pieceBId": "piece-9z-qtoy5",
+      "localPosition": [
+        -50,
+        -8.5,
+        -365
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-cw-4s64e",
+      "type": "screw",
+      "pieceAId": "piece-cr-t43ms",
+      "pieceBId": "piece-9z-qtoy5",
+      "localPosition": [
+        50,
+        -8.5,
+        335
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-dh-4yrg0",
+      "type": "screw",
+      "pieceAId": "piece-d3-tbgt5",
+      "pieceBId": "piece-cr-t43ms",
+      "localPosition": [
+        -18.499999999999993,
+        8.5,
+        -335
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-du-pwi5u",
+      "type": "screw",
+      "pieceAId": "piece-dk-j4rdq",
+      "pieceBId": "piece-do-ymbck",
+      "localPosition": [
+        -28.000000000000014,
+        8.5,
+        -295
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-dv-ki4er",
+      "type": "screw",
+      "pieceAId": "piece-dk-j4rdq",
+      "pieceBId": "piece-ds-qfn36",
+      "localPosition": [
+        27.999999999999986,
+        8.5,
+        -295
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-e6-rs56q",
+      "type": "screw",
+      "pieceAId": "piece-e4-5tn9e",
+      "pieceBId": "piece-e0-m7ogy",
+      "localPosition": [
+        -20,
+        -8.5,
+        -85
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-e7-eesb9",
+      "type": "screw",
+      "pieceAId": "piece-e4-5tn9e",
+      "pieceBId": "piece-e0-m7ogy",
+      "localPosition": [
+        20,
+        -8.5,
+        75
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-ec-fz137",
+      "type": "screw",
+      "pieceAId": "piece-ea-r971u",
+      "pieceBId": "piece-e0-m7ogy",
+      "localPosition": [
+        -20,
+        -8.5,
+        -85
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-ed-8fbfp",
+      "type": "screw",
+      "pieceAId": "piece-ea-r971u",
+      "pieceBId": "piece-e0-m7ogy",
+      "localPosition": [
+        20,
+        -8.5,
+        75
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-ei-f4tfl",
+      "type": "screw",
+      "pieceAId": "piece-eg-geya6",
+      "pieceBId": "piece-e0-m7ogy",
+      "localPosition": [
+        -20,
+        -8.5,
+        -85
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-ej-m8qh8",
+      "type": "screw",
+      "pieceAId": "piece-eg-geya6",
+      "pieceBId": "piece-e0-m7ogy",
+      "localPosition": [
+        20,
+        -8.5,
+        75
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-eo-0zrcl",
+      "type": "screw",
+      "pieceAId": "piece-em-2eaqa",
+      "pieceBId": "piece-e0-m7ogy",
+      "localPosition": [
+        -20,
+        -8.5,
+        -85
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-ep-1puqq",
+      "type": "screw",
+      "pieceAId": "piece-em-2eaqa",
+      "pieceBId": "piece-e0-m7ogy",
+      "localPosition": [
+        20,
+        -8.5,
+        75
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-eq-7hg6b",
+      "type": "screw",
+      "pieceAId": "piece-e0-m7ogy",
+      "pieceBId": "piece-cz-b3nz6",
+      "localPosition": [
+        -135,
+        -8.5,
+        -292
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 40
+    },
+    {
+      "id": "screw-er-o8j0b",
+      "type": "screw",
+      "pieceAId": "piece-e0-m7ogy",
+      "pieceBId": "piece-cz-b3nz6",
+      "localPosition": [
+        135,
+        -8.5,
+        288
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 40
+    },
+    {
+      "id": "pocket-screw-fi-vj0zo",
+      "type": "pocket-screw",
+      "pieceAId": "piece-f0-gok2u",
+      "pieceBId": "piece-eu-oi1dy",
+      "localPosition": [
+        -125.00000000000003,
+        -8.5,
+        -203
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 32
+    },
+    {
+      "id": "pocket-screw-fj-6xdl9",
+      "type": "pocket-screw",
+      "pieceAId": "piece-f0-gok2u",
+      "pieceBId": "piece-ew-7g7tk",
+      "localPosition": [
+        124.99999999999997,
+        -8.5,
+        -203
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 32
+    },
+    {
+      "id": "pocket-screw-fk-eeldd",
+      "type": "pocket-screw",
+      "pieceAId": "piece-f4-dvic9",
+      "pieceBId": "piece-eu-oi1dy",
+      "localPosition": [
+        -125,
+        8.5,
+        -203
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4,
+      "length": 32
+    },
+    {
+      "id": "screw-fl-6t34u",
+      "type": "screw",
+      "pieceAId": "piece-fc-7wd6h",
+      "pieceBId": "piece-eu-oi1dy",
+      "localPosition": [
+        -95,
+        8.5,
+        -328
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-fm-brgma",
+      "type": "screw",
+      "pieceAId": "piece-fc-7wd6h",
+      "pieceBId": "piece-eu-oi1dy",
+      "localPosition": [
+        95,
+        8.5,
+        322
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    }
+  ],
+  "hardware": [
+    {
+      "id": "hw-6x-yo506",
+      "catalogId": "castor-75",
+      "kind": "castor",
+      "name": "Retracting castor 75 mm",
+      "pieceId": "piece-6r-hagio",
+      "face": "start",
+      "u": 45,
+      "v": 17.5,
+      "width": 75,
+      "height": 110,
+      "depth": 75,
+      "price": 250
+    },
+    {
+      "id": "hw-7k-kls8t",
+      "catalogId": "castor-75",
+      "kind": "castor",
+      "name": "Retracting castor 75 mm",
+      "pieceId": "piece-7e-4fkab",
+      "face": "start",
+      "u": 45,
+      "v": 17.5,
+      "width": 75,
+      "height": 110,
+      "depth": 75,
+      "price": 250
+    },
+    {
+      "id": "hw-7t-bgsqq",
+      "catalogId": "castor-75",
+      "kind": "castor",
+      "name": "Retracting castor 75 mm",
+      "pieceId": "piece-7n-8d9u7",
+      "face": "start",
+      "u": 45,
+      "v": 17.5,
+      "width": 75,
+      "height": 110,
+      "depth": 75,
+      "price": 250
+    },
+    {
+      "id": "hw-8g-qszcx",
+      "catalogId": "castor-75",
+      "kind": "castor",
+      "name": "Retracting castor 75 mm",
+      "pieceId": "piece-8a-c6xkb",
+      "face": "start",
+      "u": 45,
+      "v": 17.5,
+      "width": 75,
+      "height": 110,
+      "depth": 75,
+      "price": 250
+    },
+    {
+      "id": "hw-a3-3kxib",
+      "catalogId": "barrel-bolt-100",
+      "kind": "latch",
+      "name": "Barrel bolt 100 mm",
+      "pieceId": "piece-a2-nu80u",
+      "face": "top",
+      "u": 50,
+      "v": 180,
+      "width": 32,
+      "height": 100,
+      "depth": 18,
+      "price": 55
+    },
+    {
+      "id": "hw-a4-8qo8o",
+      "catalogId": "barrel-bolt-100",
+      "kind": "latch",
+      "name": "Barrel bolt 100 mm",
+      "pieceId": "piece-a2-nu80u",
+      "face": "top",
+      "u": 620,
+      "v": 180,
+      "width": 32,
+      "height": 100,
+      "depth": 18,
+      "price": 55
+    },
+    {
+      "id": "hw-a5-5dwnu",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-9z-qtoy5",
+      "face": "bottom",
+      "u": 80,
+      "v": 70,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-a6-j4knf",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-9z-qtoy5",
+      "face": "bottom",
+      "u": 270,
+      "v": 70,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-a7-s2ocm",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-9z-qtoy5",
+      "face": "bottom",
+      "u": 460,
+      "v": 70,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-a8-wtn3y",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-9z-qtoy5",
+      "face": "bottom",
+      "u": 650,
+      "v": 70,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-a9-ho402",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-9z-qtoy5",
+      "face": "bottom",
+      "u": 840,
+      "v": 70,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-aa-ilff6",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-9z-qtoy5",
+      "face": "bottom",
+      "u": 1030,
+      "v": 70,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-ab-etni6",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-9z-qtoy5",
+      "face": "bottom",
+      "u": 80,
+      "v": 1770,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-ac-8ymwy",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-9z-qtoy5",
+      "face": "bottom",
+      "u": 270,
+      "v": 1770,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-ad-kw1qu",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-9z-qtoy5",
+      "face": "bottom",
+      "u": 460,
+      "v": 1770,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-ae-tlias",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-9z-qtoy5",
+      "face": "bottom",
+      "u": 650,
+      "v": 1770,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-af-l2gq1",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-9z-qtoy5",
+      "face": "bottom",
+      "u": 840,
+      "v": 1770,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-ag-lbo02",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-9z-qtoy5",
+      "face": "bottom",
+      "u": 1030,
+      "v": 1770,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-ap-25f60",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-aj-dle0q",
+      "face": "bottom",
+      "u": 40,
+      "v": 40,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-aq-6aalv",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-aj-dle0q",
+      "face": "bottom",
+      "u": 330,
+      "v": 435,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-ar-n9h4o",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-an-gw604",
+      "face": "bottom",
+      "u": 40,
+      "v": 40,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-as-sqx5t",
+      "catalogId": "angle-25",
+      "kind": "bracket",
+      "name": "Angle bracket 25×25 mm",
+      "pieceId": "piece-an-gw604",
+      "face": "bottom",
+      "u": 210,
+      "v": 435,
+      "width": 25,
+      "height": 25,
+      "depth": 16,
+      "price": 6
+    },
+    {
+      "id": "hw-fn-b1ezr",
+      "catalogId": "slide-500",
+      "kind": "drawer-slide",
+      "name": "Ball-bearing slide 500 mm",
+      "pieceId": "piece-f0-gok2u",
+      "face": "bottom",
+      "u": 160,
+      "v": 240,
+      "width": 12.7,
+      "height": 500,
+      "depth": 12.7,
+      "price": 145
+    },
+    {
+      "id": "hw-fo-4gjtv",
+      "catalogId": "slide-500",
+      "kind": "drawer-slide",
+      "name": "Ball-bearing slide 500 mm",
+      "pieceId": "piece-f4-dvic9",
+      "face": "top",
+      "u": 160,
+      "v": 240,
+      "width": 12.7,
+      "height": 500,
+      "depth": 12.7,
+      "price": 145
+    },
+    {
+      "id": "hw-fp-k06ha",
+      "catalogId": "pull-128",
+      "kind": "handle",
+      "name": "Bar pull 128 mm",
+      "pieceId": "piece-fc-7wd6h",
+      "face": "top",
+      "u": 175,
+      "v": 528,
+      "width": 12,
+      "height": 168,
+      "depth": 30,
+      "price": 48
+    }
+  ],
+  "dimensions": []
+}

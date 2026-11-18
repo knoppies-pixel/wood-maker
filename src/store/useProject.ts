@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { defaultCatalog } from "../domain/catalog.ts";
 import { sampleFrame } from "../domain/example.ts";
 import { uid } from "../domain/math.ts";
-import { circleOutline, curveCut, edgeProfile, HARDWARE_CATALOG, placeHardware, planJoint, routeCut, taperPiece } from "../domain/features.ts";
+import { circleOutline, curveCut, edgeProfile, HARDWARE_CATALOG, placeHardware, planJoint, plungeCut, routeCut, taperPiece } from "../domain/features.ts";
 import { keepBottom, localToWorld } from "../domain/geometry.ts";
 import { localCopies } from "../domain/modifiers.ts";
 import {
@@ -27,6 +27,7 @@ interface ProjectState extends Snapshot {
   cutPiece: (pieceId: string, mode: "crosscut" | "rip", distance: number, mitre: number, bevel?: number) => ActionResult;
   taper: (pieceId: string, widthAtStart: number, widthAtEnd: number) => ActionResult;
   curve: (pieceId: string, points: Array<{ u: number; v: number }>, waste: "left" | "right") => ActionResult;
+  plunge: (pieceId: string, opening: { x: number; z: number; width: number; length: number }, keepOffcut?: boolean) => ActionResult;
   drillHole: (pieceId: string, input: Omit<Hole, "id">) => ActionResult;
   addRoute: (pieceId: string, input: Omit<RouterCut, "id">) => ActionResult;
   addProfile: (pieceId: string, profile: "round-over" | "chamfer" | "cove", edge: "left" | "right" | "start" | "end", radius: number, side?: "top" | "bottom") => ActionResult;
@@ -116,6 +117,27 @@ export const useProject = create<ProjectState>()(
         if ("error" in result) return { ok: false, message: result.error };
         set({ pieces: get().pieces.map((item) => (item.id === pieceId ? result.piece : item)) });
         return { ok: true, message: `Tapered from ${Math.round(widthAtStart)} mm to ${Math.round(widthAtEnd)} mm.` };
+      },
+
+      plunge: (pieceId, opening, keepOffcut = true) => {
+        const piece = get().pieces.find((item) => item.id === pieceId);
+        if (!piece) return { ok: false, message: "Select a piece to plunge." };
+        const result = plungeCut(piece, opening);
+        if ("error" in result) return { ok: false, message: result.error };
+        const offcut = keepOffcut
+          ? { ...result.offcut, position: [result.offcut.position[0] + result.offcut.width / 2 + 30, result.offcut.position[1], result.offcut.position[2]] as Vec3Tuple }
+          : null;
+        set({
+          pieces: [
+            ...get().pieces.map((item) => (item.id === pieceId ? result.piece : item)),
+            ...(offcut ? [offcut] : []),
+          ],
+        });
+        return {
+          ok: true,
+          selectId: offcut?.id,
+          message: offcut ? "Opening cut. The piece that came out is beside it." : "Opening cut.",
+        };
       },
 
       curve: (pieceId, points, waste) => {
@@ -469,6 +491,7 @@ function clonePiece(piece: Piece, offset: number): Piece {
     name: `${piece.name} copy`,
     position: [piece.position[0] + offset, piece.position[1], piece.position[2]],
     holes: piece.holes.map((hole) => ({ ...hole, id: stamp("hole") })),
+    openings: (piece.openings ?? []).map((opening) => ({ ...opening, id: stamp("open") })),
     marks: (piece.marks ?? []).map((mark) => ({ ...mark, id: stamp("mark") })),
     modifiers: (piece.modifiers ?? []).map((modifier) => ({ ...modifier, id: stamp("mod") })),
     routes: (piece.routes ?? []).map((route) => ({ ...route, id: stamp("route") })),

@@ -203,7 +203,24 @@ function unionLength(spans: Array<{ start: number; end: number }>): number {
 function boardsNeeded(board: Board, pieces: Piece[]): number {
   const mine = pieces.filter((piece) => piece.boardId === board.id);
   if (mine.length === 0) return 1;
-  const millimetres = mine.reduce((sum, piece) => sum + piece.length * instanceCount(piece, pieces), 0);
+  // Identical spans are one rip, counted once. A later crosscut of one rip sits inside the
+  // other rip's span, so the lengths are unioned rather than added. An array repeats its span.
+  const groups = new Map<string, { start: number; end: number; copies: number }>();
+  for (const piece of mine) {
+    if (piece.spanEnd <= piece.spanStart) continue;
+    const key = `${piece.spanStart.toFixed(2)}|${piece.spanEnd.toFixed(2)}`;
+    const copies = instanceCount(piece, pieces);
+    const existing = groups.get(key);
+    if (existing) existing.copies = Math.max(existing.copies, copies);
+    else groups.set(key, { start: piece.spanStart, end: piece.spanEnd, copies });
+  }
+  const spans = [...groups.values()];
+  if (spans.length === 0) return 1;
+  const maxCopies = spans.reduce((max, span) => Math.max(max, span.copies), 1);
+  let millimetres = 0;
+  for (let copy = 1; copy <= maxCopies; copy += 1) {
+    millimetres += unionLength(spans.filter((span) => span.copies >= copy));
+  }
   return Math.max(1, Math.ceil(millimetres / board.length));
 }
 

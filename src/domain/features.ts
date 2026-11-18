@@ -1,4 +1,4 @@
-import { holeLocalPoint, localToWorld, sectionWidths } from "./geometry.ts";
+import { holeLocalPoint, localToWorld, openingRegions, sectionWidths } from "./geometry.ts";
 import { rotateEuler, sub, uid, v } from "./math.ts";
 import {
   BARE_FINISH,
@@ -30,8 +30,13 @@ export const HARDWARE_CATALOG: HardwareOffer[] = [
   { id: "butt-hinge-75", kind: "hinge", name: "Butt hinge 75 mm", width: 40, height: 75, depth: 2.5, price: 36 },
   { id: "slide-350", kind: "drawer-slide", name: "Ball-bearing slide 350 mm", width: 12.7, height: 350, depth: 12.7, price: 85 },
   { id: "slide-450", kind: "drawer-slide", name: "Ball-bearing slide 450 mm", width: 12.7, height: 450, depth: 12.7, price: 98 },
+  { id: "slide-500", kind: "drawer-slide", name: "Ball-bearing slide 500 mm", width: 12.7, height: 500, depth: 12.7, price: 145 },
   { id: "pull-128", kind: "handle", name: "Bar pull 128 mm", width: 12, height: 168, depth: 30, price: 48 },
   { id: "knob-30", kind: "handle", name: "Round knob 30 mm", width: 30, height: 30, depth: 26, price: 22 },
+  { id: "angle-25", kind: "bracket", name: "Angle bracket 25×25 mm", width: 25, height: 25, depth: 16, price: 6 },
+  { id: "angle-50", kind: "bracket", name: "Angle bracket 50×50 mm", width: 50, height: 50, depth: 20, price: 14 },
+  { id: "castor-75", kind: "castor", name: "Retracting castor 75 mm", width: 75, height: 110, depth: 75, price: 250 },
+  { id: "barrel-bolt-100", kind: "latch", name: "Barrel bolt 100 mm", width: 32, height: 100, depth: 18, price: 55 },
 ];
 
 export const FINISH_PRESETS: Finish[] = [
@@ -44,13 +49,14 @@ export const FINISH_PRESETS: Finish[] = [
   { grain: "length", treatment: "paint", color: "#7d8c74", label: "Sage paint" },
 ];
 
-export function shapeDefaults(width: number): Pick<Piece, "bevelStart" | "bevelEnd" | "widthStart" | "widthEnd" | "outline" | "routes" | "profiles" | "joinery" | "finish" | "marks" | "modifiers"> {
+export function shapeDefaults(width: number): Pick<Piece, "bevelStart" | "bevelEnd" | "widthStart" | "widthEnd" | "outline" | "openings" | "routes" | "profiles" | "joinery" | "finish" | "marks" | "modifiers"> {
   return {
     bevelStart: 0,
     bevelEnd: 0,
     widthStart: width,
     widthEnd: width,
     outline: null,
+    openings: [],
     routes: [],
     profiles: [],
     joinery: [],
@@ -70,6 +76,8 @@ export function normalizePiece(piece: Piece): Piece {
     widthStart: piece.widthStart || width,
     widthEnd: piece.widthEnd || width,
     outline: piece.outline ?? null,
+    openings: piece.openings ?? [],
+    section: piece.section === "round" ? "round" : "rect",
     routes: piece.routes ?? [],
     profiles: piece.profiles ?? [],
     joinery: piece.joinery ?? [],
@@ -95,6 +103,65 @@ export function taperPiece(piece: Piece, widthAtStart: number, widthAtEnd: numbe
       width: Math.max(widthAtStart, widthAtEnd),
     },
   };
+}
+
+/** A jigsaw or plunge-router rectangle. A bite that crosses an edge is a notch. The offcut is kept. */
+export function plungeCut(
+  piece: Piece,
+  input: { x: number; z: number; width: number; length: number },
+): { piece: Piece; offcut: Piece } | { error: string } {
+  if (piece.section === "round") return { error: "Plunge a flat face. Round stock is crosscut or drilled." };
+  if (piece.outline) return { error: "Plunge a rectangular piece. The curved outline is already the saw path." };
+  if (Math.abs((piece.widthStart || piece.width) - (piece.widthEnd || piece.width)) > 0.1) {
+    return { error: "Plunge a square section. Taper it after the opening is cut." };
+  }
+  if (input.width < MIN_PART_MM || input.length < MIN_PART_MM) {
+    return { error: `An opening needs at least ${MIN_PART_MM} mm on both sides.` };
+  }
+  const board = { x0: -piece.width / 2, x1: piece.width / 2, z0: -piece.length / 2, z1: piece.length / 2 };
+  const hole = {
+    x0: input.x - input.width / 2,
+    x1: input.x + input.width / 2,
+    z0: input.z - input.length / 2,
+    z1: input.z + input.length / 2,
+  };
+  const ix0 = Math.max(board.x0, hole.x0);
+  const ix1 = Math.min(board.x1, hole.x1);
+  const iz0 = Math.max(board.z0, hole.z0);
+  const iz1 = Math.min(board.z1, hole.z1);
+  if (ix1 - ix0 < MIN_PART_MM || iz1 - iz0 < MIN_PART_MM) return { error: "That opening misses the piece." };
+  const opening = { id: uid("open"), x: input.x, z: input.z, width: input.width, length: input.length };
+  const regions = openingRegions(piece.width, piece.length, [...(piece.openings ?? []), opening]);
+  if (regions === 0) return { error: "That opening removes the whole piece." };
+  if (regions > 1) return { error: "That opening would split the piece in two. Crosscut or rip it instead." };
+  const offcutW = ix1 - ix0;
+  const offcutL = iz1 - iz0;
+  const world = localToWorld(piece, v((ix0 + ix1) / 2, 0, (iz0 + iz1) / 2));
+  const offcut: Piece = {
+    ...piece,
+    id: uid("piece"),
+    name: `${piece.name.replace(/ · \d+(\.\d+)? mm$/, "")} cutout`,
+    width: offcutW,
+    widthStart: offcutW,
+    widthEnd: offcutW,
+    length: offcutL,
+    openings: [],
+    holes: [],
+    routes: [],
+    profiles: [],
+    joinery: [],
+    marks: [],
+    modifiers: [],
+    outline: null,
+    mitreStart: 0,
+    mitreEnd: 0,
+    bevelStart: 0,
+    bevelEnd: 0,
+    position: [world.x, world.y, world.z],
+    spanStart: piece.spanStart,
+    spanEnd: piece.spanStart,
+  };
+  return { piece: { ...piece, openings: [...(piece.openings ?? []), opening] }, offcut };
 }
 
 export function curveCut(piece: Piece, points: Array<{ u: number; v: number }>, waste: "left" | "right"): { piece: Piece } | { error: string } {
@@ -436,6 +503,8 @@ export function describePiece(piece: Piece): string {
   if ((piece.bevelStart || 0) !== 0 || (piece.bevelEnd || 0) !== 0) notes.push(`bevel ${piece.bevelStart || 0}° / ${piece.bevelEnd || 0}°`);
   if (piece.widthStart && piece.widthEnd && (piece.widthStart !== piece.widthEnd)) notes.push(`taper ${Math.round(piece.widthStart)}→${Math.round(piece.widthEnd)}`);
   if (piece.outline) notes.push("curved saw cut");
+  if (piece.section === "round") notes.push("round");
+  if ((piece.openings?.length ?? 0) > 0) notes.push(`${piece.openings?.length} cutout${piece.openings?.length === 1 ? "" : "s"}`);
   const styles = new Map<string, number>();
   for (const hole of piece.holes ?? []) styles.set(hole.style ?? "twist", (styles.get(hole.style ?? "twist") ?? 0) + 1);
   for (const [style, count] of styles) {

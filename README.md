@@ -15,18 +15,18 @@ The dev server listens on port **4317**. `npm test` checks the cut, kerf and sho
 
 ## What you can do
 
-- Browse a sample catalogue of planed pine, meranti and saligna, plus 2440×1220 plywood, MDF and Supawood. Click a length to drop that board on the bench at full size.
+- Browse a sample catalogue of planed pine, meranti and saligna, construction pine, dressed pine, round pipe, plus plywood (including 17 mm), MDF and Supawood. Click a length to drop that board on the bench at full size.
 - Import your own stock list as JSON or CSV, or download the current catalogue in either format.
 - Orbit the bench, select a piece, and move or rotate it. Grid snap (1 / 5 / 10 / 50 mm) and face snap butt pieces together and sit them on the floor. Screwed pieces move as one assembly.
-- **Saw.** Crosscut from the reference end (the brass dot) or the far end, with mitre and bevel. Rip along the width. Taper one or both ends. Draw a bandsaw or jigsaw path on the top face and keep one side of it. A splitting cut removes a kerf (default 3 mm) and becomes two real pieces.
+- **Saw.** Crosscut from the reference end (the brass dot) or the far end, with mitre and bevel. The dock shows the long point as well as the centreline; turn on Long point to type the long point directly. Rip along the width. Taper one or both ends. Draw a bandsaw or jigsaw path on the top face and keep one side of it. Plunge cuts a rectangular opening, or a notch when the rectangle crosses an edge, and keeps the offcut. A splitting cut removes a kerf (default 3 mm) and becomes two real pieces. Round stock can be crosscut, not ripped.
 - **Drill.** Twist bits, countersinks, Forstner bits and hole saws. A hole saw cuts through and leaves the plug as its own piece.
 - **Router.** Dados across the grain, grooves with the grain, rebates on an edge, and round-over, chamfer or cove profiles.
 - **Joinery.** Mortise and tenon, half-lap, a dovetail tail and pin, and paired dowels. Each feature is stored on both pieces so they fit.
 - **Fasteners.** Screws, 15° pocket screws, bolts and glue. Joined pieces move together.
-- **Hardware.** Butt hinges, drawer slides and pulls from a small catalogue. They are priced on the shopping list.
+- **Hardware.** Butt hinges, drawer slides, angle brackets, castors, barrel bolts and pulls from a small catalogue. They are priced on the shopping list.
 - **Finish.** Per piece: grain along or across the length, plus bare wood, stain or paint.
 - Read a **cut list** (stock length, finished size, mitres, and notes for tapers, curves, holes, router cuts and joints), a **shopping list** with timber and hardware, and a **fastener list**.
-- Undo and redo. The project autosaves in this browser. Export and open it as JSON.
+- Undo and redo. The project autosaves in this browser. Export and open it as JSON. Project → Examples loads a stackable sawhorse and a mitre-saw workbench built in the app.
 
 Keyboard: `V` move, `K` saw, `D` drill, `T` router, `J` joint, `Y` fasten, `H` hardware, `P` pencil, `M` measure. `G` / `R` / `S` grab, rotate and scale, then `X` `Y` `Z` and a typed value. Numpad `1` `3` `7` are front, side and top, numpad `5` is orthographic, `F` or `.` frames the selection. Arrows nudge, `Ctrl+D` duplicates, `Ctrl+C` / `Ctrl+V` copy and paste, `?` opens the cheat sheet. `Enter` cuts, `Delete` removes the selection, `Ctrl+Z` / `Ctrl+Shift+Z` undo and redo, `Ctrl+S` saves locally, `Esc` cancels.
 

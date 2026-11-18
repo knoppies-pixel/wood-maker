@@ -123,7 +123,8 @@ function parseItem(row: unknown): { item: StockItem } | { error: string } {
       species,
       thickness,
       width,
-      sheet: sheetValue === true || sheetValue === "true" || width >= 600,
+      sheet: record.section === "round" ? false : sheetValue === true || sheetValue === "true" || width >= 600,
+      ...(record.section === "round" ? { section: "round" as const } : {}),
       lengths: lengths.lengths,
     },
   };

@@ -91,18 +91,45 @@ export function worldToLocal(piece: Pick<Piece, "position" | "rotation">, world:
   };
 }
 
-export function pointLengths(piece: Pick<Piece, "length" | "width" | "mitreStart" | "mitreEnd">): {
+export function pointLengths(piece: {
+  length: number;
+  width: number;
+  thickness?: number;
+  mitreStart: number;
+  mitreEnd: number;
+  bevelStart?: number;
+  bevelEnd?: number;
+}): {
   center: number;
   long: number;
   short: number;
 } {
-  const delta = Math.tan(piece.mitreEnd * DEG) - Math.tan(piece.mitreStart * DEG);
-  const extra = (piece.width / 2) * delta;
+  const mitre = Math.abs(Math.tan((piece.mitreEnd || 0) * DEG) - Math.tan((piece.mitreStart || 0) * DEG)) * (piece.width / 2);
+  const bevel = Math.abs(Math.tan((piece.bevelEnd || 0) * DEG) - Math.tan((piece.bevelStart || 0) * DEG)) * ((piece.thickness || 0) / 2);
+  const extra = mitre + bevel;
   return {
     center: piece.length,
-    long: piece.length + Math.abs(extra),
-    short: piece.length - Math.abs(extra),
+    long: piece.length + extra,
+    short: piece.length - extra,
   };
+}
+
+/** How much longer the long point is than the centreline, for a cut about to be made. */
+export function longPointAllowance(
+  piece: { width: number; thickness?: number; mitreStart?: number; mitreEnd?: number; bevelStart?: number; bevelEnd?: number },
+  cutMitre: number,
+  cutBevel: number,
+  from: "start" | "end",
+): number {
+  return pointLengths({
+    length: 0,
+    width: piece.width,
+    thickness: piece.thickness ?? 0,
+    mitreStart: from === "start" ? piece.mitreStart ?? 0 : cutMitre,
+    mitreEnd: from === "start" ? cutMitre : piece.mitreEnd ?? 0,
+    bevelStart: from === "start" ? piece.bevelStart ?? 0 : cutBevel,
+    bevelEnd: from === "start" ? cutBevel : piece.bevelEnd ?? 0,
+  }).long;
 }
 
 /** A ray that misses a thin board but passes within `slack` still lands on the nearest real face. */
@@ -214,6 +241,8 @@ function wind(corners: Quad, outward: Vec3): Quad {
 }
 
 export function buildMesh(piece: Piece): MeshData {
+  if (piece.section === "round") return cylinderMesh(piece.length, Math.max(piece.width, piece.thickness) / 2, piece.finish?.grain ?? "length");
+  if ((piece.openings?.length ?? 0) > 0 && !piece.outline) return openingMesh(piece);
   if (piece.outline && piece.outline.length >= 3) return extrudeOutline(piece.outline, piece.thickness, piece.finish?.grain ?? "length");
   const faces = localFaces(piece);
   const positions = new Float32Array(faces.length * 4 * 3);
@@ -249,6 +278,181 @@ export function buildMesh(piece: Piece): MeshData {
   });
 
   return { positions, normals, uvs, indices, groups };
+}
+
+export function sectionContains(width: number, length: number, openings: Array<{ x: number; z: number; width: number; length: number }> | undefined, x: number, z: number): boolean {
+  if (x < -width / 2 - 1e-6 || x > width / 2 + 1e-6 || z < -length / 2 - 1e-6 || z > length / 2 + 1e-6) return false;
+  return !(openings ?? []).some((opening) => Math.abs(x - opening.x) < opening.width / 2 - 1e-6 && Math.abs(z - opening.z) < opening.length / 2 - 1e-6);
+}
+
+/** How many separate pieces a set of rectangular openings would leave. 0 means the board is gone. */
+export function openingRegions(width: number, length: number, openings: Array<{ x: number; z: number; width: number; length: number }>): number {
+  const grid = openingGrid(width, length, openings);
+  if (!grid) return 0;
+  const seen: boolean[][] = grid.solid.map((row) => row.map(() => false));
+  let regions = 0;
+  for (let i = 0; i < grid.solid.length; i += 1) {
+    for (let j = 0; j < grid.solid[i].length; j += 1) {
+      if (!grid.solid[i][j] || seen[i][j]) continue;
+      regions += 1;
+      const stack = [[i, j]];
+      seen[i][j] = true;
+      while (stack.length > 0) {
+        const [ci, cj] = stack.pop() ?? [0, 0];
+        for (const [ni, nj] of [[ci - 1, cj], [ci + 1, cj], [ci, cj - 1], [ci, cj + 1]] as const) {
+          if (ni < 0 || nj < 0 || ni >= grid.solid.length || nj >= grid.solid[ni].length) continue;
+          if (!grid.solid[ni][nj] || seen[ni][nj]) continue;
+          seen[ni][nj] = true;
+          stack.push([ni, nj]);
+        }
+      }
+    }
+  }
+  return regions;
+}
+
+function openingMesh(piece: Piece): MeshData {
+  const grid = openingGrid(piece.width, piece.length, piece.openings ?? []);
+  const half = piece.thickness / 2;
+  const grain = piece.finish?.grain ?? "length";
+  const positions: number[] = [];
+  const normals: number[] = [];
+  const uvs: number[] = [];
+  const indices: number[] = [];
+  const pushQuad = (corners: Quad, outward: Vec3) => {
+    const wound = wind(corners, outward);
+    const base = positions.length / 3;
+    for (const corner of wound) {
+      positions.push(corner.x, corner.y, corner.z);
+      normals.push(outward.x, outward.y, outward.z);
+      const [u, vv] = uvOf("top", corner, grain);
+      uvs.push(u / 180, vv / 180);
+    }
+    indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
+  };
+  if (grid) {
+    for (let i = 0; i < grid.xs.length - 1; i += 1) {
+      for (let j = 0; j < grid.zs.length - 1; j += 1) {
+        if (!grid.solid[i]?.[j]) continue;
+        const x0 = grid.xs[i];
+        const x1 = grid.xs[i + 1];
+        const z0 = grid.zs[j];
+        const z1 = grid.zs[j + 1];
+        if (x1 - x0 < 0.05 || z1 - z0 < 0.05) continue;
+        pushQuad([v(x0, half, z0), v(x1, half, z0), v(x1, half, z1), v(x0, half, z1)], v(0, 1, 0));
+        pushQuad([v(x0, -half, z0), v(x0, -half, z1), v(x1, -half, z1), v(x1, -half, z0)], v(0, -1, 0));
+      }
+    }
+  }
+  const capCount = indices.length;
+  if (grid) {
+    const solidAt = (i: number, j: number) => Boolean(grid.solid[i]?.[j]);
+    for (let i = 0; i < grid.xs.length - 1; i += 1) {
+      for (let j = 0; j < grid.zs.length - 1; j += 1) {
+        if (!solidAt(i, j)) continue;
+        const x0 = grid.xs[i];
+        const x1 = grid.xs[i + 1];
+        const z0 = grid.zs[j];
+        const z1 = grid.zs[j + 1];
+        if (!solidAt(i - 1, j)) pushQuad([v(x0, -half, z0), v(x0, -half, z1), v(x0, half, z1), v(x0, half, z0)], v(-1, 0, 0));
+        if (!solidAt(i + 1, j)) pushQuad([v(x1, -half, z1), v(x1, -half, z0), v(x1, half, z0), v(x1, half, z1)], v(1, 0, 0));
+        if (!solidAt(i, j - 1)) pushQuad([v(x1, -half, z0), v(x0, -half, z0), v(x0, half, z0), v(x1, half, z0)], v(0, 0, -1));
+        if (!solidAt(i, j + 1)) pushQuad([v(x0, -half, z1), v(x1, -half, z1), v(x1, half, z1), v(x0, half, z1)], v(0, 0, 1));
+      }
+    }
+  }
+  return {
+    positions: Float32Array.from(positions),
+    normals: Float32Array.from(normals),
+    uvs: Float32Array.from(uvs),
+    indices: new Uint32Array(indices),
+    groups: [
+      { start: 0, count: capCount, materialIndex: 0 },
+      { start: capCount, count: indices.length - capCount, materialIndex: 1 },
+    ],
+  };
+}
+
+function openingGrid(width: number, length: number, openings: Array<{ x: number; z: number; width: number; length: number }>): { xs: number[]; zs: number[]; solid: boolean[][] } | null {
+  const x0 = -width / 2;
+  const x1 = width / 2;
+  const z0 = -length / 2;
+  const z1 = length / 2;
+  const xs = uniqueCoords([x0, x1, ...openings.flatMap((opening) => [clamp(opening.x - opening.width / 2, x0, x1), clamp(opening.x + opening.width / 2, x0, x1)])]);
+  const zs = uniqueCoords([z0, z1, ...openings.flatMap((opening) => [clamp(opening.z - opening.length / 2, z0, z1), clamp(opening.z + opening.length / 2, z0, z1)])]);
+  if (xs.length < 2 || zs.length < 2) return null;
+  const solid = xs.slice(0, -1).map((x, i) => zs.slice(0, -1).map((z, j) => {
+    const cx = (x + xs[i + 1]) / 2;
+    const cz = (z + zs[j + 1]) / 2;
+    return sectionContains(width, length, openings, cx, cz);
+  }));
+  return { xs, zs, solid };
+}
+
+function uniqueCoords(values: number[]): number[] {
+  const sorted = [...values].sort((a, b) => a - b);
+  const out: number[] = [];
+  for (const value of sorted) {
+    if (out.length === 0 || value - out[out.length - 1] > 0.05) out.push(value);
+  }
+  return out;
+}
+
+function cylinderMesh(length: number, radius: number, grain: "length" | "width"): MeshData {
+  const segments = 24;
+  const half = length / 2;
+  const positions: number[] = [];
+  const normals: number[] = [];
+  const uvs: number[] = [];
+  const indices: number[] = [];
+  const push = (x: number, y: number, z: number, nx: number, ny: number, nz: number) => {
+    positions.push(x, y, z);
+    normals.push(nx, ny, nz);
+    const uv = grain === "width" ? [z, x] : [x, z];
+    uvs.push(uv[0] / 180, uv[1] / 180);
+    return positions.length / 3 - 1;
+  };
+  for (let i = 0; i < segments; i += 1) {
+    const a0 = (i / segments) * Math.PI * 2;
+    const a1 = ((i + 1) / segments) * Math.PI * 2;
+    const x0 = Math.cos(a0) * radius;
+    const y0 = Math.sin(a0) * radius;
+    const x1 = Math.cos(a1) * radius;
+    const y1 = Math.sin(a1) * radius;
+    const base = positions.length / 3;
+    push(x0, y0, -half, Math.cos(a0), Math.sin(a0), 0);
+    push(x1, y1, -half, Math.cos(a1), Math.sin(a1), 0);
+    push(x1, y1, half, Math.cos(a1), Math.sin(a1), 0);
+    push(x0, y0, half, Math.cos(a0), Math.sin(a0), 0);
+    indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
+  }
+  const sideCount = indices.length;
+  const top = push(0, 0, half, 0, 0, 1);
+  const bottom = push(0, 0, -half, 0, 0, -1);
+  for (let i = 0; i < segments; i += 1) {
+    const a0 = (i / segments) * Math.PI * 2;
+    const a1 = ((i + 1) / segments) * Math.PI * 2;
+    const x0 = Math.cos(a0) * radius;
+    const y0 = Math.sin(a0) * radius;
+    const x1 = Math.cos(a1) * radius;
+    const y1 = Math.sin(a1) * radius;
+    const t0 = push(x0, y0, half, 0, 0, 1);
+    const t1 = push(x1, y1, half, 0, 0, 1);
+    indices.push(top, t0, t1);
+    const b0 = push(x0, y0, -half, 0, 0, -1);
+    const b1 = push(x1, y1, -half, 0, 0, -1);
+    indices.push(bottom, b1, b0);
+  }
+  return {
+    positions: Float32Array.from(positions),
+    normals: Float32Array.from(normals),
+    uvs: Float32Array.from(uvs),
+    indices: new Uint32Array(indices),
+    groups: [
+      { start: 0, count: sideCount, materialIndex: 0 },
+      { start: sideCount, count: indices.length - sideCount, materialIndex: 1 },
+    ],
+  };
 }
 
 /** Extrude a simple XZ polygon through the thickness. The outline is the bandsaw path. */

@@ -7,7 +7,7 @@ import { StockPanel } from "./components/StockPanel.tsx";
 import { Toolbar } from "./components/Toolbar.tsx";
 import { Viewport } from "./components/Viewport.tsx";
 import { clamp } from "./domain/math.ts";
-import { kerfAlong } from "./domain/operations.ts";
+import { kerfAlong, sawDistance } from "./domain/operations.ts";
 import { saveStoredProject } from "./domain/project-io.ts";
 import { MIN_PART_MM } from "./domain/types.ts";
 import { CheatSheet } from "./components/CheatSheet.tsx";
@@ -266,8 +266,16 @@ function cutSelected(): void {
   const ui = useUi.getState();
   const kerf = useProject.getState().kerf;
   if (ui.sawMode === "taper" || ui.sawMode === "curve") return;
-  const consumed = ui.sawMode === "crosscut" ? kerfAlong(kerf, ui.sawMitre, ui.sawBevel) : kerf;
-  const distance = ui.sawMode === "rip" || ui.sawFrom === "start" ? ui.sawDistance : piece.length - ui.sawDistance - consumed;
+  if (ui.sawMode === "plunge") {
+    const result = useProject.getState().plunge(piece.id, { x: 0, z: 0, width: ui.plungeWidth, length: ui.plungeLength });
+    if (!result.ok) toast.error(result.message);
+    else {
+      toast.success(result.message ?? "Opening cut.");
+      if (result.selectId) useUi.getState().select(result.selectId);
+    }
+    return;
+  }
+  const distance = sawDistance(piece, ui.sawDistance, ui.sawMode, ui.sawFrom, ui.sawMitre, ui.sawBevel, kerf, ui.sawLongPoint);
   const result = useProject.getState().cutPiece(piece.id, ui.sawMode === "rip" ? "rip" : "crosscut", distance, ui.sawMode === "crosscut" ? ui.sawMitre : 0, ui.sawBevel);
   if (!result.ok) toast.error(result.message);
   else {

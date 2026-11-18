@@ -139,7 +139,7 @@ function HardwareMark({ piece, item }: { piece: Piece; item: HardwareItem }) {
   const point = holeLocalPoint(piece, item.face, item.u, item.v);
   const inward = inwardNormal(item.face, piece);
   const outward = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(-inward.x, -inward.y, -inward.z).normalize());
-  const color = item.kind === "hinge" ? "#c6a15a" : item.kind === "drawer-slide" ? "#c5ccd1" : "#1f2428";
+  const color = item.kind === "hinge" ? "#c6a15a" : item.kind === "drawer-slide" ? "#c5ccd1" : item.kind === "bracket" ? "#d5dde3" : item.kind === "castor" ? "#3e4650" : item.kind === "latch" ? "#c2a36a" : "#1f2428";
   if (item.face === "top" || item.face === "bottom") {
     const lift = item.face === "top" ? item.depth / 2 : -item.depth / 2;
     return (

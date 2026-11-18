@@ -22,7 +22,7 @@ export interface ViewRequest {
   kind: ViewKind;
   nonce: number;
 }
-export type SawMode = "crosscut" | "rip" | "taper" | "curve";
+export type SawMode = "crosscut" | "rip" | "taper" | "curve" | "plunge";
 export type RouterMode = "dado" | "groove" | "rebate" | "profile";
 export type JointMode = "mortise-tenon" | "half-lap" | "dovetail" | "dowels";
 export type InspectorTab = "piece" | "cuts" | "shop" | "screws";
@@ -65,6 +65,9 @@ interface UiState {
   sawFrom: "start" | "end";
   sawMode: SawMode;
   sawBevel: number;
+  sawLongPoint: boolean;
+  plungeWidth: number;
+  plungeLength: number;
   taperStart: number;
   taperEnd: number;
   curvePoints: Array<{ u: number; v: number }>;
@@ -128,6 +131,9 @@ interface UiState {
   setSawFrom: (from: "start" | "end") => void;
   setSawMode: (mode: SawMode) => void;
   setSawBevel: (bevel: number) => void;
+  setSawLongPoint: (on: boolean) => void;
+  setPlungeWidth: (width: number) => void;
+  setPlungeLength: (length: number) => void;
   setTaperStart: (width: number) => void;
   setTaperEnd: (width: number) => void;
   setCurvePoints: (points: Array<{ u: number; v: number }>) => void;
@@ -192,6 +198,9 @@ export const useUi = create<UiState>((set) => ({
   sawFrom: "start",
   sawMode: "crosscut",
   sawBevel: 0,
+  sawLongPoint: false,
+  plungeWidth: 80,
+  plungeLength: 40,
   taperStart: 76,
   taperEnd: 38,
   curvePoints: [],
@@ -255,6 +264,9 @@ export const useUi = create<UiState>((set) => ({
   setSawFrom: (sawFrom) => set({ sawFrom }),
   setSawMode: (sawMode) => set({ sawMode }),
   setSawBevel: (sawBevel) => set({ sawBevel }),
+  setSawLongPoint: (sawLongPoint) => set({ sawLongPoint }),
+  setPlungeWidth: (plungeWidth) => set({ plungeWidth }),
+  setPlungeLength: (plungeLength) => set({ plungeLength }),
   setTaperStart: (taperStart) => set({ taperStart }),
   setTaperEnd: (taperEnd) => set({ taperEnd }),
   setCurvePoints: (curvePoints) => set({ curvePoints }),

@@ -3,7 +3,7 @@ import type { ThreeEvent } from "@react-three/fiber";
 import { useLayoutEffect, useMemo, useRef, type MutableRefObject, type Ref } from "react";
 import { toast } from "sonner";
 import * as THREE from "three";
-import { canPlaceHole, kerfAlong, preferLegalHole } from "../domain/operations.ts";
+import { canPlaceHole, kerfAlong, preferLegalHole, sawDistance } from "../domain/operations.ts";
 import { nearestPieceEdge, profileTarget, routeFits, sawDistanceFromStation, snapFaceHit, stationFromHit } from "../domain/picking.ts";
 import { faceExtent, localCopies } from "../domain/modifiers.ts";
 import { offsetOnFace } from "../domain/marks.ts";
@@ -273,6 +273,25 @@ function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "do
     if (kind === "move") return;
     useUi.getState().select(piece.id);
     commitSaw(piece);
+    return;
+  }
+  if (kind === "down" && tool === "saw" && sawMode === "plunge" && hit) {
+    if (hit.face !== "top") {
+      toast.error("Plunge from the top face.");
+      return;
+    }
+    const ui = useUi.getState();
+    const result = useProject.getState().plunge(piece.id, {
+      x: hit.u - piece.width / 2,
+      z: hit.v - piece.length / 2,
+      width: ui.plungeWidth,
+      length: ui.plungeLength,
+    });
+    if (!result.ok) toast.error(result.message);
+    else {
+      toast.success(result.message ?? "Opening cut.");
+      if (result.selectId) useUi.getState().select(result.selectId);
+    }
     return;
   }
   if (kind === "down" && tool === "saw" && useUi.getState().sawMode === "curve" && hit?.face === "top") {
@@ -581,8 +600,7 @@ function commitSaw(piece: Piece): void {
   const ui = useUi.getState();
   if (ui.sawMode !== "crosscut" && ui.sawMode !== "rip") return;
   const kerf = useProject.getState().kerf;
-  const consumed = ui.sawMode === "crosscut" ? kerfAlong(kerf, ui.sawMitre, ui.sawBevel) : kerf;
-  const distance = ui.sawMode === "rip" || ui.sawFrom === "start" ? ui.sawDistance : piece.length - ui.sawDistance - consumed;
+  const distance = sawDistance(piece, ui.sawDistance, ui.sawMode, ui.sawFrom, ui.sawMitre, ui.sawBevel, kerf, ui.sawLongPoint);
   const result = useProject.getState().cutPiece(piece.id, ui.sawMode === "rip" ? "rip" : "crosscut", distance, ui.sawMode === "crosscut" ? ui.sawMitre : 0, ui.sawBevel);
   if (!result.ok) toast.error(result.message);
   else {

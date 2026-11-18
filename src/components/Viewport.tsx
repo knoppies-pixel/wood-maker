@@ -6,13 +6,13 @@ import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { faceSize, localToWorld, rayDistanceOnAxis, snapTranslation, worldCorners } from "../domain/geometry.ts";
+import { faceSize, localToWorld, longPointAllowance, pointLengths, rayDistanceOnAxis, snapTranslation, worldCorners } from "../domain/geometry.ts";
 import { HARDWARE_CATALOG } from "../domain/features.ts";
 import { offsetOnFace } from "../domain/marks.ts";
 import { faceExtent } from "../domain/modifiers.ts";
 import { holeLocalPoint } from "../domain/geometry.ts";
 import { DEG, clamp, formatMm } from "../domain/math.ts";
-import { connectedIds, kerfAlong } from "../domain/operations.ts";
+import { connectedIds, kerfAlong, sawDistance } from "../domain/operations.ts";
 import { profileLocal, profileTarget, routeLocalBox } from "../domain/picking.ts";
 import { MIN_PART_MM, type Piece, type Vec3Tuple } from "../domain/types.ts";
 import { useProject } from "../store/useProject.ts";
@@ -853,19 +853,46 @@ function SawDock({ piece }: { piece: Piece | undefined }) {
   const distance = useUi((state) => state.sawDistance);
   const mitre = useUi((state) => state.sawMitre);
   const bevel = useUi((state) => state.sawBevel);
+  const longPoint = useUi((state) => state.sawLongPoint);
+  const plungeWidth = useUi((state) => state.plungeWidth);
+  const plungeLength = useUi((state) => state.plungeLength);
   const kerf = useProject((state) => state.kerf);
   const span = piece ? (mode === "rip" ? piece.width : piece.length) : 0;
   const consumed = piece && mode === "crosscut" ? kerfAlong(kerf, mitre, bevel) : kerf;
-  const max = piece ? Math.max(MIN_PART_MM, span - consumed - MIN_PART_MM) : MIN_PART_MM;
-  const head = mode === "rip" || from === "start" ? distance : piece ? piece.length - distance - consumed : 0;
+  const allowance = piece && mode === "crosscut" ? longPointAllowance(piece, mitre, bevel, from) : 0;
+  const max = piece ? Math.max(MIN_PART_MM, span - consumed - MIN_PART_MM + (longPoint ? allowance : 0)) : MIN_PART_MM;
+  const centre = longPoint && mode === "crosscut" ? distance - allowance : distance;
+  const head = mode === "rip" || from === "start" ? centre : piece ? piece.length - centre - consumed : 0;
   const tail = piece ? span - head - consumed : 0;
+  const keepLong = piece && mode === "crosscut"
+    ? pointLengths({
+        length: Math.max(head, 0),
+        width: piece.width,
+        thickness: piece.thickness,
+        mitreStart: piece.mitreStart,
+        mitreEnd: mitre,
+        bevelStart: piece.bevelStart,
+        bevelEnd: bevel,
+      }).long
+    : head;
 
   function cut() {
     if (!piece) {
       toast.error("Select a piece to cut.");
       return;
     }
-    const result = useProject.getState().cutPiece(piece.id, mode === "rip" ? "rip" : "crosscut", head, mode === "crosscut" ? mitre : 0, bevel);
+    if (mode === "plunge") {
+      const result = useProject.getState().plunge(piece.id, { x: 0, z: 0, width: plungeWidth, length: plungeLength });
+      if (!result.ok) toast.error(result.message);
+      else {
+        toast.success(result.message ?? "Opening cut.");
+        if (result.selectId) useUi.getState().select(result.selectId);
+      }
+      return;
+    }
+    if (mode !== "crosscut" && mode !== "rip") return;
+    const station = sawDistance(piece, distance, mode, from, mitre, bevel, kerf, longPoint);
+    const result = useProject.getState().cutPiece(piece.id, mode === "rip" ? "rip" : "crosscut", station, mode === "crosscut" ? mitre : 0, bevel);
     if (!result.ok) toast.error(result.message);
     else {
       toast.success(result.message ?? "Cut");
@@ -886,6 +913,7 @@ function SawDock({ piece }: { piece: Piece | undefined }) {
           }
         }}>Taper</Toggle>
         <Toggle on={mode === "curve"} onClick={() => useUi.getState().setSawMode("curve")}>Curve</Toggle>
+        <Toggle on={mode === "plunge"} onClick={() => useUi.getState().setSawMode("plunge")}>Plunge</Toggle>
         {mode === "crosscut" ? (
           <Toggle on={from === "end"} onClick={() => useUi.getState().setSawFrom(from === "start" ? "end" : "start")}>
             {from === "start" ? "From reference end" : "From far end"}
@@ -900,6 +928,13 @@ function SawDock({ piece }: { piece: Piece | undefined }) {
         <div className="flex flex-wrap gap-3">
           <NumberSlider label="Mitre" min={-60} max={60} suffix="°" value={mitre} onCommit={(value) => useUi.getState().setSawMitre(value)} />
           <NumberSlider label="Bevel" min={-60} max={60} suffix="°" value={bevel} onCommit={(value) => useUi.getState().setSawBevel(value)} />
+          <Toggle on={longPoint} onClick={() => useUi.getState().setSawLongPoint(!longPoint)}>Long point</Toggle>
+        </div>
+      ) : null}
+      {mode === "plunge" ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <NumberSlider label="Width" min={MIN_PART_MM} max={Math.max(piece?.width ?? 80, MIN_PART_MM + 1)} value={plungeWidth} onCommit={(value) => useUi.getState().setPlungeWidth(value)} />
+          <NumberSlider label="Length" min={MIN_PART_MM} max={Math.max(piece?.length ?? 80, MIN_PART_MM + 1)} value={plungeLength} onCommit={(value) => useUi.getState().setPlungeLength(value)} />
         </div>
       ) : null}
       {mode === "taper" ? <TaperControls piece={piece} /> : null}
@@ -909,14 +944,16 @@ function SawDock({ piece }: { piece: Piece | undefined }) {
           {piece && mode === "rip"
             ? `Left ${formatMm(head)} mm · kerf ${formatMm(consumed)} · right ${formatMm(tail)} mm`
             : piece && mode === "crosscut"
-              ? `Keep ${formatMm(head)} mm · kerf ${formatMm(consumed)} along the board · offcut ${formatMm(tail)} mm`
+              ? `Keep ${formatMm(head)} mm on the centreline · long point ${formatMm(keepLong)} mm · kerf ${formatMm(consumed)} · offcut ${formatMm(tail)} mm`
               : mode === "taper"
                 ? "Narrow one or both ends. The taper stays inside the board."
-                : "Click the top face to draw the cut. Start and finish on an edge."}
+                : mode === "plunge"
+                  ? "Click the top face. The rectangle is cut out and kept as its own piece. A bite that crosses an edge is a notch."
+                  : "Click the top face to draw the cut. Start and finish on an edge."}
         </p>
-        {mode === "crosscut" || mode === "rip" ? (
+        {mode === "crosscut" || mode === "rip" || mode === "plunge" ? (
           <Button size="sm" disabled={!piece} onClick={cut}>
-            Cut
+            {mode === "plunge" ? "Cut opening" : "Cut"}
           </Button>
         ) : null}
       </div>
@@ -1104,6 +1141,11 @@ function HardwareDock() {
     ["slide-450", "Slide 450"],
     ["pull-128", "Bar pull"],
     ["knob-30", "Knob"],
+    ["angle-25", "Bracket 25"],
+    ["angle-50", "Bracket 50"],
+    ["slide-500", "Slide 500"],
+    ["castor-75", "Castor"],
+    ["barrel-bolt-100", "Barrel bolt"],
   ] as const;
   return (
     <div className="flex flex-col gap-2">

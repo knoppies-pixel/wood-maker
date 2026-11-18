@@ -2,11 +2,12 @@ import {
   faceSize,
   holeLocalPoint,
   localToWorld,
+  longPointAllowance,
   placementFor,
 } from "./geometry.ts";
 import { DEG, clamp, uid, v } from "./math.ts";
 import { shapeDefaults } from "./features.ts";
-import { MIN_PART_MM, type Board, type Fastener, type Hole, type Piece, type StockItem } from "./types.ts";
+import { MIN_PART_MM, type Board, type Fastener, type Hole, type Opening, type Piece, type StockItem } from "./types.ts";
 
 export interface CutOk {
   ok: true;
@@ -64,10 +65,31 @@ export function addStockPiece(
     position,
     rotation: [0, 0, 0],
     holes: [],
+    section: stock.section === "round" ? "round" : "rect",
     spanStart: 0,
     spanEnd: length,
   };
   return { board, piece };
+}
+
+/** Station distance from the chosen end, turned into the centreline distance crosscut/rip expect. */
+export function sawDistance(
+  piece: Piece,
+  station: number,
+  mode: "crosscut" | "rip",
+  from: "start" | "end",
+  mitre: number,
+  bevel: number,
+  kerf: number,
+  asLongPoint: boolean,
+): number {
+  const cutMitre = mode === "crosscut" ? mitre : 0;
+  const cutBevel = mode === "crosscut" ? bevel : 0;
+  const allowance = asLongPoint && mode === "crosscut" ? longPointAllowance(piece, cutMitre, cutBevel, from) : 0;
+  const centre = station - allowance;
+  if (mode === "rip" || from === "start") return centre;
+  const consumed = kerfAlong(kerf, cutMitre, cutBevel);
+  return piece.length - centre - consumed;
 }
 
 export function crosscut(piece: Piece, distanceFromStart: number, mitreDeg: number, kerf: number, bevelDeg = 0): CutOk | CutErr {
@@ -88,6 +110,7 @@ export function crosscut(piece: Piece, distanceFromStart: number, mitreDeg: numb
   const pos1 = localToWorld(piece, v(0, 0, off1));
   const pos2 = localToWorld(piece, v(0, 0, off2));
   const holes = splitHolesCross(piece, distanceFromStart, consumed);
+  const openings = splitOpenings(piece, "z", distanceFromStart, consumed);
   const cutWidth = widthAlong(piece, distanceFromStart);
   const a = makeChild(piece, {
     length: distanceFromStart,
@@ -98,6 +121,7 @@ export function crosscut(piece: Piece, distanceFromStart: number, mitreDeg: numb
     width: Math.max(piece.widthStart || piece.width, cutWidth),
     position: [pos1.x, pos1.y, pos1.z],
     holes: holes.a,
+    openings: openings.a,
     outline: null,
     routes: shiftRoutes(piece, 0, distanceFromStart),
     profiles: splitProfiles(piece, "start"),
@@ -114,6 +138,7 @@ export function crosscut(piece: Piece, distanceFromStart: number, mitreDeg: numb
     width: Math.max(cutWidth, piece.widthEnd || piece.width),
     position: [pos2.x, pos2.y, pos2.z],
     holes: holes.b,
+    openings: openings.b,
     outline: null,
     routes: shiftRoutes(piece, distanceFromStart + consumed, piece.length),
     profiles: splitProfiles(piece, "end"),
@@ -125,6 +150,7 @@ export function crosscut(piece: Piece, distanceFromStart: number, mitreDeg: numb
 }
 
 export function rip(piece: Piece, distanceFromLeft: number, kerf: number): CutOk | CutErr {
+  if (piece.section === "round") return { ok: false, reason: "Rip a rectangular board. Round stock is only crosscut." };
   const remain = piece.width - distanceFromLeft - kerf;
   if (!(distanceFromLeft >= MIN_PART_MM && remain >= MIN_PART_MM)) {
     return {
@@ -137,6 +163,7 @@ export function rip(piece: Piece, distanceFromLeft: number, kerf: number): CutOk
   const pos1 = localToWorld(piece, v(off1, 0, 0));
   const pos2 = localToWorld(piece, v(off2, 0, 0));
   const holes = splitHolesRip(piece, distanceFromLeft, kerf);
+  const openings = splitOpenings(piece, "x", distanceFromLeft, kerf);
   const fraction = distanceFromLeft / (piece.width || 1);
   const kerfFraction = kerf / (piece.width || 1);
   const a = makeChild(piece, {
@@ -145,6 +172,7 @@ export function rip(piece: Piece, distanceFromLeft: number, kerf: number): CutOk
     widthEnd: (piece.widthEnd || piece.width) * fraction,
     position: [pos1.x, pos1.y, pos1.z],
     holes: holes.a,
+    openings: openings.a,
     name: partName(piece.name, piece.length),
   });
   const rightFraction = 1 - fraction - kerfFraction;
@@ -154,6 +182,7 @@ export function rip(piece: Piece, distanceFromLeft: number, kerf: number): CutOk
     widthEnd: (piece.widthEnd || piece.width) * rightFraction,
     position: [pos2.x, pos2.y, pos2.z],
     holes: holes.b,
+    openings: openings.b,
     name: partName(piece.name, piece.length),
   });
   if (a.name === b.name) b.name = `${b.name} b`;
@@ -294,6 +323,28 @@ function uniqueName(base: string, pieces: Piece[]): string {
 export function partName(name: string, length: number): string {
   const base = name.replace(/ · \d+(\.\d+)? mm$/, "");
   return `${base} · ${Math.round(length)} mm`;
+}
+
+function splitOpenings(piece: Piece, axis: "x" | "z", keep: number, consumed: number): { a: Opening[]; b: Opening[] } {
+  const total = axis === "z" ? piece.length : piece.width;
+  const remain = total - keep - consumed;
+  const aCentre = -total / 2 + keep / 2;
+  const bCentre = -total / 2 + keep + consumed + remain / 2;
+  const a: Opening[] = [];
+  const b: Opening[] = [];
+  for (const opening of piece.openings ?? []) {
+    const centre = axis === "z" ? opening.z : opening.x;
+    const half = (axis === "z" ? opening.length : opening.width) / 2;
+    const along = centre + total / 2;
+    if (along + half <= keep + 0.5) {
+      const shifted = axis === "z" ? { ...opening, z: opening.z - aCentre } : { ...opening, x: opening.x - aCentre };
+      a.push(shifted);
+    } else if (along - half >= keep + consumed - 0.5) {
+      const shifted = axis === "z" ? { ...opening, z: opening.z - bCentre } : { ...opening, x: opening.x - bCentre };
+      b.push(shifted);
+    }
+  }
+  return { a, b };
 }
 
 function splitHolesCross(piece: Piece, distance: number, consumed: number): { a: Hole[]; b: Hole[] } {

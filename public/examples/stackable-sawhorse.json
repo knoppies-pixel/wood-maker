@@ -1,0 +1,3497 @@
+{
+  "format": "benchwork-project",
+  "version": 1,
+  "name": "Stackable sawhorse",
+  "units": "mm",
+  "kerf": 3,
+  "catalog": [
+    {
+      "id": "pine-22x44",
+      "name": "PAR Pine 22×44",
+      "species": "SA Pine",
+      "thickness": 22,
+      "width": 44,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 34
+        },
+        {
+          "length": 2400,
+          "price": 44
+        },
+        {
+          "length": 3000,
+          "price": 55
+        }
+      ]
+    },
+    {
+      "id": "pine-22x69",
+      "name": "PAR Pine 22×69",
+      "species": "SA Pine",
+      "thickness": 22,
+      "width": 69,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 52
+        },
+        {
+          "length": 2400,
+          "price": 68
+        },
+        {
+          "length": 3000,
+          "price": 84
+        }
+      ]
+    },
+    {
+      "id": "pine-22x94",
+      "name": "PAR Pine 22×94",
+      "species": "SA Pine",
+      "thickness": 22,
+      "width": 94,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 72
+        },
+        {
+          "length": 2400,
+          "price": 95
+        },
+        {
+          "length": 3000,
+          "price": 118
+        }
+      ]
+    },
+    {
+      "id": "pine-22x144",
+      "name": "PAR Pine 22×144",
+      "species": "SA Pine",
+      "thickness": 22,
+      "width": 144,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 152
+        },
+        {
+          "length": 3000,
+          "price": 188
+        }
+      ]
+    },
+    {
+      "id": "pine-38x38",
+      "name": "PAR Pine 38×38",
+      "species": "SA Pine",
+      "thickness": 38,
+      "width": 38,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 48
+        },
+        {
+          "length": 2400,
+          "price": 62
+        },
+        {
+          "length": 3000,
+          "price": 78
+        }
+      ]
+    },
+    {
+      "id": "pine-38x76",
+      "name": "PAR Pine 38×76",
+      "species": "SA Pine",
+      "thickness": 38,
+      "width": 76,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 105
+        },
+        {
+          "length": 2400,
+          "price": 138
+        },
+        {
+          "length": 3000,
+          "price": 172
+        }
+      ]
+    },
+    {
+      "id": "pine-38x114",
+      "name": "PAR Pine 38×114",
+      "species": "SA Pine",
+      "thickness": 38,
+      "width": 114,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 205
+        },
+        {
+          "length": 3000,
+          "price": 255
+        }
+      ]
+    },
+    {
+      "id": "pine-38x152",
+      "name": "PAR Pine 38×152",
+      "species": "SA Pine",
+      "thickness": 38,
+      "width": 152,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 268
+        },
+        {
+          "length": 3000,
+          "price": 332
+        }
+      ]
+    },
+    {
+      "id": "pine-50x76",
+      "name": "PAR Pine 50×76",
+      "species": "SA Pine",
+      "thickness": 50,
+      "width": 76,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 185
+        },
+        {
+          "length": 3000,
+          "price": 230
+        }
+      ]
+    },
+    {
+      "id": "pine-76x76",
+      "name": "PAR Pine 76×76",
+      "species": "SA Pine",
+      "thickness": 76,
+      "width": 76,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 255
+        },
+        {
+          "length": 3000,
+          "price": 318
+        }
+      ]
+    },
+    {
+      "id": "meranti-21x44",
+      "name": "PAR Meranti 21×44",
+      "species": "Meranti",
+      "thickness": 21,
+      "width": 44,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 92
+        },
+        {
+          "length": 3000,
+          "price": 128
+        }
+      ]
+    },
+    {
+      "id": "meranti-21x69",
+      "name": "PAR Meranti 21×69",
+      "species": "Meranti",
+      "thickness": 21,
+      "width": 69,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 135
+        },
+        {
+          "length": 3000,
+          "price": 188
+        }
+      ]
+    },
+    {
+      "id": "meranti-21x94",
+      "name": "PAR Meranti 21×94",
+      "species": "Meranti",
+      "thickness": 21,
+      "width": 94,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 185
+        },
+        {
+          "length": 3000,
+          "price": 258
+        }
+      ]
+    },
+    {
+      "id": "meranti-21x144",
+      "name": "PAR Meranti 21×144",
+      "species": "Meranti",
+      "thickness": 21,
+      "width": 144,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 275
+        },
+        {
+          "length": 3000,
+          "price": 385
+        }
+      ]
+    },
+    {
+      "id": "meranti-44x44",
+      "name": "PAR Meranti 44×44",
+      "species": "Meranti",
+      "thickness": 44,
+      "width": 44,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 155
+        },
+        {
+          "length": 3000,
+          "price": 218
+        }
+      ]
+    },
+    {
+      "id": "meranti-44x69",
+      "name": "PAR Meranti 44×69",
+      "species": "Meranti",
+      "thickness": 44,
+      "width": 69,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 225
+        },
+        {
+          "length": 3000,
+          "price": 315
+        }
+      ]
+    },
+    {
+      "id": "meranti-44x94",
+      "name": "PAR Meranti 44×94",
+      "species": "Meranti",
+      "thickness": 44,
+      "width": 94,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2100,
+          "price": 305
+        },
+        {
+          "length": 3000,
+          "price": 428
+        }
+      ]
+    },
+    {
+      "id": "saligna-32x32",
+      "name": "Saligna 32×32",
+      "species": "Saligna",
+      "thickness": 32,
+      "width": 32,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 32
+        },
+        {
+          "length": 2400,
+          "price": 42
+        }
+      ]
+    },
+    {
+      "id": "saligna-44x44",
+      "name": "Saligna 44×44",
+      "species": "Saligna",
+      "thickness": 44,
+      "width": 44,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 78
+        },
+        {
+          "length": 3000,
+          "price": 96
+        }
+      ]
+    },
+    {
+      "id": "ply-6",
+      "name": "Plywood 6 mm",
+      "species": "Plywood",
+      "thickness": 6,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 195
+        }
+      ]
+    },
+    {
+      "id": "ply-9",
+      "name": "Plywood 9 mm",
+      "species": "Plywood",
+      "thickness": 9,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 275
+        }
+      ]
+    },
+    {
+      "id": "ply-12",
+      "name": "Plywood 12 mm",
+      "species": "Plywood",
+      "thickness": 12,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 365
+        }
+      ]
+    },
+    {
+      "id": "ply-16",
+      "name": "Plywood 16 mm",
+      "species": "Plywood",
+      "thickness": 16,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 545
+        }
+      ]
+    },
+    {
+      "id": "ply-18",
+      "name": "Plywood 18 mm",
+      "species": "Plywood",
+      "thickness": 18,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 615
+        }
+      ]
+    },
+    {
+      "id": "mdf-12",
+      "name": "MDF 12 mm",
+      "species": "MDF",
+      "thickness": 12,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 295
+        }
+      ]
+    },
+    {
+      "id": "mdf-16",
+      "name": "MDF 16 mm",
+      "species": "MDF",
+      "thickness": 16,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 410
+        }
+      ]
+    },
+    {
+      "id": "mdf-18",
+      "name": "MDF 18 mm",
+      "species": "MDF",
+      "thickness": 18,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 465
+        }
+      ]
+    },
+    {
+      "id": "supawood-16",
+      "name": "Supawood 16 mm",
+      "species": "Supawood",
+      "thickness": 16,
+      "width": 1220,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2440,
+          "price": 335
+        }
+      ]
+    },
+    {
+      "id": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 112
+        },
+        {
+          "length": 2400,
+          "price": 145
+        },
+        {
+          "length": 3000,
+          "price": 182
+        }
+      ]
+    },
+    {
+      "id": "pine-19x42",
+      "name": "DAR Pine 19×42",
+      "species": "SA Pine",
+      "thickness": 19,
+      "width": 42,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1800,
+          "price": 36
+        },
+        {
+          "length": 2400,
+          "price": 46
+        },
+        {
+          "length": 3000,
+          "price": 58
+        }
+      ]
+    },
+    {
+      "id": "ply-17",
+      "name": "Plywood 17 mm",
+      "species": "Plywood",
+      "thickness": 17,
+      "width": 1200,
+      "sheet": true,
+      "lengths": [
+        {
+          "length": 2400,
+          "price": 590
+        }
+      ]
+    },
+    {
+      "id": "ply-17-300",
+      "name": "Plywood 17×300",
+      "species": "Plywood",
+      "thickness": 17,
+      "width": 300,
+      "sheet": false,
+      "lengths": [
+        {
+          "length": 1200,
+          "price": 148
+        }
+      ]
+    },
+    {
+      "id": "pipe-25",
+      "name": "Steel pipe 25 mm",
+      "species": "Steel",
+      "thickness": 25,
+      "width": 25,
+      "sheet": false,
+      "section": "round",
+      "lengths": [
+        {
+          "length": 1200,
+          "price": 95
+        },
+        {
+          "length": 2400,
+          "price": 175
+        }
+      ]
+    }
+  ],
+  "boards": [
+    {
+      "id": "board-1-p9tp6",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-7-l149r",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-d-u4qle",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-j-yrcfj",
+      "stockId": "ply-17-300",
+      "name": "Plywood 17×300",
+      "species": "Plywood",
+      "thickness": 17,
+      "width": 300,
+      "length": 1200,
+      "price": 148,
+      "sheet": false
+    },
+    {
+      "id": "board-11-pjh8p",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-19-isham",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    },
+    {
+      "id": "board-1h-j28ev",
+      "stockId": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "length": 2400,
+      "price": 145,
+      "sheet": false
+    }
+  ],
+  "pieces": [
+    {
+      "id": "piece-3-q3tkf",
+      "name": "Top sawhorse top",
+      "boardId": "board-1-p9tp6",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 1080,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        820,
+        744.291614531907,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [
+        {
+          "id": "hole-1n-z5h2x",
+          "face": "top",
+          "u": 45,
+          "v": 80,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-1p-h788d",
+          "face": "top",
+          "u": 45,
+          "v": 386,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-1r-cni5r",
+          "face": "top",
+          "u": 45,
+          "v": 1000,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-1t-klsti",
+          "face": "top",
+          "u": 45,
+          "v": 694,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 1080
+    },
+    {
+      "id": "piece-5-gd3b3",
+      "name": "Top sawhorse web",
+      "boardId": "board-1-p9tp6",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 1020,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        820,
+        681.791614531907,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 1083,
+      "spanEnd": 2103
+    },
+    {
+      "id": "piece-9-pl68m",
+      "name": "Top sawhorse bottom",
+      "boardId": "board-7-l149r",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 1020,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        820,
+        619.291614531907,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [
+        {
+          "id": "hole-1v-qza36",
+          "face": "top",
+          "u": 45,
+          "v": 80,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-1x-dyang",
+          "face": "top",
+          "u": 45,
+          "v": 360,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-1z-r87lt",
+          "face": "top",
+          "u": 45,
+          "v": 940,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-21-kk5ow",
+          "face": "top",
+          "u": 45,
+          "v": 660,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 1020
+    },
+    {
+      "id": "piece-b-ytcnc",
+      "name": "Bottom sawhorse top",
+      "boardId": "board-7-l149r",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 1000,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -820,
+        744.291614531907,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [
+        {
+          "id": "hole-3n-g5brd",
+          "face": "top",
+          "u": 45,
+          "v": 80,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-3p-kps27",
+          "face": "top",
+          "u": 45,
+          "v": 360,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-3r-ccnb8",
+          "face": "top",
+          "u": 45,
+          "v": 920,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-3t-rf14c",
+          "face": "top",
+          "u": 45,
+          "v": 640,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 1023,
+      "spanEnd": 2023
+    },
+    {
+      "id": "piece-f-gvrsn",
+      "name": "Bottom sawhorse web",
+      "boardId": "board-d-u4qle",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 940,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -820,
+        681.791614531907,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        1.5707963267948966
+      ],
+      "holes": [],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 940
+    },
+    {
+      "id": "piece-h-vzdzj",
+      "name": "Bottom sawhorse bottom",
+      "boardId": "board-d-u4qle",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 940,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -820,
+        619.291614531907,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "holes": [
+        {
+          "id": "hole-3v-j9m7s",
+          "face": "top",
+          "u": 45,
+          "v": 80,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-3x-zn0bm",
+          "face": "top",
+          "u": 45,
+          "v": 360,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-3z-v7ji3",
+          "face": "top",
+          "u": 45,
+          "v": 860,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-41-dilsy",
+          "face": "top",
+          "u": 45,
+          "v": 580,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 943,
+      "spanEnd": 1883
+    },
+    {
+      "id": "piece-n-9o91k",
+      "name": "Sawhorse end plate",
+      "boardId": "board-j-yrcfj",
+      "stockId": "ply-17-300",
+      "species": "Plywood",
+      "profileName": "Plywood 17×300",
+      "thickness": 17,
+      "width": 250,
+      "length": 235,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 250,
+      "widthEnd": 105,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        820,
+        644.291614531907,
+        -548.5
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -3.141592653589793
+      ],
+      "holes": [
+        {
+          "id": "hole-2j-psupq",
+          "face": "bottom",
+          "u": 31.255319148936167,
+          "v": 30,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-2l-49xxr",
+          "face": "bottom",
+          "u": 218.74468085106383,
+          "v": 30,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-2n-4fr51",
+          "face": "bottom",
+          "u": 58.40425531914893,
+          "v": 118,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-2p-4hy3a",
+          "face": "bottom",
+          "u": 191.59574468085106,
+          "v": 118,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-2r-gyz33",
+          "face": "bottom",
+          "u": 85.24468085106383,
+          "v": 205,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-2t-zlicv",
+          "face": "bottom",
+          "u": 164.75531914893617,
+          "v": 205,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 235
+    },
+    {
+      "id": "piece-r-1chas",
+      "name": "Sawhorse end plate",
+      "boardId": "board-j-yrcfj",
+      "stockId": "ply-17-300",
+      "species": "Plywood",
+      "profileName": "Plywood 17×300",
+      "thickness": 17,
+      "width": 250,
+      "length": 235,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 250,
+      "widthEnd": 105,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        820,
+        644.291614531907,
+        548.5
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        0
+      ],
+      "holes": [
+        {
+          "id": "hole-3b-bdp6z",
+          "face": "bottom",
+          "u": 31.255319148936167,
+          "v": 30,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-3d-16fwa",
+          "face": "bottom",
+          "u": 218.74468085106383,
+          "v": 30,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-3f-ehmep",
+          "face": "bottom",
+          "u": 58.40425531914893,
+          "v": 118,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-3h-moz2o",
+          "face": "bottom",
+          "u": 191.59574468085106,
+          "v": 118,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-3j-f5wzm",
+          "face": "bottom",
+          "u": 85.24468085106383,
+          "v": 205,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-3l-zxwwu",
+          "face": "bottom",
+          "u": 164.75531914893617,
+          "v": 205,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 238,
+      "spanEnd": 473
+    },
+    {
+      "id": "piece-v-3e968",
+      "name": "Sawhorse end plate",
+      "boardId": "board-j-yrcfj",
+      "stockId": "ply-17-300",
+      "species": "Plywood",
+      "profileName": "Plywood 17×300",
+      "thickness": 17,
+      "width": 250,
+      "length": 235,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 250,
+      "widthEnd": 105,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -820,
+        644.291614531907,
+        -508.5
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        -3.141592653589793
+      ],
+      "holes": [
+        {
+          "id": "hole-4j-2h8o8",
+          "face": "bottom",
+          "u": 31.255319148936167,
+          "v": 30,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-4l-da01b",
+          "face": "bottom",
+          "u": 218.74468085106383,
+          "v": 30,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-4n-jp5eh",
+          "face": "bottom",
+          "u": 58.40425531914893,
+          "v": 118,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-4p-5gpm2",
+          "face": "bottom",
+          "u": 191.59574468085106,
+          "v": 118,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-4r-2p5wg",
+          "face": "bottom",
+          "u": 85.24468085106383,
+          "v": 205,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-4t-nj144",
+          "face": "bottom",
+          "u": 164.75531914893617,
+          "v": 205,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 476,
+      "spanEnd": 711
+    },
+    {
+      "id": "piece-z-cik26",
+      "name": "Sawhorse end plate",
+      "boardId": "board-j-yrcfj",
+      "stockId": "ply-17-300",
+      "species": "Plywood",
+      "profileName": "Plywood 17×300",
+      "thickness": 17,
+      "width": 250,
+      "length": 235,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 0,
+      "widthStart": 250,
+      "widthEnd": 105,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -820,
+        644.291614531907,
+        508.5
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0,
+        0
+      ],
+      "holes": [
+        {
+          "id": "hole-5b-2h9sz",
+          "face": "bottom",
+          "u": 31.255319148936167,
+          "v": 30,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-5d-7mvev",
+          "face": "bottom",
+          "u": 218.74468085106383,
+          "v": 30,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-5f-7uupj",
+          "face": "bottom",
+          "u": 58.40425531914893,
+          "v": 118,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-5h-0295w",
+          "face": "bottom",
+          "u": 191.59574468085106,
+          "v": 118,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-5j-9931t",
+          "face": "bottom",
+          "u": 85.24468085106383,
+          "v": 205,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-5l-pgdk5",
+          "face": "bottom",
+          "u": 164.75531914893617,
+          "v": 205,
+          "diameter": 4,
+          "depth": 17,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 714,
+      "spanEnd": 949
+    },
+    {
+      "id": "piece-13-ia3su",
+      "name": "Sawhorse leg",
+      "boardId": "board-11-pjh8p",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 754.6497130744734,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 17,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        675.4455552305928,
+        371.0705645149255,
+        -464.9999999999999
+      ],
+      "rotation": [
+        1.5707963267948966,
+        -0.29670597283903605,
+        1.5707963267948966
+      ],
+      "holes": [
+        {
+          "id": "hole-23-5wgec",
+          "face": "top",
+          "u": 25,
+          "v": 25,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-25-bui4d",
+          "face": "top",
+          "u": 25,
+          "v": 140,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-27-26t47",
+          "face": "top",
+          "u": 65,
+          "v": 25,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-29-c078r",
+          "face": "top",
+          "u": 65,
+          "v": 140,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 754.6497130744734
+    },
+    {
+      "id": "piece-15-9u9cs",
+      "name": "Sawhorse leg",
+      "boardId": "board-11-pjh8p",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 754.6497130744734,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": -17,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        964.5544447694072,
+        371.0705645149254,
+        -465.0000000000001
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        -0.29670597283903605,
+        -1.5707963267948966
+      ],
+      "holes": [
+        {
+          "id": "hole-2b-nte3l",
+          "face": "top",
+          "u": 25,
+          "v": 729.6497130744734,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-2d-yws63",
+          "face": "top",
+          "u": 25,
+          "v": 614.6497130744734,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-2f-d2uhw",
+          "face": "top",
+          "u": 65,
+          "v": 729.6497130744734,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-2h-ziuld",
+          "face": "top",
+          "u": 65,
+          "v": 614.6497130744734,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 757.7867883439349,
+      "spanEnd": 1512.4365014184082
+    },
+    {
+      "id": "piece-17-9xynf",
+      "name": "Sawhorse leg",
+      "boardId": "board-11-pjh8p",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 754.6497130744734,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 17,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        675.4455552305928,
+        371.0705645149254,
+        465.0000000000001
+      ],
+      "rotation": [
+        1.5707963267948966,
+        -0.29670597283903605,
+        1.5707963267948966
+      ],
+      "holes": [
+        {
+          "id": "hole-2v-7b6ft",
+          "face": "top",
+          "u": 25,
+          "v": 25,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-2x-94npt",
+          "face": "top",
+          "u": 25,
+          "v": 140,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-2z-ijugo",
+          "face": "top",
+          "u": 65,
+          "v": 25,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-31-22qzd",
+          "face": "top",
+          "u": 65,
+          "v": 140,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 1515.4365014184082,
+      "spanEnd": 2270.0862144928815
+    },
+    {
+      "id": "piece-1b-qxi37",
+      "name": "Sawhorse leg",
+      "boardId": "board-19-isham",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 754.6497130744734,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": -17,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        931.0837783107008,
+        360.83755484962956,
+        465
+      ],
+      "rotation": [
+        1.5707963267948966,
+        0.29670597283903605,
+        1.5707963267948966
+      ],
+      "holes": [
+        {
+          "id": "hole-33-xcvbf",
+          "face": "bottom",
+          "u": 25,
+          "v": 25,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-35-njs6h",
+          "face": "bottom",
+          "u": 25,
+          "v": 140,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-37-goxnz",
+          "face": "bottom",
+          "u": 65,
+          "v": 25,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-39-frcgz",
+          "face": "bottom",
+          "u": 65,
+          "v": 140,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 754.6497130744734
+    },
+    {
+      "id": "piece-1d-b12go",
+      "name": "Sawhorse leg",
+      "boardId": "board-19-isham",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 754.6497130744734,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 17,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -931.0837783107008,
+        360.83755484962956,
+        -425
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        0.29670597283903605,
+        -1.5707963267948966
+      ],
+      "holes": [
+        {
+          "id": "hole-43-bxboj",
+          "face": "bottom",
+          "u": 25,
+          "v": 729.6497130744734,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-45-5fyxg",
+          "face": "bottom",
+          "u": 25,
+          "v": 614.6497130744734,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-47-a5udx",
+          "face": "bottom",
+          "u": 65,
+          "v": 729.6497130744734,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-49-ypsgg",
+          "face": "bottom",
+          "u": 65,
+          "v": 614.6497130744734,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 757.7867883439349,
+      "spanEnd": 1512.4365014184082
+    },
+    {
+      "id": "piece-1f-wzt94",
+      "name": "Sawhorse leg",
+      "boardId": "board-19-isham",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 754.6497130744734,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": -17,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -708.9162216892992,
+        360.8375548496296,
+        -425
+      ],
+      "rotation": [
+        1.5707963267948966,
+        0.29670597283903605,
+        1.5707963267948966
+      ],
+      "holes": [
+        {
+          "id": "hole-4b-j7f8o",
+          "face": "bottom",
+          "u": 25,
+          "v": 25,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-4d-an3l9",
+          "face": "bottom",
+          "u": 25,
+          "v": 140,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-4f-fj2dn",
+          "face": "bottom",
+          "u": 65,
+          "v": 25,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-4h-noiqf",
+          "face": "bottom",
+          "u": 65,
+          "v": 140,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 1515.4365014184082,
+      "spanEnd": 2270.0862144928815
+    },
+    {
+      "id": "piece-1j-yuz4q",
+      "name": "Sawhorse leg",
+      "boardId": "board-1h-j28ev",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 754.6497130744734,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": 0,
+      "bevelEnd": 17,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -964.5544447694072,
+        371.0705645149254,
+        425.0000000000001
+      ],
+      "rotation": [
+        1.5707963267948966,
+        -0.29670597283903605,
+        1.5707963267948966
+      ],
+      "holes": [
+        {
+          "id": "hole-4v-ehuzd",
+          "face": "top",
+          "u": 25,
+          "v": 25,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-4x-jz504",
+          "face": "top",
+          "u": 25,
+          "v": 140,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-4z-bhkmr",
+          "face": "top",
+          "u": 65,
+          "v": 25,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-51-6v7kv",
+          "face": "top",
+          "u": 65,
+          "v": 140,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 0,
+      "spanEnd": 754.6497130744734
+    },
+    {
+      "id": "piece-1l-t9dia",
+      "name": "Sawhorse leg",
+      "boardId": "board-1h-j28ev",
+      "stockId": "pine-35x90",
+      "species": "SA Pine",
+      "profileName": "Construction pine 35×90",
+      "thickness": 35,
+      "width": 90,
+      "length": 754.6497130744734,
+      "mitreStart": 0,
+      "mitreEnd": 0,
+      "bevelStart": -17,
+      "bevelEnd": 0,
+      "widthStart": 90,
+      "widthEnd": 90,
+      "outline": null,
+      "openings": [],
+      "routes": [],
+      "profiles": [],
+      "joinery": [],
+      "finish": {
+        "grain": "length",
+        "treatment": "paint",
+        "color": "#7d8c74",
+        "label": "Sage paint"
+      },
+      "marks": [],
+      "modifiers": [],
+      "position": [
+        -675.4455552305928,
+        371.0705645149255,
+        424.9999999999999
+      ],
+      "rotation": [
+        -1.5707963267948966,
+        -0.29670597283903605,
+        -1.5707963267948966
+      ],
+      "holes": [
+        {
+          "id": "hole-53-rdy2r",
+          "face": "top",
+          "u": 25,
+          "v": 729.6497130744734,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-55-jp73g",
+          "face": "top",
+          "u": 25,
+          "v": 614.6497130744734,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-57-gv16a",
+          "face": "top",
+          "u": 65,
+          "v": 729.6497130744734,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-59-78ni4",
+          "face": "top",
+          "u": 65,
+          "v": 614.6497130744734,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        }
+      ],
+      "section": "rect",
+      "spanStart": 757.7867883439349,
+      "spanEnd": 1512.4365014184082
+    }
+  ],
+  "fasteners": [
+    {
+      "id": "screw-1o-n9chj",
+      "type": "screw",
+      "pieceAId": "piece-3-q3tkf",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        0,
+        17.5,
+        -460
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-1q-vkb2m",
+      "type": "screw",
+      "pieceAId": "piece-3-q3tkf",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        0,
+        17.5,
+        -154
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-1s-7bywy",
+      "type": "screw",
+      "pieceAId": "piece-3-q3tkf",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        0,
+        17.5,
+        460
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-1u-3bkoq",
+      "type": "screw",
+      "pieceAId": "piece-3-q3tkf",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        0,
+        17.5,
+        154
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-1w-m1qlg",
+      "type": "screw",
+      "pieceAId": "piece-9-pl68m",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        0,
+        17.5,
+        -430
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-1y-qzok6",
+      "type": "screw",
+      "pieceAId": "piece-9-pl68m",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        0,
+        17.5,
+        -150
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-20-npyrf",
+      "type": "screw",
+      "pieceAId": "piece-9-pl68m",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        0,
+        17.5,
+        430
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-22-ap1w4",
+      "type": "screw",
+      "pieceAId": "piece-9-pl68m",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        0,
+        17.5,
+        150
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-24-skuun",
+      "type": "screw",
+      "pieceAId": "piece-13-ia3su",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -20,
+        17.5,
+        -352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-26-neb72",
+      "type": "screw",
+      "pieceAId": "piece-13-ia3su",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -20,
+        17.5,
+        -237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-28-ajn8b",
+      "type": "screw",
+      "pieceAId": "piece-13-ia3su",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        20,
+        17.5,
+        -352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-2a-expth",
+      "type": "screw",
+      "pieceAId": "piece-13-ia3su",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        20,
+        17.5,
+        -237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-2c-avc3x",
+      "type": "screw",
+      "pieceAId": "piece-15-9u9cs",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -20,
+        17.5,
+        352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-2e-ycz46",
+      "type": "screw",
+      "pieceAId": "piece-15-9u9cs",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -20,
+        17.5,
+        237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-2g-vzks5",
+      "type": "screw",
+      "pieceAId": "piece-15-9u9cs",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        20,
+        17.5,
+        352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-2i-ow8me",
+      "type": "screw",
+      "pieceAId": "piece-15-9u9cs",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        20,
+        17.5,
+        237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-2k-2trmk",
+      "type": "screw",
+      "pieceAId": "piece-n-9o91k",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -93.74468085106383,
+        -8.5,
+        -87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-2m-k7izc",
+      "type": "screw",
+      "pieceAId": "piece-n-9o91k",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        93.74468085106383,
+        -8.5,
+        -87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-2o-vqnqy",
+      "type": "screw",
+      "pieceAId": "piece-n-9o91k",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -66.59574468085107,
+        -8.5,
+        0.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-2q-h2vdh",
+      "type": "screw",
+      "pieceAId": "piece-n-9o91k",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        66.59574468085106,
+        -8.5,
+        0.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-2s-rrdrz",
+      "type": "screw",
+      "pieceAId": "piece-n-9o91k",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -39.75531914893617,
+        -8.5,
+        87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-2u-ff4ux",
+      "type": "screw",
+      "pieceAId": "piece-n-9o91k",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        39.75531914893617,
+        -8.5,
+        87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-2w-gcioa",
+      "type": "screw",
+      "pieceAId": "piece-17-9xynf",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -20,
+        17.5,
+        -352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-2y-l4sls",
+      "type": "screw",
+      "pieceAId": "piece-17-9xynf",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -20,
+        17.5,
+        -237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-30-11vz7",
+      "type": "screw",
+      "pieceAId": "piece-17-9xynf",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        20,
+        17.5,
+        -352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-32-k8fno",
+      "type": "screw",
+      "pieceAId": "piece-17-9xynf",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        20,
+        17.5,
+        -237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-34-hoe9g",
+      "type": "screw",
+      "pieceAId": "piece-1b-qxi37",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -20,
+        -17.5,
+        -352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-36-5vuvv",
+      "type": "screw",
+      "pieceAId": "piece-1b-qxi37",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -20,
+        -17.5,
+        -237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-38-cg4if",
+      "type": "screw",
+      "pieceAId": "piece-1b-qxi37",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        20,
+        -17.5,
+        -352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-3a-qnlbk",
+      "type": "screw",
+      "pieceAId": "piece-1b-qxi37",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        20,
+        -17.5,
+        -237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-3c-f6yp0",
+      "type": "screw",
+      "pieceAId": "piece-r-1chas",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -93.74468085106383,
+        -8.5,
+        -87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-3e-d8vii",
+      "type": "screw",
+      "pieceAId": "piece-r-1chas",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        93.74468085106383,
+        -8.5,
+        -87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-3g-nizv7",
+      "type": "screw",
+      "pieceAId": "piece-r-1chas",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -66.59574468085107,
+        -8.5,
+        0.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-3i-k2ubp",
+      "type": "screw",
+      "pieceAId": "piece-r-1chas",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        66.59574468085106,
+        -8.5,
+        0.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-3k-zs0m5",
+      "type": "screw",
+      "pieceAId": "piece-r-1chas",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        -39.75531914893617,
+        -8.5,
+        87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-3m-n09ef",
+      "type": "screw",
+      "pieceAId": "piece-r-1chas",
+      "pieceBId": "piece-5-gd3b3",
+      "localPosition": [
+        39.75531914893617,
+        -8.5,
+        87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-3o-jar87",
+      "type": "screw",
+      "pieceAId": "piece-b-ytcnc",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        0,
+        17.5,
+        -420
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-3q-puiih",
+      "type": "screw",
+      "pieceAId": "piece-b-ytcnc",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        0,
+        17.5,
+        -140
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-3s-91gs2",
+      "type": "screw",
+      "pieceAId": "piece-b-ytcnc",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        0,
+        17.5,
+        420
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-3u-vgwqv",
+      "type": "screw",
+      "pieceAId": "piece-b-ytcnc",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        0,
+        17.5,
+        140
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-3w-dliik",
+      "type": "screw",
+      "pieceAId": "piece-h-vzdzj",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        0,
+        17.5,
+        -390
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-3y-torx4",
+      "type": "screw",
+      "pieceAId": "piece-h-vzdzj",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        0,
+        17.5,
+        -110
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-40-xv5hv",
+      "type": "screw",
+      "pieceAId": "piece-h-vzdzj",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        0,
+        17.5,
+        390
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-42-th3k3",
+      "type": "screw",
+      "pieceAId": "piece-h-vzdzj",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        0,
+        17.5,
+        110
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-44-djumv",
+      "type": "screw",
+      "pieceAId": "piece-1d-b12go",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -20,
+        -17.5,
+        352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-46-ossxm",
+      "type": "screw",
+      "pieceAId": "piece-1d-b12go",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -20,
+        -17.5,
+        237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-48-9bi7r",
+      "type": "screw",
+      "pieceAId": "piece-1d-b12go",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        20,
+        -17.5,
+        352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-4a-ialab",
+      "type": "screw",
+      "pieceAId": "piece-1d-b12go",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        20,
+        -17.5,
+        237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-4c-ngwg5",
+      "type": "screw",
+      "pieceAId": "piece-1f-wzt94",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -20,
+        -17.5,
+        -352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-4e-f38hk",
+      "type": "screw",
+      "pieceAId": "piece-1f-wzt94",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -20,
+        -17.5,
+        -237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-4g-kv63x",
+      "type": "screw",
+      "pieceAId": "piece-1f-wzt94",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        20,
+        -17.5,
+        -352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-4i-q5vn2",
+      "type": "screw",
+      "pieceAId": "piece-1f-wzt94",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        20,
+        -17.5,
+        -237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-4k-blkcr",
+      "type": "screw",
+      "pieceAId": "piece-v-3e968",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -93.74468085106383,
+        -8.5,
+        -87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-4m-okabp",
+      "type": "screw",
+      "pieceAId": "piece-v-3e968",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        93.74468085106383,
+        -8.5,
+        -87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-4o-79vbl",
+      "type": "screw",
+      "pieceAId": "piece-v-3e968",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -66.59574468085107,
+        -8.5,
+        0.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-4q-136zp",
+      "type": "screw",
+      "pieceAId": "piece-v-3e968",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        66.59574468085106,
+        -8.5,
+        0.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-4s-a4elx",
+      "type": "screw",
+      "pieceAId": "piece-v-3e968",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -39.75531914893617,
+        -8.5,
+        87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-4u-0wi23",
+      "type": "screw",
+      "pieceAId": "piece-v-3e968",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        39.75531914893617,
+        -8.5,
+        87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-4w-988gv",
+      "type": "screw",
+      "pieceAId": "piece-1j-yuz4q",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -20,
+        17.5,
+        -352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-4y-y9vfc",
+      "type": "screw",
+      "pieceAId": "piece-1j-yuz4q",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -20,
+        17.5,
+        -237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-50-sm99u",
+      "type": "screw",
+      "pieceAId": "piece-1j-yuz4q",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        20,
+        17.5,
+        -352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-52-4omku",
+      "type": "screw",
+      "pieceAId": "piece-1j-yuz4q",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        20,
+        17.5,
+        -237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-54-9fm75",
+      "type": "screw",
+      "pieceAId": "piece-1l-t9dia",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -20,
+        17.5,
+        352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-56-4q8ef",
+      "type": "screw",
+      "pieceAId": "piece-1l-t9dia",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -20,
+        17.5,
+        237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-58-w87wv",
+      "type": "screw",
+      "pieceAId": "piece-1l-t9dia",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        20,
+        17.5,
+        352.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-5a-mui86",
+      "type": "screw",
+      "pieceAId": "piece-1l-t9dia",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        20,
+        17.5,
+        237.3248565372367
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-5c-dggmx",
+      "type": "screw",
+      "pieceAId": "piece-z-cik26",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -93.74468085106383,
+        -8.5,
+        -87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-5e-gz3go",
+      "type": "screw",
+      "pieceAId": "piece-z-cik26",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        93.74468085106383,
+        -8.5,
+        -87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-5g-5m3ih",
+      "type": "screw",
+      "pieceAId": "piece-z-cik26",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -66.59574468085107,
+        -8.5,
+        0.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-5i-wfxic",
+      "type": "screw",
+      "pieceAId": "piece-z-cik26",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        66.59574468085106,
+        -8.5,
+        0.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-5k-t456d",
+      "type": "screw",
+      "pieceAId": "piece-z-cik26",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        -39.75531914893617,
+        -8.5,
+        87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    },
+    {
+      "id": "screw-5m-1wz0i",
+      "type": "screw",
+      "pieceAId": "piece-z-cik26",
+      "pieceBId": "piece-f-gvrsn",
+      "localPosition": [
+        39.75531914893617,
+        -8.5,
+        87.5
+      ],
+      "localDirection": [
+        0,
+        1,
+        0
+      ],
+      "diameter": 4,
+      "length": 30
+    }
+  ],
+  "hardware": [],
+  "dimensions": []
+}

@@ -2,10 +2,10 @@ import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { defaultCatalog, parseCatalog, parseCatalogCsv } from "./catalog.ts";
 import { sampleFrame } from "./example.ts";
-import { buildMesh, faceSnapDelta, gridSnapDelta, keepBottom, localToWorld, softBoxHit, translatePiece, worldToLocal } from "./geometry.ts";
-import { curveCut, keptOutline, planJoint, shapeDefaults, taperPiece } from "./features.ts";
+import { buildMesh, faceSnapDelta, gridSnapDelta, keepBottom, localToWorld, openingRegions, pointLengths, sectionContains, softBoxHit, translatePiece, worldToLocal } from "./geometry.ts";
+import { curveCut, keptOutline, planJoint, plungeCut, shapeDefaults, taperPiece } from "./features.ts";
 import { v } from "./math.ts";
-import { addStockPiece, canPlaceHole, connectedIds, crosscut, kerfAlong, preferLegalHole, rip } from "./operations.ts";
+import { addStockPiece, canPlaceHole, connectedIds, crosscut, kerfAlong, preferLegalHole, rip, sawDistance } from "./operations.ts";
 import { cutList, shoppingList } from "./reports.ts";
 import type { Piece } from "./types.ts";
 
@@ -135,6 +135,22 @@ describe("reports", () => {
     const list = cutList([added.board], ripped.pieces);
     expect(list[0]?.discarded).toBeCloseTo(0);
     expect(list[0]?.parts).toHaveLength(2);
+    const shop = shoppingList([added.board], [], ripped.pieces);
+    expect(shop.lines[0]?.quantity).toBe(1);
+  });
+
+  it("does not buy a second sheet when one rip is crosscut and the other is kept", () => {
+    const stock = defaultCatalog().find((item) => item.id === "ply-17");
+    if (!stock) throw new Error("missing stock");
+    const added = addStockPiece(stock, 2400, []);
+    if ("error" in added) throw new Error(added.error);
+    const ripped = rip(added.piece, 400, 3);
+    if (!ripped.ok) throw new Error(ripped.reason);
+    const cut = crosscut(ripped.pieces[0], 800, 0, 3);
+    if (!cut.ok) throw new Error(cut.reason);
+    const pieces = [...cut.pieces, ripped.pieces[1]];
+    const shop = shoppingList([added.board], [], pieces);
+    expect(shop.lines[0]?.quantity).toBe(1);
   });
 
   it("prices the sample frame as one stick with kerf and an offcut", () => {
@@ -339,5 +355,68 @@ describe("shaped cuts and joints", () => {
   it("keeps a stacked piece's underside when the thickness changes", () => {
     expect(keepBottom(19, 38, 22)).toBeCloseTo(11);
     expect(keepBottom(80, 38, 22)).toBeCloseTo(72);
+  });
+});
+
+describe("bevel long point and plunge cuts", () => {
+  it("adds the bevel to the long and short points", () => {
+    const extra = (35 / 2) * Math.tan((17 * Math.PI) / 180);
+    const points = pointLengths({
+      length: 760 - extra,
+      width: 90,
+      thickness: 35,
+      mitreStart: 0,
+      mitreEnd: 0,
+      bevelStart: 0,
+      bevelEnd: 17,
+    });
+    expect(points.long).toBeCloseTo(760, 4);
+    expect(points.short).toBeCloseTo(760 - extra * 2, 4);
+  });
+
+  it("turns a typed long point back into the centreline the saw cuts", () => {
+    const piece = blankPiece({ length: 2400, width: 90, thickness: 35, widthStart: 90, widthEnd: 90 });
+    const centre = sawDistance(piece, 760, "crosscut", "start", 0, 17, 3, true);
+    const extra = (35 / 2) * Math.tan((17 * Math.PI) / 180);
+    expect(centre).toBeCloseTo(760 - extra, 4);
+  });
+
+  it("cuts an opening and refuses one that would split the board", () => {
+    const board = blankPiece({ width: 200, length: 400, thickness: 17, widthStart: 200, widthEnd: 200 });
+    const cut = plungeCut(board, { x: 0, z: 0, width: 80, length: 120 });
+    expect("piece" in cut).toBe(true);
+    if (!("piece" in cut)) return;
+    expect(cut.offcut.width).toBeCloseTo(80);
+    expect(cut.offcut.length).toBeCloseTo(120);
+    expect(sectionContains(cut.piece.width, cut.piece.length, cut.piece.openings, 0, 0)).toBe(false);
+    expect(sectionContains(cut.piece.width, cut.piece.length, cut.piece.openings, 90, 0)).toBe(true);
+    expect(openingRegions(cut.piece.width, cut.piece.length, cut.piece.openings ?? [])).toBe(1);
+    const mesh = buildMesh(cut.piece);
+    expect(mesh.indices.length).toBeGreaterThan(36);
+    const split = plungeCut(board, { x: 0, z: 0, width: 200, length: 40 });
+    expect("error" in split).toBe(true);
+  });
+
+  it("notches an edge without splitting the piece", () => {
+    const board = blankPiece({ width: 120, length: 300, thickness: 17, widthStart: 120, widthEnd: 120 });
+    const notch = plungeCut(board, { x: -50, z: 40, width: 40, length: 50 });
+    expect("piece" in notch).toBe(true);
+    if (!("piece" in notch)) return;
+    expect(notch.offcut.width).toBeCloseTo(30);
+    expect(openingRegions(notch.piece.width, notch.piece.length, notch.piece.openings ?? [])).toBe(1);
+  });
+
+  it("buys round stock and refuses to rip it", () => {
+    const stock = defaultCatalog().find((item) => item.id === "pipe-25");
+    expect(stock?.section).toBe("round");
+    if (!stock) return;
+    const added = addStockPiece(stock, 1200, []);
+    if ("error" in added) throw new Error(added.error);
+    expect(added.piece.section).toBe("round");
+    expect(buildMesh(added.piece).indices.length).toBeGreaterThan(20);
+    const ripped = rip(added.piece, 10, 3);
+    expect(ripped.ok).toBe(false);
+    const cut = crosscut(added.piece, 875, 0, 3);
+    expect(cut.ok).toBe(true);
   });
 });

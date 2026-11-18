@@ -89,10 +89,10 @@ export function StockPanel() {
                         <div>
                           <div className="text-sm font-semibold">{item.name}</div>
                           <div className="nums text-xs text-muted-foreground">
-                            {item.thickness} × {item.width} mm
+                            {item.section === "round" ? `⌀${item.width} mm` : `${item.thickness} × ${item.width} mm`}
                           </div>
                         </div>
-                        {item.sheet ? <Badge variant="secondary">Sheet</Badge> : null}
+                        {item.section === "round" ? <Badge variant="secondary">Round</Badge> : item.sheet ? <Badge variant="secondary">Sheet</Badge> : null}
                       </div>
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {item.lengths.map((length) => (

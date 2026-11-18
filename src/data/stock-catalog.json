@@ -294,6 +294,59 @@
       "width": 1220,
       "sheet": true,
       "lengths": [{ "length": 2440, "price": 335 }]
+    },
+    {
+      "id": "pine-35x90",
+      "name": "Construction pine 35×90",
+      "species": "SA Pine",
+      "thickness": 35,
+      "width": 90,
+      "lengths": [
+        { "length": 1800, "price": 112 },
+        { "length": 2400, "price": 145 },
+        { "length": 3000, "price": 182 }
+      ]
+    },
+    {
+      "id": "pine-19x42",
+      "name": "DAR Pine 19×42",
+      "species": "SA Pine",
+      "thickness": 19,
+      "width": 42,
+      "lengths": [
+        { "length": 1800, "price": 36 },
+        { "length": 2400, "price": 46 },
+        { "length": 3000, "price": 58 }
+      ]
+    },
+    {
+      "id": "ply-17",
+      "name": "Plywood 17 mm",
+      "species": "Plywood",
+      "thickness": 17,
+      "width": 1200,
+      "sheet": true,
+      "lengths": [{ "length": 2400, "price": 590 }]
+    },
+    {
+      "id": "ply-17-300",
+      "name": "Plywood 17×300",
+      "species": "Plywood",
+      "thickness": 17,
+      "width": 300,
+      "lengths": [{ "length": 1200, "price": 148 }]
+    },
+    {
+      "id": "pipe-25",
+      "name": "Steel pipe 25 mm",
+      "species": "Steel",
+      "thickness": 25,
+      "width": 25,
+      "section": "round",
+      "lengths": [
+        { "length": 1200, "price": 95 },
+        { "length": 2400, "price": 175 }
+      ]
     }
   ]
 }
