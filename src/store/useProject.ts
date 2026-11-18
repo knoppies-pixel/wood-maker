@@ -5,6 +5,7 @@ import { sampleFrame } from "../domain/example.ts";
 import { uid } from "../domain/math.ts";
 import { circleOutline, curveCut, edgeProfile, HARDWARE_CATALOG, placeHardware, planJoint, routeCut, taperPiece } from "../domain/features.ts";
 import { localToWorld } from "../domain/geometry.ts";
+import { localCopies } from "../domain/modifiers.ts";
 import {
   addStockPiece,
   connectedIds,
@@ -40,9 +41,12 @@ interface ProjectState extends Snapshot {
   addMark: (pieceId: string, mark: Omit<import("../domain/types.ts").PencilMark, "id">) => void;
   removeMark: (pieceId: string, markId: string) => void;
   addModifier: (pieceId: string, modifier: import("../domain/types.ts").WoodModifier) => void;
+  updateModifier: (pieceId: string, modifier: import("../domain/types.ts").WoodModifier) => void;
+  applyModifiers: (pieceId: string) => ActionResult;
   toggleModifier: (pieceId: string, modifierId: string, enabled: boolean) => void;
   removeModifier: (pieceId: string, modifierId: string) => void;
   reorderModifier: (pieceId: string, modifierId: string, direction: -1 | 1) => void;
+  pastePiece: (source: Piece) => ActionResult;
   addDimension: (note: Omit<import("../domain/types.ts").DimensionNote, "id">) => void;
   removeDimension: (id: string) => void;
   removeHole: (pieceId: string, holeId: string) => void;
@@ -249,6 +253,41 @@ export const useProject = create<ProjectState>()(
             piece.id === pieceId ? { ...piece, modifiers: [...(piece.modifiers ?? []), modifier] } : piece,
           ),
         });
+      },
+
+      updateModifier: (pieceId, modifier) => {
+        set({
+          pieces: get().pieces.map((piece) =>
+            piece.id === pieceId
+              ? { ...piece, modifiers: (piece.modifiers ?? []).map((item) => (item.id === modifier.id ? modifier : item)) }
+              : piece,
+          ),
+        });
+      },
+
+      applyModifiers: (pieceId) => {
+        const pieces = get().pieces;
+        const piece = pieces.find((item) => item.id === pieceId);
+        if (!piece) return { ok: false, message: "Select a piece." };
+        const copies = localCopies(piece, pieces).slice(1);
+        if (copies.length === 0) return { ok: false, message: "Nothing to apply. Turn a modifier on first." };
+        const spawned = copies.map((copy) => {
+          const world = localToWorld(piece, { x: copy.position[0], y: copy.position[1], z: copy.position[2] });
+          const clone = clonePiece(piece, 0);
+          clone.position = [world.x, Math.max(clone.thickness / 2, world.y), world.z];
+          clone.modifiers = [];
+          return clone;
+        });
+        set({
+          pieces: [...pieces.map((item) => (item.id === pieceId ? { ...item, modifiers: [] } : item)), ...spawned],
+        });
+        return { ok: true, message: `Applied ${spawned.length} ${spawned.length === 1 ? "copy" : "copies"} as real pieces.` };
+      },
+
+      pastePiece: (source) => {
+        const copy = clonePiece(source, 40);
+        set({ pieces: [...get().pieces, copy] });
+        return { ok: true, selectId: copy.id, message: `Pasted ${copy.name}.` };
       },
 
       toggleModifier: (pieceId, modifierId, enabled) => {

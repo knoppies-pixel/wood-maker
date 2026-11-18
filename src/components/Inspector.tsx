@@ -1,4 +1,5 @@
 import { Trash2, X } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import * as THREE from "three";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +8,9 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CommitNumber } from "./fields.tsx";
+import { uid } from "../domain/math.ts";
+import type { WoodModifier } from "../domain/types.ts";
+import { Switch } from "@/components/ui/switch";
 import { FINISH_PRESETS } from "../domain/features.ts";
 import { DEG, formatMm, formatZar } from "../domain/math.ts";
 import { connectedIds } from "../domain/operations.ts";
@@ -26,7 +30,7 @@ export function Inspector() {
   const hardware = useProject((state) => state.hardware);
   const piece = pieces.find((item) => item.id === selection) ?? null;
   const cuts = cutList(boards, pieces);
-  const shop = shoppingList(boards, hardware);
+  const shop = shoppingList(boards, hardware, pieces);
   const screws = fastenerList(fasteners, pieces);
 
   return (
@@ -115,6 +119,11 @@ function PiecePane({ piece, joined }: { piece: Piece; joined: boolean }) {
       </div>
 
       <div className="grid grid-cols-3 gap-2">
+        <CommitNumber label="Length" value={piece.length} min={5} max={6000} onCommit={(value) => useProject.getState().resizePiece(piece.id, { length: value })} />
+        <CommitNumber label="Width" value={piece.width} min={5} max={6000} onCommit={(value) => useProject.getState().resizePiece(piece.id, { width: value })} />
+        <CommitNumber label="Thickness" value={piece.thickness} min={5} max={6000} onCommit={(value) => useProject.getState().resizePiece(piece.id, { thickness: value })} />
+      </div>
+      <div className="grid grid-cols-3 gap-2">
         <AxisField label="X" value={piece.position[0]} onCommit={(value) => move(piece, 0, value)} />
         <AxisField label="Y" value={piece.position[1]} onCommit={(value) => move(piece, 1, value)} />
         <AxisField label="Z" value={piece.position[2]} onCommit={(value) => move(piece, 2, value)} />
@@ -124,6 +133,8 @@ function PiecePane({ piece, joined }: { piece: Piece; joined: boolean }) {
         <AxisField label="Rot Y" suffix="°" value={piece.rotation[1] / DEG} onCommit={(value) => turn(piece, 1, value * DEG)} />
         <AxisField label="Rot Z" suffix="°" value={piece.rotation[2] / DEG} onCommit={(value) => turn(piece, 2, value * DEG)} />
       </div>
+
+      <ModifierStack piece={piece} />
 
       <div>
         <div className="mb-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Holes</div>
@@ -185,6 +196,105 @@ function FinishControls({ piece }: { piece: Piece }) {
   );
 }
 
+function ModifierStack({ piece }: { piece: Piece }) {
+  const pieces = useProject((state) => state.pieces);
+  const others = pieces.filter((item) => item.id !== piece.id);
+  const [arrayCount, setArrayCount] = useStateNumber(3);
+  const [spacing, setSpacing] = useStateNumber(80);
+  const [axis, setAxis] = useStateAxis("x");
+  const [layout, setLayout] = useState<"linear" | "radial">("linear");
+  const [targetId, setTargetId] = useState(others[0]?.id ?? "");
+  const modifiers = piece.modifiers ?? [];
+
+  function add(modifier: WoodModifier) {
+    useProject.getState().addModifier(piece.id, modifier);
+  }
+
+  return (
+    <div>
+      <div className="mb-1 flex items-center justify-between">
+        <div className="text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">Modifiers</div>
+        <Button
+          size="xs"
+          variant="outline"
+          onClick={() => {
+            const result = useProject.getState().applyModifiers(piece.id);
+            if (result.ok) toast.success(result.message ?? "Applied");
+            else toast.error(result.message);
+          }}
+        >
+          Apply
+        </Button>
+      </div>
+      {modifiers.length === 0 ? <p className="mb-2 text-sm text-muted-foreground">None. Array, mirror and even spacing copies count on the cut, shopping and fastener lists.</p> : null}
+      <ul className="mb-2 flex flex-col gap-1">
+        {modifiers.map((modifier) => (
+          <li key={modifier.id} className="rounded-md border px-2 py-1.5 text-xs">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-medium">{modifier.type === "array" ? `${modifier.layout} array ×${modifier.count}` : modifier.type === "mirror" ? `Mirror ${modifier.axis}` : `Even space ×${modifier.count}`}</span>
+              <span className="flex items-center gap-1">
+                <Switch checked={modifier.enabled} onCheckedChange={(checked) => useProject.getState().toggleModifier(piece.id, modifier.id, checked)} />
+                <Button size="icon-xs" variant="ghost" aria-label="Move modifier up" onClick={() => useProject.getState().reorderModifier(piece.id, modifier.id, -1)}>↑</Button>
+                <Button size="icon-xs" variant="ghost" aria-label="Move modifier down" onClick={() => useProject.getState().reorderModifier(piece.id, modifier.id, 1)}>↓</Button>
+                <Button size="icon-xs" variant="ghost" aria-label="Remove modifier" onClick={() => useProject.getState().removeModifier(piece.id, modifier.id)}><X /></Button>
+              </span>
+            </div>
+            {modifier.type === "array" ? (
+              <div className="mt-1 grid grid-cols-2 gap-1">
+                <CommitNumber label="Count" value={modifier.count} min={1} max={24} suffix="" onCommit={(value) => useProject.getState().updateModifier(piece.id, { ...modifier, count: value })} />
+                <CommitNumber label="Spacing" value={modifier.spacing} min={1} max={2000} onCommit={(value) => useProject.getState().updateModifier(piece.id, { ...modifier, spacing: value })} />
+              </div>
+            ) : null}
+            {modifier.type === "space" ? (
+              <div className="mt-1">
+                <CommitNumber label="Copies between" value={modifier.count} min={1} max={12} suffix="" onCommit={(value) => useProject.getState().updateModifier(piece.id, { ...modifier, count: value })} />
+              </div>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+      <div className="flex flex-wrap gap-1">
+        <select className="h-7 rounded-md border bg-background px-1 text-xs" value={axis} onChange={(event) => setAxis(event.target.value as "x" | "y" | "z")}>
+          <option value="x">Along width</option>
+          <option value="y">Through thickness</option>
+          <option value="z">Along length</option>
+        </select>
+        <Button size="xs" variant="secondary" onClick={() => add({ id: uid("mod"), type: "array", enabled: true, layout, count: arrayCount, spacing, axis, fitLength: null })}>Array</Button>
+        <Button size="xs" variant="ghost" onClick={() => setLayout(layout === "linear" ? "radial" : "linear")}>{layout}</Button>
+        <Button size="xs" variant="secondary" onClick={() => add({ id: uid("mod"), type: "mirror", enabled: true, axis, across: "edge" })}>Mirror</Button>
+        <Button
+          size="xs"
+          variant="secondary"
+          disabled={!targetId}
+          onClick={() => add({ id: uid("mod"), type: "space", enabled: true, count: arrayCount, axis, targetId })}
+        >
+          Even spacing
+        </Button>
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-1">
+        <CommitNumber label="Count" value={arrayCount} min={1} max={24} suffix="" onCommit={setArrayCount} />
+        <CommitNumber label="Spacing" value={spacing} min={1} max={2000} onCommit={setSpacing} />
+      </div>
+      <label className="mt-2 flex flex-col gap-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+        Space toward
+        <select className="h-8 rounded-md border bg-background px-2 text-sm font-normal tracking-normal text-foreground normal-case" value={targetId} onChange={(event) => setTargetId(event.target.value)}>
+          {others.length === 0 ? <option value="">Add another piece</option> : others.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+        </select>
+      </label>
+    </div>
+  );
+}
+
+function useStateNumber(initial: number): [number, (value: number) => void] {
+  const [value, setValue] = useState(initial);
+  return [value, setValue];
+}
+
+function useStateAxis(initial: "x" | "y" | "z"): ["x" | "y" | "z", (value: "x" | "y" | "z") => void] {
+  const [value, setValue] = useState(initial);
+  return [value, setValue];
+}
+
 function AxisField({ label, value, onCommit, suffix = "mm" }: { label: string; value: number; onCommit: (value: number) => void; suffix?: string }) {
   return <CommitNumber label={label} value={value} suffix={suffix} onCommit={onCommit} />;
 }
@@ -242,6 +352,7 @@ function CutPane({ rows }: { rows: ReturnType<typeof cutList> }) {
             <thead className="text-[11px] tracking-wide text-muted-foreground uppercase">
               <tr>
                 <th className="py-1 font-medium">Part</th>
+                <th className="py-1 font-medium">Qty</th>
                 <th className="py-1 font-medium">Finished</th>
               </tr>
             </thead>
@@ -249,6 +360,7 @@ function CutPane({ rows }: { rows: ReturnType<typeof cutList> }) {
               {board.parts.map((part) => (
                 <tr key={part.pieceId} className="border-t align-top">
                   <td className="py-1.5 pr-2">{part.name}</td>
+                  <td className="nums py-1.5 pr-2">{part.quantity}</td>
                   <td className="nums py-1.5">
                     {formatMm(part.length)} × {formatMm(part.width)} × {formatMm(part.thickness)}
                     {(part.mitreStart !== 0 || part.mitreEnd !== 0) && (

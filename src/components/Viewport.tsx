@@ -5,14 +5,20 @@ import { toast } from "sonner";
 import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { faceSize, localToWorld, rayDistanceOnAxis, snapTranslation } from "../domain/geometry.ts";
+import { HARDWARE_CATALOG } from "../domain/features.ts";
+import { faceExtent } from "../domain/modifiers.ts";
+import { holeLocalPoint } from "../domain/geometry.ts";
 import { DEG, clamp, formatMm } from "../domain/math.ts";
 import { connectedIds, kerfAlong } from "../domain/operations.ts";
 import { MIN_PART_MM, type Piece, type Vec3Tuple } from "../domain/types.ts";
 import { useProject } from "../store/useProject.ts";
 import { useUi, type DragPose } from "../store/useUi.ts";
+import { DimensionNotes, facePoint } from "./Marks.tsx";
+import { NumberSlider } from "./fields.tsx";
+import { modalLabel } from "../input/modal.ts";
+import { commitModal, previewModal } from "../input/modal.ts";
 import { PieceView, pieceGroups } from "./PieceView.tsx";
 import { shopMaps } from "./wood.ts";
 import { cn } from "cn";
@@ -22,6 +28,7 @@ export function Viewport() {
   const tool = useUi((state) => state.tool);
   const sawMode = useUi((state) => state.sawMode);
   const selection = useUi((state) => state.selection);
+  const modal = useUi((state) => state.modal);
   useUi((state) => state.sceneEpoch);
   const [resetSignal, setResetSignal] = useState(0);
   const selected = pieces.find((piece) => piece.id === selection) ?? null;
@@ -85,9 +92,12 @@ export function Viewport() {
         {tool === "saw" && selected && (sawMode === "crosscut" || sawMode === "rip") ? <SawPreview piece={selected} /> : null}
         {tool === "saw" && sawMode === "curve" && selected ? <CurvePreview piece={selected} /> : null}
         <Ghosts />
-        {tool === "select" && selected ? <MoveGizmo pieceId={selected.id} /> : null}
+        <DimensionNotes />
+        {tool === "select" && selected && !modal ? <MoveGizmo pieceId={selected.id} /> : null}
         <OrbitControls makeDefault enableDamping dampingFactor={0.12} maxPolarAngle={Math.PI / 2 - 0.03} minDistance={80} maxDistance={16000} />
         <ViewRig signal={resetSignal} />
+        <ViewBridge />
+        <ModalPointer />
       </Canvas>
 
       {pieces.length === 0 ? (
@@ -112,6 +122,7 @@ export function Viewport() {
       >
         Reset view
       </button>
+      <StatusLine />
       <ToolDock />
     </div>
   );
@@ -176,6 +187,132 @@ function Workshop() {
       ))}
     </group>
   );
+}
+
+function ViewBridge() {
+  const request = useUi((state) => state.viewRequest);
+  const ortho = useUi((state) => state.ortho);
+  const camera = useThree((state) => state.camera);
+  const controls = useThree((state) => state.controls) as OrbitControlsImpl | null;
+  useEffect(() => {
+    const persp = camera as THREE.PerspectiveCamera;
+    if (persp.isPerspectiveCamera) {
+      persp.fov = ortho ? 4 : 38;
+      persp.updateProjectionMatrix();
+    }
+    if (!request || !controls) return;
+    const pieces = useProject.getState().pieces;
+    const selectedId = useUi.getState().selection;
+    const focus = request.kind === "frame" && selectedId ? pieces.filter((item) => item.id === selectedId) : pieces;
+    const target = focus.length === 0
+      ? new THREE.Vector3(0, 40, 0)
+      : focus.reduce((sum, item) => sum.add(new THREE.Vector3(...item.position)), new THREE.Vector3()).multiplyScalar(1 / focus.length);
+    const span = focus.reduce((max, item) => Math.max(max, item.length, item.width), 500);
+    const dist = Math.max(ortho ? 2800 : 700, span * (ortho ? 6 : 1.7));
+    if (request.kind === "reset") {
+      camera.position.set(980, 760, 1280);
+      controls.target.set(0, 40, 0);
+    } else if (request.kind === "frame") {
+      const offset = camera.position.clone().sub(controls.target);
+      if (offset.lengthSq() < 1) offset.set(1, 0.6, 1);
+      camera.position.copy(target.clone().add(offset.setLength(dist)));
+      controls.target.copy(target);
+    } else {
+      const offset = request.kind === "front"
+        ? new THREE.Vector3(0, span * 0.25, dist)
+        : request.kind === "side"
+          ? new THREE.Vector3(dist, span * 0.25, 0)
+          : new THREE.Vector3(0, dist, span * 0.02);
+      camera.position.copy(target.clone().add(offset));
+      controls.target.copy(target);
+    }
+    controls.update();
+  }, [request, ortho, camera, controls]);
+  return null;
+}
+
+function ModalPointer() {
+  const modal = useUi((state) => state.modal);
+  const camera = useThree((state) => state.camera);
+  const gl = useThree((state) => state.gl);
+  const controls = useThree((state) => state.controls) as OrbitControlsImpl | null;
+  useEffect(() => {
+    if (!modal || !controls) return;
+    controls.enabled = false;
+    let dragging = false;
+    let moved = false;
+    let lastX = 0;
+    let lastY = 0;
+    function onDown(event: PointerEvent) {
+      if (useUi.getState().modal?.text) return;
+      dragging = true;
+      moved = false;
+      lastX = event.clientX;
+      lastY = event.clientY;
+    }
+    function onMove(event: PointerEvent) {
+      if (!dragging) return;
+      const current = useUi.getState().modal;
+      if (!current || current.text) return;
+      const dx = event.clientX - lastX;
+      const dy = event.clientY - lastY;
+      if (Math.hypot(dx, dy) > 1) moved = true;
+      lastX = event.clientX;
+      lastY = event.clientY;
+      const fov = (camera as THREE.PerspectiveCamera).isPerspectiveCamera ? (camera as THREE.PerspectiveCamera).fov : 38;
+      const distance = camera.position.distanceTo(new THREE.Vector3(...current.originPosition));
+      const mm = (2 * Math.tan((fov * Math.PI) / 360) * distance) / gl.domElement.clientHeight;
+      const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+      const up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+      if (current.op === "grab") {
+        const delta = new THREE.Vector3(...current.delta);
+        if (current.axis) {
+          const axis = new THREE.Vector3(current.axis === "x" ? 1 : 0, current.axis === "y" ? 1 : 0, current.axis === "z" ? 1 : 0);
+          delta.addScaledVector(axis, (dx * right.dot(axis) - dy * up.dot(axis)) * mm);
+        } else {
+          delta.addScaledVector(right, dx * mm).addScaledVector(up, -dy * mm);
+        }
+        const grid = useUi.getState().snapGrid && !useUi.getState().ctrlDown ? useUi.getState().gridSize : 0;
+        if (grid > 0) {
+          delta.x = Math.round(delta.x / grid) * grid;
+          delta.y = Math.round(delta.y / grid) * grid;
+          delta.z = Math.round(delta.z / grid) * grid;
+        }
+        previewModal({ delta: [delta.x, delta.y, delta.z] });
+      } else if (current.op === "rotate") {
+        const index = current.axis === "x" ? 0 : current.axis === "z" ? 2 : 1;
+        const delta: [number, number, number] = [0, 0, 0];
+        delta[index] = current.delta[index] + dx * 0.01;
+        previewModal({ delta });
+      } else {
+        const base = current.axis === "y" ? current.scale[1] : current.axis === "z" ? current.scale[2] : current.scale[0];
+        const factor = Math.max(0.05, base + dx * 0.004);
+        const scale: [number, number, number] = current.axis === "x"
+          ? [factor, 1, 1]
+          : current.axis === "y"
+            ? [1, factor, 1]
+            : current.axis === "z"
+              ? [1, 1, factor]
+              : [factor, factor, factor];
+        previewModal({ scale });
+      }
+    }
+    function onUp() {
+      if (!dragging) return;
+      dragging = false;
+      if (moved && !useUi.getState().modal?.text) commitModal();
+    }
+    gl.domElement.addEventListener("pointerdown", onDown);
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    return () => {
+      controls.enabled = true;
+      gl.domElement.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+  }, [modal?.op, modal?.pieceId, camera, gl, controls]);
+  return null;
 }
 
 function ViewRig({ signal }: { signal: number }) {
@@ -348,7 +485,14 @@ function SawPreview({ piece }: { piece: Piece }) {
         <meshBasicMaterial color="#f0d48a" />
       </mesh>
       <Html position={[marker[0], piece.thickness / 2 + 28, marker[2]]} center style={{ pointerEvents: "none" }}>
-        <div className="nums rounded-full bg-[#3a2718] px-2 py-0.5 text-xs font-semibold text-[#f6efe4]">{formatMm(distance)} mm from the reference end</div>
+        <div className="nums rounded-md bg-[#2a261f] px-2 py-0.5 text-xs font-semibold text-[#f6efe4]">{formatMm(fromStart)} mm kept</div>
+      </Html>
+      <Html
+        position={mode === "rip" ? [piece.width / 2 - Math.max(span - fromStart - consumed, 8) / 2, piece.thickness / 2 + 18, 0] : [0, piece.thickness / 2 + 18, piece.length / 2 - Math.max(span - fromStart - consumed, 8) / 2]}
+        center
+        style={{ pointerEvents: "none" }}
+      >
+        <div className={`nums rounded-md px-2 py-0.5 text-xs font-semibold text-[#f6efe4] ${valid ? "bg-[#3d4a3a]" : "bg-[#7f1d1d]"}`}>{formatMm(Math.max(0, span - fromStart - consumed))} mm offcut</div>
       </Html>
     </group>
   );
@@ -405,14 +549,28 @@ function Ghosts() {
     ghost = routerKind === "profile"
       ? <ProfileGhost piece={piece} edge={hover.edge} radius={radius} tint={tint} />
       : <RouteGhost piece={piece} kind={routerKind} edge={hover.edge} u={hover.u} v={hover.v} width={routerWidth} depth={routerDepth} tint={tint} />;
-  } else if (tool === "screw" || tool === "joint" || tool === "hardware") {
+  } else if (tool === "screw") {
     const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), inward);
+    const length = useUi.getState().screwLength;
     ghost = (
-      <mesh position={hover.point} quaternion={quaternion} raycast={() => null}>
-        <cylinderGeometry args={[tool === "hardware" ? 16 : 5, tool === "hardware" ? 16 : 5, tool === "joint" ? 18 : 12, 16]} />
+      <mesh position={new THREE.Vector3(...hover.point).addScaledVector(inward, length / 2)} quaternion={quaternion} raycast={() => null}>
+        <cylinderGeometry args={[useUi.getState().screwDiameter / 2, useUi.getState().screwDiameter / 2, length, 16]} />
         <meshBasicMaterial color={tint} transparent opacity={0.55} />
       </mesh>
     );
+  } else if (tool === "joint") {
+    ghost = <JointGhost piece={piece} hover={hover} tint={tint} inward={inward} />;
+  } else if (tool === "hardware") {
+    const offer = HARDWARE_CATALOG.find((item) => item.id === useUi.getState().hardwareId);
+    const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), inward);
+    ghost = (
+      <mesh position={new THREE.Vector3(...hover.point).addScaledVector(inward, (offer?.depth ?? 8) / 2)} quaternion={quaternion} raycast={() => null}>
+        <boxGeometry args={[offer?.width ?? 30, offer?.height ?? 60, offer?.depth ?? 8]} />
+        <meshBasicMaterial color={tint} transparent opacity={0.45} />
+      </mesh>
+    );
+  } else if (tool === "pencil" || tool === "measure") {
+    ghost = <LayoutGhost piece={piece} hover={hover} tint={tint} />;
   }
   return (
     <group>
@@ -423,6 +581,90 @@ function Ghosts() {
         </Html>
       ) : null}
     </group>
+  );
+}
+
+function JointGhost({ piece, hover, tint, inward }: { piece: Piece; hover: NonNullable<ReturnType<typeof useUi.getState>["hover"]>; tint: string; inward: THREE.Vector3 }) {
+  const kind = useUi((state) => state.jointKind);
+  const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), inward);
+  if (kind === "dowels") {
+    return (
+      <group position={hover.point} quaternion={quaternion}>
+        <mesh position={[8, 6, 0]} raycast={() => null}><cylinderGeometry args={[4, 4, 24, 12]} /><meshBasicMaterial color={tint} transparent opacity={0.5} /></mesh>
+        <mesh position={[-8, 6, 0]} raycast={() => null}><cylinderGeometry args={[4, 4, 24, 12]} /><meshBasicMaterial color={tint} transparent opacity={0.5} /></mesh>
+      </group>
+    );
+  }
+  const depth = Math.min(piece.thickness / 2, 12);
+  return (
+    <mesh position={new THREE.Vector3(...hover.point).addScaledVector(inward, depth / 2)} quaternion={quaternion} raycast={() => null}>
+      <boxGeometry args={[kind === "dovetail" ? 22 : piece.width * 0.45, depth, kind === "half-lap" ? piece.width * 0.8 : 28]} />
+      <meshBasicMaterial color={tint} transparent opacity={0.45} />
+    </mesh>
+  );
+}
+
+function LayoutGhost({ piece, hover, tint }: { piece: Piece; hover: NonNullable<ReturnType<typeof useUi.getState>["hover"]>; tint: string }) {
+  const tool = useUi((state) => state.tool);
+  const anchor = useUi((state) => state.measureAnchor);
+  const mode = useUi((state) => state.measureMode);
+  const degrees = useUi((state) => state.angleDegrees);
+  const offset = useUi((state) => state.offsetMm);
+  const edge = useUi((state) => state.offsetEdge);
+  const draft = useUi((state) => state.pencilDraft);
+  if (tool === "measure" && mode === "tape" && anchor) {
+    const host = useProject.getState().pieces.find((item) => item.id === anchor.pieceId);
+    if (!host) return null;
+    const local = holeLocalPoint(host, anchor.face, anchor.u, anchor.v);
+    const world = localToWorld(host, local);
+    const distance = Math.hypot(world.x - hover.point[0], world.y - hover.point[1], world.z - hover.point[2]);
+    return (
+      <group>
+        <LineBridge a={[world.x, world.y, world.z]} b={hover.point} color={tint} />
+        <Html position={hover.point} center style={{ pointerEvents: "none" }}>
+          <div className="nums rounded-md bg-[#2a261f] px-1.5 py-0.5 text-[11px] text-[#f6efe4]">{formatMm(distance)} mm</div>
+        </Html>
+      </group>
+    );
+  }
+  if (tool === "measure" && mode === "angle") {
+    const size = faceExtent(hover.face, piece);
+    const length = Math.min(size.u, size.v) * 0.7;
+    const radians = (degrees * Math.PI) / 180;
+    const end = facePoint(piece, hover.face, {
+      u: Math.min(size.u, Math.max(0, hover.u + Math.cos(radians) * length)),
+      v: Math.min(size.v, Math.max(0, hover.v + Math.sin(radians) * length)),
+    });
+    const start = facePoint(piece, hover.face, hover);
+    return <group position={piece.position} rotation={piece.rotation}><LineBridge a={start} b={end} color={tint} /></group>;
+  }
+  if (tool === "measure" && mode === "offset") {
+    const size = faceExtent(hover.face, piece);
+    const along = edge === "left" || edge === "right";
+    const u = edge === "left" ? offset : edge === "right" ? size.u - offset : 0;
+    const v = edge === "start" ? offset : edge === "end" ? size.v - offset : 0;
+    const a = facePoint(piece, hover.face, along ? { u, v: 0 } : { u: 0, v });
+    const b = facePoint(piece, hover.face, along ? { u, v: size.v } : { u: size.u, v });
+    return <group position={piece.position} rotation={piece.rotation}><LineBridge a={a} b={b} color={tint} /></group>;
+  }
+  if (tool === "pencil" && draft && draft[0]) {
+    const start = facePoint(piece, hover.face, draft[0]);
+    const end = facePoint(piece, hover.face, hover);
+    return <group position={piece.position} rotation={piece.rotation}><LineBridge a={start} b={end} color={tint} /></group>;
+  }
+  return <mesh position={hover.point} raycast={() => null}><sphereGeometry args={[3, 12, 12]} /><meshBasicMaterial color={tint} /></mesh>;
+}
+
+function LineBridge({ a, b, color }: { a: Vec3Tuple; b: Vec3Tuple; color: string }) {
+  const length = Math.max(1, Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]));
+  const mid: Vec3Tuple = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
+  const direction = new THREE.Vector3(b[0] - a[0], b[1] - a[1], b[2] - a[2]).normalize();
+  const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+  return (
+    <mesh position={mid} quaternion={quaternion} raycast={() => null}>
+      <cylinderGeometry args={[0.8, 0.8, length, 6]} />
+      <meshBasicMaterial color={color} />
+    </mesh>
   );
 }
 
@@ -537,6 +779,8 @@ function ToolDock() {
         {tool === "router" ? <RouterDock /> : null}
         {tool === "joint" ? <JointDock /> : null}
         {tool === "hardware" ? <HardwareDock /> : null}
+        {tool === "pencil" ? <PencilDock /> : null}
+        {tool === "measure" ? <MeasureDock /> : null}
         </div>
       </div>
     </div>
@@ -607,26 +851,13 @@ function SawDock({ piece }: { piece: Piece | undefined }) {
         {mode === "crosscut" || mode === "rip" ? <span className="nums text-sm font-semibold">{piece ? `${formatMm(distance)} mm` : "No piece"}</span> : null}
       </div>
       {mode === "crosscut" || mode === "rip" ? (
-        <Slider
-          min={MIN_PART_MM}
-          max={Math.max(MIN_PART_MM + 1, max)}
-          step={1}
-          value={[clamp(distance, MIN_PART_MM, max)]}
-          onValueChange={(value) => useUi.getState().setSawDistance(value[0] ?? distance)}
-          disabled={!piece}
-        />
+        <NumberSlider label="Station" min={MIN_PART_MM} max={Math.max(MIN_PART_MM + 1, max)} value={clamp(distance, MIN_PART_MM, max)} disabled={!piece} onCommit={(value) => useUi.getState().setSawDistance(value)} />
       ) : null}
       {mode === "crosscut" ? (
-        <>
-          <label className="flex items-center gap-3 text-xs text-muted-foreground">
-            Mitre {formatMm(mitre, 0)}°
-            <Slider min={-60} max={60} step={1} value={[mitre]} onValueChange={(value) => useUi.getState().setSawMitre(value[0] ?? 0)} />
-          </label>
-          <label className="flex items-center gap-3 text-xs text-muted-foreground">
-            Bevel {formatMm(bevel, 0)}°
-            <Slider min={-60} max={60} step={1} value={[bevel]} onValueChange={(value) => useUi.getState().setSawBevel(value[0] ?? 0)} />
-          </label>
-        </>
+        <div className="flex flex-wrap gap-3">
+          <NumberSlider label="Mitre" min={-60} max={60} suffix="°" value={mitre} onCommit={(value) => useUi.getState().setSawMitre(value)} />
+          <NumberSlider label="Bevel" min={-60} max={60} suffix="°" value={bevel} onCommit={(value) => useUi.getState().setSawBevel(value)} />
+        </div>
       ) : null}
       {mode === "taper" ? <TaperControls piece={piece} /> : null}
       {mode === "curve" ? <CurveControls piece={piece} /> : null}
@@ -655,10 +886,8 @@ function TaperControls({ piece }: { piece: Piece | undefined }) {
   const end = useUi((state) => state.taperEnd);
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-xs text-muted-foreground">Start {formatMm(start)} mm</span>
-      <Slider className="w-28" min={5} max={piece?.width ?? 80} step={1} value={[start]} onValueChange={(value) => useUi.getState().setTaperStart(value[0] ?? start)} />
-      <span className="text-xs text-muted-foreground">End {formatMm(end)} mm</span>
-      <Slider className="w-28" min={5} max={piece?.width ?? 80} step={1} value={[end]} onValueChange={(value) => useUi.getState().setTaperEnd(value[0] ?? end)} />
+      <NumberSlider label="Start" min={5} max={piece?.width ?? 80} value={start} onCommit={(value) => useUi.getState().setTaperStart(value)} />
+      <NumberSlider label="End" min={5} max={piece?.width ?? 80} value={end} onCommit={(value) => useUi.getState().setTaperEnd(value)} />
       <Button size="sm" disabled={!piece} onClick={() => {
         if (!piece) return;
         const result = useProject.getState().taper(piece.id, start, end);
@@ -717,16 +946,11 @@ function DrillDock() {
           <Switch checked={through} onCheckedChange={(checked) => useUi.getState().setDrillThrough(checked)} />
         </label>
       </div>
-      <label className="flex items-center gap-3 text-xs text-muted-foreground">
-        Depth {through ? "through" : `${formatMm(depth)} mm`}
-        <Slider min={2} max={80} step={1} disabled={through} value={[depth]} onValueChange={(value) => useUi.getState().setDrillDepth(value[0] ?? depth)} />
-      </label>
-      {style === "countersink" ? (
-        <label className="flex items-center gap-3 text-xs text-muted-foreground">
-          Mouth ⌀{formatMm(countersink)}
-          <Slider min={diameter + 2} max={40} step={1} value={[countersink]} onValueChange={(value) => useUi.getState().setCountersinkDiameter(value[0] ?? countersink)} />
-        </label>
-      ) : null}
+      <div className="flex flex-wrap gap-3">
+        <NumberSlider label="Diameter" min={2} max={80} value={diameter} onCommit={(value) => useUi.getState().setDrillDiameter(value)} />
+        <NumberSlider label="Depth" min={2} max={80} value={depth} disabled={through} onCommit={(value) => useUi.getState().setDrillDepth(value)} />
+        {style === "countersink" ? <NumberSlider label="Mouth" min={diameter + 2} max={40} value={countersink} onCommit={(value) => useUi.getState().setCountersinkDiameter(value)} /> : null}
+      </div>
       <p className="text-xs text-muted-foreground">
         {style === "hole-saw" ? "A hole saw cuts through and leaves the plug as its own piece." : style === "forstner" ? "Forstner bits leave a flat-bottomed hole and a rim." : style === "countersink" ? "The countersink is the cone the screw head sits in." : "Click a face. The hole is stored on the piece."}
       </p>
@@ -761,6 +985,10 @@ function ScrewDock() {
           </Toggle>
         ))}
       </div>
+      <div className="flex flex-wrap gap-3">
+        <NumberSlider label="Diameter" min={2} max={12} step={0.5} value={diameter} onCommit={(value) => useUi.getState().setScrewDiameter(value)} />
+        <NumberSlider label="Length" min={12} max={160} value={length} onCommit={(value) => useUi.getState().setScrewLength(value)} />
+      </div>
       <p className="text-xs text-muted-foreground">
         {kind === "glue"
           ? "Click the face that touches the other piece. Glue has no head, but the parts move together."
@@ -793,15 +1021,12 @@ function RouterDock() {
           <Toggle on={profile === "round-over"} onClick={() => useUi.getState().setProfile("round-over")}>Round-over</Toggle>
           <Toggle on={profile === "chamfer"} onClick={() => useUi.getState().setProfile("chamfer")}>Chamfer</Toggle>
           <Toggle on={profile === "cove"} onClick={() => useUi.getState().setProfile("cove")}>Cove</Toggle>
-          <span className="text-xs text-muted-foreground">R{formatMm(radius)} · edge under the cursor</span>
-          <Slider className="w-28" min={2} max={16} step={1} value={[radius]} onValueChange={(value) => useUi.getState().setProfileRadius(value[0] ?? radius)} />
+          <NumberSlider label="Radius" min={2} max={16} value={radius} onCommit={(value) => useUi.getState().setProfileRadius(value)} />
         </div>
       ) : (
-        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-          <span>Width {formatMm(width)}</span>
-          <Slider className="w-24" min={3} max={30} step={1} value={[width]} onValueChange={(value) => useUi.getState().setRouterWidth(value[0] ?? width)} />
-          <span>Depth {formatMm(depth)}</span>
-          <Slider className="w-24" min={1} max={18} step={1} value={[depth]} onValueChange={(value) => useUi.getState().setRouterDepth(value[0] ?? depth)} />
+        <div className="flex flex-wrap items-center gap-3">
+          <NumberSlider label="Width" min={3} max={30} value={width} onCommit={(value) => useUi.getState().setRouterWidth(value)} />
+          <NumberSlider label="Depth" min={1} max={18} value={depth} onCommit={(value) => useUi.getState().setRouterDepth(value)} />
         </div>
       )}
       <p className="text-xs text-muted-foreground">Hover to see the cut. A dado, groove, rebate or edge profile lands on the face or edge under the cursor. Red means it will not fit.</p>
@@ -845,6 +1070,83 @@ function HardwareDock() {
         ))}
       </div>
       <p className="text-xs text-muted-foreground">Click a face to place it. Hinges and slides note a neighbouring piece when one is close. Prices land on the shopping list.</p>
+    </div>
+  );
+}
+
+function StatusLine() {
+  const tool = useUi((state) => state.tool);
+  const modal = useUi((state) => state.modal);
+  const hints: Record<string, string> = {
+    select: "G grab · R rotate · S scale · arrows nudge · F frames",
+    saw: "Hover sets the cut · both lengths show on the board · Enter cuts",
+    drill: "Ghost hole follows the face under the cursor · red will not fit",
+    screw: "Ghost fastener · red means it does not reach a second piece",
+    router: "Edge and face come from the cursor, not a fixed side",
+    joint: "Ghost joint · first face, then the mate",
+    hardware: "Ghost hardware on the face under the cursor",
+    pencil: "Straight, freehand, or erase · marks travel with the piece",
+    measure: "Tape keeps a dimension · speed square and combination square mark the face",
+  };
+  return (
+    <div className="pointer-events-none absolute bottom-[7.5rem] left-3 max-w-md rounded-md border bg-card/92 px-2.5 py-1 text-xs text-muted-foreground shadow-sm">
+      <span className="nums text-foreground">{modal ? modalLabel(modal) : tool}</span>
+      <span className="mx-2 text-border">·</span>
+      {modal ? "X Y Z locks an axis. Type a value and press Enter. Esc cancels." : hints[tool]}
+    </div>
+  );
+}
+
+function PencilDock() {
+  const mode = useUi((state) => state.pencilMode);
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap gap-1">
+        <Toggle on={mode === "line"} onClick={() => useUi.getState().setPencilMode("line")}>Straight</Toggle>
+        <Toggle on={mode === "freehand"} onClick={() => useUi.getState().setPencilMode("freehand")}>Freehand</Toggle>
+        <Toggle on={mode === "erase"} onClick={() => useUi.getState().setPencilMode("erase")}>Erase</Toggle>
+      </div>
+      <p className="text-xs text-muted-foreground">Marks stay on the face when the piece moves. Straight is two clicks. Freehand is a drag. Erase removes the mark under the cursor. Esc drops a half-drawn line.</p>
+    </div>
+  );
+}
+
+function MeasureDock() {
+  const mode = useUi((state) => state.measureMode);
+  const angle = useUi((state) => state.angleDegrees);
+  const offset = useUi((state) => state.offsetMm);
+  const edge = useUi((state) => state.offsetEdge);
+  const anchor = useUi((state) => state.measureAnchor);
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap gap-1">
+        <Toggle on={mode === "tape"} onClick={() => useUi.getState().setMeasureMode("tape")}>Tape</Toggle>
+        <Toggle on={mode === "angle"} onClick={() => useUi.getState().setMeasureMode("angle")}>Speed square</Toggle>
+        <Toggle on={mode === "offset"} onClick={() => useUi.getState().setMeasureMode("offset")}>Combination square</Toggle>
+      </div>
+      {mode === "angle" ? (
+        <div className="flex flex-wrap items-center gap-1">
+          {[22.5, 26.6, 30, 45, 60].map((preset) => (
+            <Toggle key={preset} on={angle === preset} onClick={() => useUi.getState().setAngleDegrees(preset)}>{preset === 26.6 ? "6/12" : `${preset}°`}</Toggle>
+          ))}
+          <NumberSlider label="Angle" value={angle} min={0} max={90} step={0.1} suffix="°" onCommit={(value) => useUi.getState().setAngleDegrees(value)} />
+        </div>
+      ) : null}
+      {mode === "offset" ? (
+        <div className="flex flex-wrap items-center gap-1">
+          {(["left", "right", "start", "end"] as const).map((side) => (
+            <Toggle key={side} on={edge === side} onClick={() => useUi.getState().setOffsetEdge(side)}>{side}</Toggle>
+          ))}
+          <NumberSlider label="Offset" value={offset} min={1} max={300} step={1} onCommit={(value) => useUi.getState().setOffsetMm(value)} />
+        </div>
+      ) : null}
+      <p className="text-xs text-muted-foreground">
+        {mode === "tape"
+          ? anchor ? "Click the second point. The dimension stays, and you can click the label to remove it." : "Click two points. The distance is kept on the pieces."
+          : mode === "angle"
+            ? "Hover shows the blade. Click to pencil that angle onto the face. 22.5° and 45° are the common stops. 6/12 is a rafter pitch."
+            : "Hover shows the gauge line. Click to mark that offset from the chosen edge."}
+      </p>
     </div>
   );
 }

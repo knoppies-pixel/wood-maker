@@ -1,6 +1,37 @@
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
 import { cn } from "cn";
+
+export function NumberSlider({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  suffix = "mm",
+  disabled,
+  onCommit,
+}: {
+  label?: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  suffix?: string;
+  disabled?: boolean;
+  onCommit: (value: number) => void;
+}) {
+  const safeMax = Math.max(min, max);
+  const shown = Math.min(safeMax, Math.max(min, value));
+  return (
+    <label className="flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+      {label ? <span className="shrink-0">{label}</span> : null}
+      <Slider className="w-24" min={min} max={safeMax} step={step} disabled={disabled} value={[shown]} onValueChange={(next) => onCommit(next[0] ?? shown)} />
+      <CommitNumber value={shown} min={min} max={safeMax} suffix={suffix} onCommit={onCommit} className="h-7 w-[4.6rem] px-2 text-xs" />
+    </label>
+  );
+}
 
 export function CommitNumber({
   value,

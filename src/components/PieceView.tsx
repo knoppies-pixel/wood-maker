@@ -5,11 +5,14 @@ import { toast } from "sonner";
 import * as THREE from "three";
 import { canPlaceHole } from "../domain/operations.ts";
 import { nearestPieceEdge, routeFits, snapFaceHit, stationFromHit } from "../domain/picking.ts";
+import { faceExtent, localCopies } from "../domain/modifiers.ts";
+import { parallelMark } from "../domain/marks.ts";
 import { buildMesh, faceUvFromLocal, holeLocalPoint, inwardNormal } from "../domain/geometry.ts";
-import type { Hole, Piece } from "../domain/types.ts";
+import type { Hole, PencilMark, Piece } from "../domain/types.ts";
 import { useProject } from "../store/useProject.ts";
 import { useUi, type HoverHit } from "../store/useUi.ts";
 import { FeatureMarks, HardwareMarks } from "./FeatureMarks.tsx";
+import { PencilMarks } from "./Marks.tsx";
 import { woodMaps } from "./wood.ts";
 
 export const pieceGroups = new Map<string, THREE.Group>();
@@ -32,6 +35,10 @@ export function PieceView({ piece }: { piece: Piece }) {
   }, [maps]);
   const tint = piece.finish?.treatment === "bare" ? "#ffffff" : piece.finish?.color ?? "#ffffff";
   const hardware = useProject((state) => state.hardware);
+  const others = useProject((state) => state.pieces);
+  const copies = localCopies(piece, others);
+  const modal = useUi((state) => state.modal);
+  const previewScale = modal?.pieceId === piece.id && modal.op === "scale" ? modal.scale : ([1, 1, 1] as const);
   const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
 
@@ -54,29 +61,34 @@ export function PieceView({ piece }: { piece: Piece }) {
   }, [piece.id]);
 
   return (
-    <group ref={groupRef} position={position} rotation={rotation}>
-      <mesh
-        ref={meshRef}
-        geometry={geometry}
-        castShadow
-        receiveShadow
-        userData={{ pieceId: piece.id }}
-        onPointerDown={(event) => onPiecePointer(event, piece, "down")}
-        onPointerMove={(event) => onPiecePointer(event, piece, "move")}
-        onPointerOut={() => {
-          const hover = useUi.getState().hover;
-          if (hover?.pieceId === piece.id) useUi.getState().setHover(null);
-        }}
-      >
-        <meshStandardMaterial attach="material-0" map={faceMap} color={tint} roughness={piece.finish?.treatment === "paint" ? 0.42 : 0.78} metalness={0.02} emissive={selected ? "#e26a1a" : "#000000"} emissiveIntensity={selected ? 0.16 : 0} />
-        <meshStandardMaterial attach="material-1" map={maps.edge} color={tint} roughness={0.86} metalness={0} />
-        {(selected || mate) && <Edges threshold={20} color={selected ? "#f08a2a" : "#d7b98a"} />}
-      </mesh>
-      {(piece.holes ?? []).map((hole) => (
-        <HoleMark key={hole.id} piece={piece} hole={hole} />
+    <group ref={groupRef} position={position} rotation={rotation} scale={previewScale}>
+      {copies.map((copy, index) => (
+        <group key={`${copy.position.join(":")}:${index}`} position={copy.position} rotation={copy.rotation} scale={copy.scale}>
+          <mesh
+            ref={index === 0 ? meshRef : undefined}
+            geometry={geometry}
+            castShadow
+            receiveShadow
+            userData={{ pieceId: piece.id }}
+            raycast={index === 0 ? undefined : () => null}
+            onPointerDown={index === 0 ? (event) => onPiecePointer(event, piece, "down") : undefined}
+            onPointerMove={index === 0 ? (event) => onPiecePointer(event, piece, "move") : undefined}
+            onPointerUp={index === 0 ? () => finishFreehand(piece) : undefined}
+            onPointerOut={index === 0 ? () => {
+              const hover = useUi.getState().hover;
+              if (hover?.pieceId === piece.id) useUi.getState().setHover(null);
+            } : undefined}
+          >
+            <meshStandardMaterial attach="material-0" map={faceMap} color={tint} roughness={piece.finish?.treatment === "paint" ? 0.42 : 0.78} metalness={0.02} emissive={selected ? "#e26a1a" : "#000000"} emissiveIntensity={selected ? 0.16 : 0} side={THREE.DoubleSide} />
+            <meshStandardMaterial attach="material-1" map={maps.edge} color={tint} roughness={0.86} metalness={0} side={THREE.DoubleSide} />
+            {index === 0 && (selected || mate) ? <Edges threshold={20} color={selected ? "#f08a2a" : "#d7b98a"} /> : null}
+          </mesh>
+          {index === 0 ? (piece.holes ?? []).map((hole) => <HoleMark key={hole.id} piece={piece} hole={hole} />) : null}
+          {index === 0 ? <FeatureMarks piece={piece} /> : null}
+          {index === 0 ? <HardwareMarks piece={piece} items={hardware ?? []} /> : null}
+          <PencilMarks piece={piece} />
+        </group>
       ))}
-      <FeatureMarks piece={piece} />
-      <HardwareMarks piece={piece} items={hardware ?? []} />
     </group>
   );
 }
@@ -137,10 +149,15 @@ function HoleMark({ piece, hole }: { piece: Piece; hole: Hole }) {
 
 function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "down" | "move") {
   event.stopPropagation();
+  if (useUi.getState().modal) return;
   const tool = useUi.getState().tool;
   const hit = readHit(event, piece);
-  if (hit && (tool === "saw" || tool === "drill" || tool === "screw" || tool === "router" || tool === "hardware" || tool === "joint")) {
-    useUi.getState().setHover(hit);
+  if (hit && tool !== "select") useUi.getState().setHover(hit);
+  if (kind === "move" && tool === "pencil" && hit && useUi.getState().pencilDrawing && useUi.getState().pencilFace === hit.face) {
+    const draft = useUi.getState().pencilDraft ?? [];
+    const last = draft[draft.length - 1];
+    if (!last || Math.hypot(last.u - hit.u, last.v - hit.v) > 2) useUi.getState().setPencilDraft([...draft, { u: hit.u, v: hit.v }]);
+    return;
   }
   const sawMode = useUi.getState().sawMode;
   if (kind === "move" && tool === "saw" && hit && (sawMode === "crosscut" || sawMode === "rip")) {
@@ -222,6 +239,14 @@ function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "do
     useUi.getState().setJointFirst(null);
     return;
   }
+  if (tool === "pencil") {
+    drawPencil(piece, hit);
+    return;
+  }
+  if (tool === "measure") {
+    measure(piece, hit);
+    return;
+  }
   if (tool === "hardware") {
     const result = useProject.getState().addHardware(useUi.getState().hardwareId, piece.id, hit.face, hit);
     if (result.ok) toast.success(result.message ?? "Hardware placed");
@@ -292,30 +317,34 @@ function readHit(event: ThreeEvent<PointerEvent>, piece: Piece): HoverHit | null
   const uv = faceUvFromLocal(piece, { x: local.x, y: local.y, z: local.z }, { x: face.normal.x, y: face.normal.y, z: face.normal.z });
   if (!uv) return null;
   const ui = useUi.getState();
-  const snapping = ui.ctrlDown ? false : true;
+  const anySnap = ui.snapVertices || ui.snapMidpoints || ui.snapEdges || ui.snapCentres || ui.snapGrid || ui.snapMarks || ui.snapDimensions;
+  const forceAll = ui.ctrlDown && !anySnap;
   const snapped = snapFaceHit(
     piece,
     uv.face,
     uv.u,
     uv.v,
     {
-      enabled: snapping,
-      vertices: ui.snapVertices,
-      midpoints: ui.snapMidpoints,
-      edges: ui.snapEdges,
-      centres: ui.snapCentres,
-      grid: ui.snapGrid,
-      marks: ui.snapMarks,
+      enabled: ui.ctrlDown ? !anySnap : anySnap,
+      vertices: forceAll || ui.snapVertices,
+      midpoints: forceAll || ui.snapMidpoints,
+      edges: forceAll || ui.snapEdges,
+      centres: forceAll || ui.snapCentres,
+      grid: forceAll || ui.snapGrid,
+      marks: forceAll || ui.snapMarks,
       gridSize: ui.gridSize,
     },
     piece.marks ?? [],
-    (useProject.getState().dimensions ?? [])
-      .flatMap((note) => [note.a, note.b])
-      .filter((anchor) => anchor.pieceId === piece.id && anchor.face === uv.face)
-      .map((anchor) => ({ u: anchor.u, v: anchor.v })),
+    forceAll || ui.snapDimensions
+      ? (useProject.getState().dimensions ?? [])
+        .flatMap((note) => [note.a, note.b])
+        .filter((anchor) => anchor.pieceId === piece.id && anchor.face === uv.face)
+        .map((anchor) => ({ u: anchor.u, v: anchor.v }))
+      : [],
   );
   const edge = snapped.snap ? snapped.edge : nearestPieceEdge(piece, uv.face, snapped.u, snapped.v);
   const tool = ui.tool;
+  const worldNormal = face.normal.clone().transformDirection(event.object.matrixWorld);
   let valid = true;
   if (tool === "router") valid = ui.routerKind === "profile" ? ui.profileRadius < piece.thickness / 2 : routeFits(piece, ui.routerDepth);
   if (tool === "drill") {
@@ -327,7 +356,12 @@ function readHit(event: ThreeEvent<PointerEvent>, piece: Piece): HoverHit | null
       depth: ui.drillStyle === "hole-saw" ? piece.thickness : ui.drillDepth,
     }) === null;
   }
-  const worldNormal = face.normal.clone().transformDirection(event.object.matrixWorld);
+  if (tool === "joint") valid = piece.thickness >= 8;
+  if (tool === "screw" && ui.fastenerKind !== "glue") {
+    const direction = worldNormal.clone().negate();
+    const raycaster = new THREE.Raycaster(event.point.clone().addScaledVector(direction, 0.4), direction, 0, ui.screwLength + 4);
+    valid = raycaster.intersectObjects([...pieceMeshes.values()], false).some((item) => item.object.userData.pieceId !== piece.id && item.distance <= ui.screwLength - 2);
+  }
   const placed = holeLocalPoint(piece, uv.face, snapped.u, snapped.v);
   const world = parent.localToWorld(new THREE.Vector3(placed.x, placed.y, placed.z));
   return {
@@ -341,6 +375,94 @@ function readHit(event: ThreeEvent<PointerEvent>, piece: Piece): HoverHit | null
     snap: snapped.snap,
     valid,
   };
+}
+
+function finishFreehand(piece: Piece): void {
+  const ui = useUi.getState();
+  if (ui.tool !== "pencil" || !ui.pencilDrawing) return;
+  const draft = ui.pencilDraft ?? [];
+  useUi.getState().setPencilDrawing(false);
+  useUi.getState().setPencilDraft(null, null, null);
+  if (draft.length < 2 || ui.pencilFace == null) return;
+  useProject.getState().addMark(piece.id, { face: ui.pencilFace, kind: "freehand", points: draft });
+}
+
+function drawPencil(piece: Piece, hit: HoverHit): void {
+  const ui = useUi.getState();
+  useUi.getState().select(piece.id);
+  if (ui.pencilMode === "erase") {
+    const mark = nearestMark(piece, hit);
+    if (!mark) {
+      toast.error("No pencil mark under the cursor.");
+      return;
+    }
+    useProject.getState().removeMark(piece.id, mark.id);
+    return;
+  }
+  if (ui.pencilMode === "freehand") {
+    useUi.getState().setPencilDraft([{ u: hit.u, v: hit.v }], piece.id, hit.face);
+    useUi.getState().setPencilDrawing(true);
+    return;
+  }
+  if (!ui.pencilDraft || ui.pencilPieceId !== piece.id || ui.pencilFace !== hit.face) {
+    useUi.getState().setPencilDraft([{ u: hit.u, v: hit.v }], piece.id, hit.face);
+    return;
+  }
+  const start = ui.pencilDraft[0];
+  if (!start) return;
+  useProject.getState().addMark(piece.id, { face: hit.face, kind: "line", points: [start, { u: hit.u, v: hit.v }] });
+  useUi.getState().setPencilDraft(null, null, null);
+  toast.success("Pencil line marked.");
+}
+
+function measure(piece: Piece, hit: HoverHit): void {
+  const ui = useUi.getState();
+  useUi.getState().select(piece.id);
+  if (ui.measureMode === "tape") {
+    if (!ui.measureAnchor) {
+      useUi.getState().setMeasureAnchor({ pieceId: piece.id, face: hit.face, u: hit.u, v: hit.v });
+      toast.success("First point. Click the second.");
+      return;
+    }
+    useProject.getState().addDimension({
+      a: ui.measureAnchor,
+      b: { pieceId: piece.id, face: hit.face, u: hit.u, v: hit.v },
+    });
+    useUi.getState().setMeasureAnchor(null);
+    toast.success("Dimension kept. Click it to remove it.");
+    return;
+  }
+  if (ui.measureMode === "angle") {
+    const size = faceExtent(hit.face, piece);
+    const radians = (ui.angleDegrees * Math.PI) / 180;
+    const length = Math.min(size.u, size.v) * 0.7;
+    const end = {
+      u: Math.min(size.u, Math.max(0, hit.u + Math.cos(radians) * length)),
+      v: Math.min(size.v, Math.max(0, hit.v + Math.sin(radians) * length)),
+    };
+    useProject.getState().addMark(piece.id, { face: hit.face, kind: "line", points: [{ u: hit.u, v: hit.v }, end], label: `${ui.angleDegrees}°` });
+    toast.success(`${ui.angleDegrees}° marked on the face.`);
+    return;
+  }
+  const points = parallelMark(hit.face, piece, ui.offsetEdge, ui.offsetMm);
+  useProject.getState().addMark(piece.id, { face: hit.face, kind: "line", points, label: `${ui.offsetMm} mm` });
+  toast.success(`Offset ${ui.offsetMm} mm from the ${ui.offsetEdge} edge.`);
+}
+
+function nearestMark(piece: Piece, hit: HoverHit): PencilMark | null {
+  let best: PencilMark | null = null;
+  let bestDistance = 14;
+  for (const mark of piece.marks ?? []) {
+    if (mark.face !== hit.face) continue;
+    for (const point of mark.points) {
+      const distance = Math.hypot(point.u - hit.u, point.v - hit.v);
+      if (distance < bestDistance) {
+        best = mark;
+        bestDistance = distance;
+      }
+    }
+  }
+  return best;
 }
 
 function toGeometry(piece: Piece): THREE.BufferGeometry {

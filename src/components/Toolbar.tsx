@@ -1,11 +1,14 @@
 import {
+  CircleHelp,
   Download,
   FolderOpen,
   Move3D,
   PanelLeft,
   PanelRight,
+  Pencil,
   Redo2,
   RotateCw,
+  Ruler,
   Save,
   Trash2,
   Undo2,
@@ -30,13 +33,15 @@ import { useUi, type ToolId } from "../store/useUi.ts";
 import { cn } from "cn";
 
 const tools: Array<{ id: ToolId; label: string; hint: string; key: string }> = [
-  { id: "select", label: "Move", hint: "Select, move and rotate", key: "1" },
-  { id: "saw", label: "Saw", hint: "Crosscut, rip, taper or curve", key: "2" },
-  { id: "drill", label: "Drill", hint: "Twist, countersink, Forstner, hole saw", key: "3" },
-  { id: "router", label: "Router", hint: "Dados, grooves, rebates, edge profiles", key: "5" },
-  { id: "joint", label: "Joint", hint: "Mortise and tenon, half-lap, dovetail, dowels", key: "6" },
-  { id: "screw", label: "Fasten", hint: "Screws, pocket screws, bolts and glue", key: "4" },
-  { id: "hardware", label: "Hardware", hint: "Hinges, slides and pulls", key: "7" },
+  { id: "select", label: "Move", hint: "Select. G grab, R rotate, S scale", key: "V" },
+  { id: "saw", label: "Saw", hint: "Crosscut, rip, taper or curve. Enter cuts", key: "K" },
+  { id: "drill", label: "Drill", hint: "Twist, countersink, Forstner, hole saw", key: "D" },
+  { id: "router", label: "Router", hint: "Dado, groove, rebate or the edge under the cursor", key: "T" },
+  { id: "joint", label: "Joint", hint: "Mortise and tenon, half-lap, dovetail, dowels", key: "J" },
+  { id: "screw", label: "Fasten", hint: "Screws, pocket screws, bolts and glue", key: "Y" },
+  { id: "hardware", label: "Hardware", hint: "Hinges, slides and pulls", key: "H" },
+  { id: "pencil", label: "Pencil", hint: "Lines and freehand marks that stay on the face", key: "P" },
+  { id: "measure", label: "Measure", hint: "Tape, speed square and combination square", key: "M" },
 ];
 
 export function Toolbar() {
@@ -111,10 +116,13 @@ export function Toolbar() {
 
       <div className="ml-auto flex items-center gap-1">
         <span className="mr-1 hidden max-w-40 truncate text-sm text-muted-foreground xl:inline">{name}</span>
-        <IconButton label="Undo" disabled={!canUndo} onClick={() => useProject.temporal.getState().undo()}>
+        <IconButton label="Shortcuts (?)" onClick={() => useUi.getState().setCheatOpen(true)}>
+          <CircleHelp />
+        </IconButton>
+        <IconButton label="Undo (Ctrl+Z)" disabled={!canUndo} onClick={() => useProject.temporal.getState().undo()}>
           <Undo2 />
         </IconButton>
-        <IconButton label="Redo" disabled={!canRedo} onClick={() => useProject.temporal.getState().redo()}>
+        <IconButton label="Redo (Ctrl+Shift+Z)" disabled={!canRedo} onClick={() => useProject.temporal.getState().redo()}>
           <Redo2 />
         </IconButton>
         <SnapToggles />
@@ -182,6 +190,8 @@ export function Toolbar() {
 function ToolGlyph({ id }: { id: ToolId }) {
   if (id === "saw") return <SawIcon className="size-4" />;
   if (id === "drill") return <DrillIcon className="size-4" />;
+  if (id === "pencil") return <Pencil className="size-4" />;
+  if (id === "measure") return <Ruler className="size-4" />;
   if (id === "screw" || id === "joint" || id === "hardware" || id === "router") return <ScrewIcon className="size-4" />;
   return <Move3D className="size-4" />;
 }

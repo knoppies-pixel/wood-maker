@@ -28,7 +28,7 @@ The dev server listens on port **4317**. `npm test` checks the cut, kerf and sho
 - Read a **cut list** (stock length, finished size, mitres, and notes for tapers, curves, holes, router cuts and joints), a **shopping list** with timber and hardware, and a **fastener list**.
 - Undo and redo. The project autosaves in this browser. Export and open it as JSON.
 
-Keyboard: `1` move, `2` saw, `3` drill, `4` fasten, `5` router, `6` joint, `7` hardware, `T` / `R` move or rotate, `Enter` cuts, `Delete` removes the selection, `Ctrl+Z` / `Ctrl+Shift+Z` undo and redo, `Ctrl+S` saves locally, `Esc` returns to move.
+Keyboard: `V` move, `K` saw, `D` drill, `T` router, `J` joint, `Y` fasten, `H` hardware, `P` pencil, `M` measure. `G` / `R` / `S` grab, rotate and scale, then `X` `Y` `Z` and a typed value. Numpad `1` `3` `7` are front, side and top, numpad `5` is orthographic, `F` or `.` frames the selection. Arrows nudge, `Ctrl+D` duplicates, `Ctrl+C` / `Ctrl+V` copy and paste, `?` opens the cheat sheet. `Enter` cuts, `Delete` removes the selection, `Ctrl+Z` / `Ctrl+Shift+Z` undo and redo, `Ctrl+S` saves locally, `Esc` cancels.
 
 ## How a cut is measured
 

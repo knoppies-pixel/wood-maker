@@ -1,3 +1,4 @@
+import { worldToLocal } from "./geometry.ts";
 import type { FaceId, ModifierAxis, Piece, Vec3Tuple, WoodModifier } from "./types.ts";
 
 export interface LocalCopy {
@@ -8,19 +9,20 @@ export interface LocalCopy {
 
 const MAX_COPIES = 48;
 
-export function localCopies(piece: Piece): LocalCopy[] {
+export function localCopies(piece: Piece, others: Piece[] = []): LocalCopy[] {
   let copies: LocalCopy[] = [{ position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] }];
   for (const modifier of piece.modifiers ?? []) {
     if (!modifier.enabled) continue;
     if (modifier.type === "array") copies = arrayCopies(piece, copies, modifier);
     if (modifier.type === "mirror") copies = copies.flatMap((copy) => [copy, mirrorCopy(piece, copy, modifier.axis, modifier.across)]);
+    if (modifier.type === "space") copies = spaceCopies(piece, copies, modifier, others);
     if (copies.length > MAX_COPIES) copies = copies.slice(0, MAX_COPIES);
   }
   return copies;
 }
 
-export function instanceCount(piece: Piece): number {
-  return Math.max(1, localCopies(piece).length);
+export function instanceCount(piece: Piece, others: Piece[] = []): number {
+  return Math.max(1, localCopies(piece, others).length);
 }
 
 export function axisExtent(piece: Piece, axis: ModifierAxis): number {
@@ -57,6 +59,27 @@ function arrayCopies(piece: Piece, copies: LocalCopy[], modifier: Extract<WoodMo
     for (let i = 0; i < count; i += 1) {
       const position: Vec3Tuple = [...copy.position];
       position[index] += step * i;
+      next.push({ ...copy, position });
+    }
+  }
+  return next;
+}
+
+function spaceCopies(piece: Piece, copies: LocalCopy[], modifier: Extract<WoodModifier, { type: "space" }>, others: Piece[]): LocalCopy[] {
+  const target = others.find((item) => item.id === modifier.targetId);
+  if (!target || target.id === piece.id) return copies;
+  const steps = Math.max(1, Math.min(12, Math.round(modifier.count)));
+  const index = axisIndex(modifier.axis);
+  const delta = target.position[index] - piece.position[index];
+  if (Math.abs(delta) < 1) return copies;
+  const next: LocalCopy[] = [];
+  for (const copy of copies) {
+    next.push(copy);
+    for (let step = 1; step <= steps; step += 1) {
+      const world = { x: piece.position[0], y: piece.position[1], z: piece.position[2] };
+      world[modifier.axis] += (delta * step) / (steps + 1);
+      const local = worldToLocal(piece, world);
+      const position: Vec3Tuple = [copy.position[0] + local.x, copy.position[1] + local.y, copy.position[2] + local.z];
       next.push({ ...copy, position });
     }
   }

@@ -74,7 +74,7 @@ export function cutList(boards: Board[], pieces: Piece[]): CutBoard[] {
           longPoint: points.long,
           shortPoint: points.short,
           holes: piece.holes.length,
-          quantity: instanceCount(piece),
+          quantity: instanceCount(piece, pieces),
           notes: describePiece(piece),
           spanStart: piece.spanStart,
           spanEnd: piece.spanEnd,
@@ -157,7 +157,7 @@ export function fastenerList(fasteners: Fastener[], pieces: Piece[]): FastenerLi
     const key = fastener.type === "glue" ? "Glue joint" : fastener.type === "pocket-screw" ? `Pocket ${diameter}×${length}` : fastener.type === "bolt" ? `Bolt M${diameter}×${length}` : `${diameter}×${length}`;
     const joint = `${names.get(fastener.pieceAId) ?? "?"} → ${names.get(fastener.pieceBId) ?? "?"}`;
     const host = pieces.find((item) => item.id === fastener.pieceAId);
-    const copies = host ? instanceCount(host) : 1;
+    const copies = host ? instanceCount(host, pieces) : 1;
     const existing = groups.get(key);
     if (existing) {
       existing.quantity += copies;
@@ -203,7 +203,7 @@ function unionLength(spans: Array<{ start: number; end: number }>): number {
 function boardsNeeded(board: Board, pieces: Piece[]): number {
   const mine = pieces.filter((piece) => piece.boardId === board.id);
   if (mine.length === 0) return 1;
-  const millimetres = mine.reduce((sum, piece) => sum + piece.length * instanceCount(piece), 0);
+  const millimetres = mine.reduce((sum, piece) => sum + piece.length * instanceCount(piece, pieces), 0);
   return Math.max(1, Math.ceil(millimetres / board.length));
 }
 

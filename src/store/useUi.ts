@@ -1,7 +1,27 @@
 import { create } from "zustand";
-import type { FaceId, FastenerType, HoleStyle, ProfileName, Vec3Tuple } from "../domain/types.ts";
+import type { AnchorPoint, FaceId, FacePoint, FastenerType, HoleStyle, Piece, ProfileName, Vec3Tuple } from "../domain/types.ts";
 
-export type ToolId = "select" | "saw" | "drill" | "screw" | "router" | "joint" | "hardware";
+export type ToolId = "select" | "saw" | "drill" | "screw" | "router" | "joint" | "hardware" | "pencil" | "measure";
+export type PencilMode = "line" | "freehand" | "erase";
+export type MeasureMode = "tape" | "angle" | "offset";
+export type ModalOp = "grab" | "rotate" | "scale";
+export type ViewKind = "front" | "side" | "top" | "frame" | "reset";
+
+export interface TransformModal {
+  op: ModalOp;
+  axis: "x" | "y" | "z" | null;
+  text: string;
+  pieceId: string;
+  originPosition: Vec3Tuple;
+  originRotation: Vec3Tuple;
+  delta: Vec3Tuple;
+  scale: Vec3Tuple;
+}
+
+export interface ViewRequest {
+  kind: ViewKind;
+  nonce: number;
+}
 export type SawMode = "crosscut" | "rip" | "taper" | "curve";
 export type RouterMode = "dado" | "groove" | "rebate" | "profile";
 export type JointMode = "mortise-tenon" | "half-lap" | "dovetail" | "dowels";
@@ -67,6 +87,21 @@ interface UiState {
   jointKind: JointMode;
   jointFirst: { pieceId: string; face: FaceId; u: number; v: number } | null;
   hardwareId: string;
+  pencilMode: PencilMode;
+  pencilDraft: FacePoint[] | null;
+  pencilFace: FaceId | null;
+  pencilPieceId: string | null;
+  pencilDrawing: boolean;
+  measureMode: MeasureMode;
+  measureAnchor: AnchorPoint | null;
+  angleDegrees: number;
+  offsetMm: number;
+  offsetEdge: "left" | "right" | "start" | "end";
+  modal: TransformModal | null;
+  viewRequest: ViewRequest | null;
+  ortho: boolean;
+  cheatOpen: boolean;
+  clipboard: Piece | null;
   stockOpen: boolean;
   inspectorOpen: boolean;
   tab: InspectorTab;
@@ -115,6 +150,19 @@ interface UiState {
   setJointKind: (kind: JointMode) => void;
   setJointFirst: (hit: { pieceId: string; face: FaceId; u: number; v: number } | null) => void;
   setHardwareId: (id: string) => void;
+  setPencilMode: (mode: PencilMode) => void;
+  setPencilDraft: (points: FacePoint[] | null, pieceId?: string | null, face?: FaceId | null) => void;
+  setPencilDrawing: (drawing: boolean) => void;
+  setMeasureMode: (mode: MeasureMode) => void;
+  setMeasureAnchor: (anchor: AnchorPoint | null) => void;
+  setAngleDegrees: (degrees: number) => void;
+  setOffsetMm: (mm: number) => void;
+  setOffsetEdge: (edge: "left" | "right" | "start" | "end") => void;
+  setModal: (modal: TransformModal | null) => void;
+  requestView: (kind: ViewKind) => void;
+  setOrtho: (ortho: boolean) => void;
+  setCheatOpen: (open: boolean) => void;
+  setClipboard: (piece: Piece | null) => void;
   setStockOpen: (open: boolean) => void;
   setInspectorOpen: (open: boolean) => void;
   setTab: (tab: InspectorTab) => void;
@@ -166,6 +214,21 @@ export const useUi = create<UiState>((set) => ({
   jointKind: "mortise-tenon",
   jointFirst: null,
   hardwareId: "butt-hinge-60",
+  pencilMode: "line",
+  pencilDraft: null,
+  pencilFace: null,
+  pencilPieceId: null,
+  pencilDrawing: false,
+  measureMode: "tape",
+  measureAnchor: null,
+  angleDegrees: 45,
+  offsetMm: 20,
+  offsetEdge: "left",
+  modal: null,
+  viewRequest: null,
+  ortho: false,
+  cheatOpen: false,
+  clipboard: null,
   stockOpen: false,
   inspectorOpen: false,
   tab: "piece",
@@ -214,6 +277,23 @@ export const useUi = create<UiState>((set) => ({
   setJointKind: (jointKind) => set({ jointKind, jointFirst: null }),
   setJointFirst: (jointFirst) => set({ jointFirst }),
   setHardwareId: (hardwareId) => set({ hardwareId }),
+  setPencilMode: (pencilMode) => set({ pencilMode, pencilDraft: null, pencilDrawing: false }),
+  setPencilDraft: (pencilDraft, pieceId, face) => set({
+    pencilDraft,
+    pencilPieceId: pieceId === undefined ? useUi.getState().pencilPieceId : pieceId,
+    pencilFace: face === undefined ? useUi.getState().pencilFace : face,
+  }),
+  setPencilDrawing: (pencilDrawing) => set({ pencilDrawing }),
+  setMeasureMode: (measureMode) => set({ measureMode, measureAnchor: null }),
+  setMeasureAnchor: (measureAnchor) => set({ measureAnchor }),
+  setAngleDegrees: (angleDegrees) => set({ angleDegrees }),
+  setOffsetMm: (offsetMm) => set({ offsetMm }),
+  setOffsetEdge: (offsetEdge) => set({ offsetEdge }),
+  setModal: (modal) => set({ modal }),
+  requestView: (kind) => set({ viewRequest: { kind, nonce: Date.now() } }),
+  setOrtho: (ortho) => set({ ortho }),
+  setCheatOpen: (cheatOpen) => set({ cheatOpen }),
+  setClipboard: (clipboard) => set({ clipboard }),
   setStockOpen: (stockOpen) => set({ stockOpen }),
   setInspectorOpen: (inspectorOpen) => set({ inspectorOpen }),
   setTab: (tab) => set({ tab, inspectorOpen: true }),

@@ -243,6 +243,15 @@ export type WoodModifier =
       axis: ModifierAxis;
       /** Edge places a touching copy. Centre flips through the piece origin. */
       across: "edge" | "centre";
+    }
+  | {
+      id: string;
+      type: "space";
+      enabled: boolean;
+      /** Extra copies placed between this piece and the target. */
+      count: number;
+      axis: ModifierAxis;
+      targetId: string;
     };
 
 export interface AnchorPoint {

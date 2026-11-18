@@ -77,4 +77,19 @@ describe("modifiers", () => {
     const angle = angleMark(board, "top", 45);
     expect(angle[1]?.u).toBeCloseTo(angle[1]?.v ?? 0);
   });
+
+  it("spaces extra copies evenly between two pieces", () => {
+    const target = piece({ id: "other", position: [400, 11, 0] });
+    const source = piece({
+      id: "source",
+      position: [0, 11, 0],
+      modifiers: [{ id: "s", type: "space", enabled: true, count: 3, axis: "x", targetId: "other" }],
+    });
+    const copies = localCopies(source, [source, target]);
+    expect(copies).toHaveLength(4);
+    expect(copies[1]?.position[0]).toBeCloseTo(100);
+    expect(copies[2]?.position[0]).toBeCloseTo(200);
+    expect(copies[3]?.position[0]).toBeCloseTo(300);
+    expect(instanceCount(source, [source, target])).toBe(4);
+  });
 });
