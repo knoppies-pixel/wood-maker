@@ -151,7 +151,9 @@ function PieceCopy({
         );
         if (!hit) return;
         const point = new THREE.Vector3(hit.point.x, hit.point.y, hit.point.z).applyMatrix4(mesh.matrixWorld);
-        const normal = new THREE.Vector3(hit.normal.x, hit.normal.y, hit.normal.z).transformDirection(mesh.matrixWorld).normalize();
+        // Face normals stay in geometry space, matching THREE.Mesh.raycast. Transforming
+        // here would make a near-miss on a rotated board pick the wrong face.
+        const normal = new THREE.Vector3(hit.normal.x, hit.normal.y, hit.normal.z).normalize();
         intersects.push({
           distance: raycaster.ray.origin.distanceTo(point),
           point,
