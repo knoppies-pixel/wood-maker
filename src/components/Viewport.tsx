@@ -878,7 +878,13 @@ function SawDock({ piece }: { piece: Piece | undefined }) {
       <div className="flex flex-wrap items-center gap-2">
         <Toggle on={mode === "crosscut"} onClick={() => useUi.getState().setSawMode("crosscut")}>Crosscut</Toggle>
         <Toggle on={mode === "rip"} onClick={() => useUi.getState().setSawMode("rip")}>Rip</Toggle>
-        <Toggle on={mode === "taper"} onClick={() => useUi.getState().setSawMode("taper")}>Taper</Toggle>
+        <Toggle on={mode === "taper"} onClick={() => {
+          useUi.getState().setSawMode("taper");
+          if (piece) {
+            useUi.getState().setTaperStart(Math.round(piece.width));
+            useUi.getState().setTaperEnd(Math.max(MIN_PART_MM, Math.round(piece.width / 2)));
+          }
+        }}>Taper</Toggle>
         <Toggle on={mode === "curve"} onClick={() => useUi.getState().setSawMode("curve")}>Curve</Toggle>
         {mode === "crosscut" ? (
           <Toggle on={from === "end"} onClick={() => useUi.getState().setSawFrom(from === "start" ? "end" : "start")}>
@@ -1152,7 +1158,6 @@ function MeasureDock() {
   const mode = useUi((state) => state.measureMode);
   const angle = useUi((state) => state.angleDegrees);
   const offset = useUi((state) => state.offsetMm);
-  const edge = useUi((state) => state.offsetEdge);
   const anchor = useUi((state) => state.measureAnchor);
   return (
     <div className="flex flex-col gap-2">
@@ -1170,19 +1175,14 @@ function MeasureDock() {
         </div>
       ) : null}
       {mode === "offset" ? (
-        <div className="flex flex-wrap items-center gap-1">
-          {(["left", "right", "start", "end"] as const).map((side) => (
-            <Toggle key={side} on={edge === side} onClick={() => useUi.getState().setOffsetEdge(side)}>{side}</Toggle>
-          ))}
-          <NumberSlider label="Offset" value={offset} min={1} max={300} step={1} onCommit={(value) => useUi.getState().setOffsetMm(value)} />
-        </div>
+        <NumberSlider label="Offset" value={offset} min={1} max={300} step={1} onCommit={(value) => useUi.getState().setOffsetMm(value)} />
       ) : null}
       <p className="text-xs text-muted-foreground">
         {mode === "tape"
           ? anchor ? "Click the second point. The dimension stays, and you can click the label to remove it." : "Click two points. The distance is kept on the pieces."
           : mode === "angle"
             ? "Hover shows the blade. Click to pencil that angle onto the face. 22.5° and 45° are the common stops. 6/12 is a rafter pitch."
-            : "Hover shows the gauge line. Click to mark that offset from the chosen edge."}
+            : "Hover shows the gauge line, offset from the nearest edge of the face under the cursor. Click to mark it."}
       </p>
     </div>
   );

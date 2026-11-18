@@ -2,10 +2,10 @@ import * as THREE from "three";
 import { describe, expect, it } from "vitest";
 import { defaultCatalog, parseCatalog, parseCatalogCsv } from "./catalog.ts";
 import { sampleFrame } from "./example.ts";
-import { buildMesh, faceSnapDelta, gridSnapDelta, keepBottom, localToWorld, translatePiece, worldToLocal } from "./geometry.ts";
+import { buildMesh, faceSnapDelta, gridSnapDelta, keepBottom, localToWorld, softBoxHit, translatePiece, worldToLocal } from "./geometry.ts";
 import { curveCut, keptOutline, planJoint, shapeDefaults, taperPiece } from "./features.ts";
 import { v } from "./math.ts";
-import { addStockPiece, connectedIds, crosscut, kerfAlong, rip } from "./operations.ts";
+import { addStockPiece, canPlaceHole, connectedIds, crosscut, kerfAlong, preferLegalHole, rip } from "./operations.ts";
 import { cutList, shoppingList } from "./reports.ts";
 import type { Piece } from "./types.ts";
 
@@ -269,6 +269,27 @@ describe("shaped cuts and joints", () => {
     expect(result.pieces[0].bevelEnd).toBe(45);
     expect(result.pieces[1].bevelStart).toBe(45);
     expect(result.pieces[0].length + result.pieces[1].length + kerfAlong(3, 0, 45)).toBeCloseTo(1000);
+  });
+
+  it("lets a near miss land on a thin board", () => {
+    const min = v(-11, -11, -400);
+    const max = v(11, 11, 400);
+    const close = softBoxHit(min, max, v(0, 30, 0), v(0, -1, 0), 18);
+    expect(close?.point.y).toBe(11);
+    expect(close?.normal.y).toBe(1);
+    const wide = softBoxHit(min, max, v(40, 30, 0), v(0, -1, 0), 18);
+    expect(wide).toBeNull();
+  });
+
+  it("keeps a drill click that fits when edge snap would break out", () => {
+    const piece = blankPiece({ width: 22, thickness: 22, length: 800 });
+    const snappedToEdge = preferLegalHole(piece, "top", { u: 8, v: 200 }, { u: 0, v: 200 }, 5, 18);
+    expect(snappedToEdge).toEqual({ u: 8, v: 200, keepSnap: false });
+    expect(canPlaceHole(piece, { face: "top", u: snappedToEdge.u, v: snappedToEdge.v, diameter: 5, depth: 18 })).toBeNull();
+    const alreadyLegal = preferLegalHole(piece, "top", { u: 11, v: 200 }, { u: 11, v: 200 }, 5, 18);
+    expect(alreadyLegal.keepSnap).toBe(true);
+    const bothIllegal = preferLegalHole(piece, "top", { u: 1, v: 200 }, { u: 0, v: 200 }, 5, 18);
+    expect(bothIllegal).toEqual({ u: 0, v: 200, keepSnap: true });
   });
 
   it("tapers inside the existing width", () => {

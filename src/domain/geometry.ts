@@ -105,6 +105,47 @@ export function pointLengths(piece: Pick<Piece, "length" | "width" | "mitreStart
   };
 }
 
+/** A ray that misses a thin board but passes within `slack` still lands on the nearest real face. */
+export function softBoxHit(
+  min: Vec3,
+  max: Vec3,
+  origin: Vec3,
+  direction: Vec3,
+  slack: number,
+): { point: Vec3; normal: Vec3 } | null {
+  const dir = normalize(direction);
+  const emin = v(min.x - slack, min.y - slack, min.z - slack);
+  const emax = v(max.x + slack, max.y + slack, max.z + slack);
+  let tEnter = Number.NEGATIVE_INFINITY;
+  let tExit = Number.POSITIVE_INFINITY;
+  for (const axis of ["x", "y", "z"] as const) {
+    const component = dir[axis];
+    if (Math.abs(component) < 1e-8) {
+      if (origin[axis] < emin[axis] || origin[axis] > emax[axis]) return null;
+      continue;
+    }
+    let near = (emin[axis] - origin[axis]) / component;
+    let far = (emax[axis] - origin[axis]) / component;
+    if (near > far) [near, far] = [far, near];
+    tEnter = Math.max(tEnter, near);
+    tExit = Math.min(tExit, far);
+    if (tEnter > tExit) return null;
+  }
+  if (tExit < 0) return null;
+  const travel = tEnter >= 0 ? tEnter : tExit;
+  const hit = add(origin, mul(dir, travel));
+  const point = v(clamp(hit.x, min.x, max.x), clamp(hit.y, min.y, max.y), clamp(hit.z, min.z, max.z));
+  const faces = [
+    { distance: Math.abs(point.y - max.y), normal: v(0, 1, 0) },
+    { distance: Math.abs(point.y - min.y), normal: v(0, -1, 0) },
+    { distance: Math.abs(point.x - max.x), normal: v(1, 0, 0) },
+    { distance: Math.abs(point.x - min.x), normal: v(-1, 0, 0) },
+    { distance: Math.abs(point.z - max.z), normal: v(0, 0, 1) },
+    { distance: Math.abs(point.z - min.z), normal: v(0, 0, -1) },
+  ].sort((a, b) => a.distance - b.distance);
+  return { point, normal: faces[0]?.normal ?? v(0, 1, 0) };
+}
+
 export function localFaces(
   piece: Pick<Piece, "length" | "width" | "widthStart" | "widthEnd" | "thickness" | "mitreStart" | "mitreEnd" | "bevelStart" | "bevelEnd">,
 ): LocalFace[] {

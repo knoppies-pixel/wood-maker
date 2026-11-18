@@ -181,6 +181,24 @@ export function canPlaceHole(piece: Piece, hole: Pick<Hole, "face" | "u" | "v" |
   return null;
 }
 
+/** Edge snap must not drag a legal click onto the arris, where the bit would break out. */
+export function preferLegalHole(
+  piece: Piece,
+  face: Hole["face"],
+  raw: { u: number; v: number },
+  snapped: { u: number; v: number },
+  diameter: number,
+  depth: number,
+): { u: number; v: number; keepSnap: boolean } {
+  if (canPlaceHole(piece, { face, u: snapped.u, v: snapped.v, diameter, depth }) === null) {
+    return { u: snapped.u, v: snapped.v, keepSnap: true };
+  }
+  if (canPlaceHole(piece, { face, u: raw.u, v: raw.v, diameter, depth }) === null) {
+    return { u: raw.u, v: raw.v, keepSnap: false };
+  }
+  return { u: snapped.u, v: snapped.v, keepSnap: true };
+}
+
 export function makeHole(
   piece: Piece,
   input: Pick<Hole, "face" | "u" | "v" | "diameter" | "depth" | "through"> & Partial<Pick<Hole, "style" | "secondaryDiameter">>,

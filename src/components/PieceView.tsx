@@ -3,11 +3,11 @@ import type { ThreeEvent } from "@react-three/fiber";
 import { useLayoutEffect, useMemo, useRef, type MutableRefObject, type Ref } from "react";
 import { toast } from "sonner";
 import * as THREE from "three";
-import { canPlaceHole, kerfAlong } from "../domain/operations.ts";
+import { canPlaceHole, kerfAlong, preferLegalHole } from "../domain/operations.ts";
 import { nearestPieceEdge, profileTarget, routeFits, sawDistanceFromStation, snapFaceHit, stationFromHit } from "../domain/picking.ts";
 import { faceExtent, localCopies } from "../domain/modifiers.ts";
 import { offsetOnFace } from "../domain/marks.ts";
-import { buildMesh, faceUvFromLocal, holeLocalPoint, inwardNormal } from "../domain/geometry.ts";
+import { buildMesh, faceUvFromLocal, holeLocalPoint, inwardNormal, softBoxHit } from "../domain/geometry.ts";
 import type { HardwareItem, Hole, PencilMark, Piece } from "../domain/types.ts";
 import { useProject } from "../store/useProject.ts";
 import { useUi, type HoverHit } from "../store/useUi.ts";
@@ -132,11 +132,39 @@ function PieceCopy({
     if (!mesh) return;
     hitMeshes.add(mesh);
     if (index === 0) pieceMeshes.set(piece.id, mesh);
+    if (!mesh.geometry.boundingBox) mesh.geometry.computeBoundingBox();
+    const bounds = mesh.geometry.boundingBox;
+    if (bounds) {
+      mesh.raycast = (raycaster, intersects) => {
+        const before = intersects.length;
+        THREE.Mesh.prototype.raycast.call(mesh, raycaster, intersects);
+        if (intersects.length > before) return;
+        const inverse = new THREE.Matrix4().copy(mesh.matrixWorld).invert();
+        const origin = raycaster.ray.origin.clone().applyMatrix4(inverse);
+        const direction = raycaster.ray.direction.clone().transformDirection(inverse);
+        const hit = softBoxHit(
+          { x: bounds.min.x, y: bounds.min.y, z: bounds.min.z },
+          { x: bounds.max.x, y: bounds.max.y, z: bounds.max.z },
+          { x: origin.x, y: origin.y, z: origin.z },
+          { x: direction.x, y: direction.y, z: direction.z },
+          18,
+        );
+        if (!hit) return;
+        const point = new THREE.Vector3(hit.point.x, hit.point.y, hit.point.z).applyMatrix4(mesh.matrixWorld);
+        const normal = new THREE.Vector3(hit.normal.x, hit.normal.y, hit.normal.z).transformDirection(mesh.matrixWorld).normalize();
+        intersects.push({
+          distance: raycaster.ray.origin.distanceTo(point),
+          point,
+          object: mesh,
+          face: { a: 0, b: 0, c: 0, normal, materialIndex: 0 },
+        });
+      };
+    }
     return () => {
       hitMeshes.delete(mesh);
       if (pieceMeshes.get(piece.id) === mesh) pieceMeshes.delete(piece.id);
     };
-  }, [piece.id, index]);
+  }, [piece.id, index, geometry]);
 
   return (
     <group position={position} rotation={rotation} scale={scale}>
@@ -423,18 +451,24 @@ function readHit(event: ThreeEvent<PointerEvent>, piece: Piece): HoverHit | null
         .map((anchor) => ({ u: anchor.u, v: anchor.v }))
       : [],
   );
-  const edge = snapped.snap ? snapped.edge : nearestPieceEdge(piece, uv.face, snapped.u, snapped.v);
   const tool = ui.tool;
+  const drillDepth = ui.drillStyle === "hole-saw" ? piece.thickness : ui.drillDepth;
+  const drillPoint = tool === "drill"
+    ? preferLegalHole(piece, uv.face, uv, snapped, ui.drillDiameter, drillDepth)
+    : { u: snapped.u, v: snapped.v, keepSnap: snapped.snap != null };
+  const u = drillPoint.u;
+  const v = drillPoint.v;
+  const edge = drillPoint.keepSnap && snapped.snap ? snapped.edge : nearestPieceEdge(piece, uv.face, u, v);
   const worldNormal = face.normal.clone().transformDirection(event.object.matrixWorld);
   let valid = true;
   if (tool === "router") valid = ui.routerKind === "profile" ? ui.profileRadius < piece.thickness / 2 : routeFits(piece, ui.routerDepth);
   if (tool === "drill") {
     valid = canPlaceHole(piece, {
       face: uv.face,
-      u: snapped.u,
-      v: snapped.v,
+      u,
+      v,
       diameter: ui.drillDiameter,
-      depth: ui.drillStyle === "hole-saw" ? piece.thickness : ui.drillDepth,
+      depth: drillDepth,
     }) === null;
   }
   if (tool === "joint") valid = piece.thickness >= 8;
@@ -443,17 +477,17 @@ function readHit(event: ThreeEvent<PointerEvent>, piece: Piece): HoverHit | null
     const raycaster = new THREE.Raycaster(event.point.clone().addScaledVector(direction, 0.4), direction, 0, ui.screwLength + 4);
     valid = raycaster.intersectObjects(rayTargets(), false).some((item) => item.object.userData.pieceId !== piece.id && item.distance <= ui.screwLength - 2);
   }
-  const placed = holeLocalPoint(piece, uv.face, snapped.u, snapped.v);
+  const placed = holeLocalPoint(piece, uv.face, u, v);
   const world = parent.localToWorld(new THREE.Vector3(placed.x, placed.y, placed.z));
   return {
     pieceId: piece.id,
     face: uv.face,
-    u: snapped.u,
-    v: snapped.v,
+    u,
+    v,
     point: [world.x, world.y, world.z],
     normal: [worldNormal.x, worldNormal.y, worldNormal.z],
     edge,
-    snap: snapped.snap,
+    snap: drillPoint.keepSnap ? snapped.snap : null,
     valid,
   };
 }
