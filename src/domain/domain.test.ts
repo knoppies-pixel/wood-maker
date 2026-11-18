@@ -9,6 +9,13 @@ import { addStockPiece, canPlaceHole, connectedIds, crosscut, kerfAlong, preferL
 import { cutList, shoppingList } from "./reports.ts";
 import type { Piece } from "./types.ts";
 
+function meshHasPointNear(mesh: ReturnType<typeof buildMesh>, x: number, z: number): boolean {
+  for (let i = 0; i < mesh.positions.length; i += 3) {
+    if (Math.hypot(mesh.positions[i] - x, mesh.positions[i + 2] - z) < 1.6) return true;
+  }
+  return false;
+}
+
 function blankPiece(patch: Partial<Piece> = {}): Piece {
   return {
     id: "p",
@@ -406,7 +413,7 @@ describe("bevel long point and plunge cuts", () => {
     expect(openingRegions(notch.piece.width, notch.piece.length, notch.piece.openings ?? [])).toBe(1);
   });
 
-  it("buys round stock and refuses to rip it", () => {
+  it("rips round stock into two smaller rounds", () => {
     const stock = defaultCatalog().find((item) => item.id === "pipe-25");
     expect(stock?.section).toBe("round");
     if (!stock) return;
@@ -415,8 +422,42 @@ describe("bevel long point and plunge cuts", () => {
     expect(added.piece.section).toBe("round");
     expect(buildMesh(added.piece).indices.length).toBeGreaterThan(20);
     const ripped = rip(added.piece, 10, 3);
-    expect(ripped.ok).toBe(false);
+    expect(ripped.ok).toBe(true);
+    if (!ripped.ok) return;
+    expect(ripped.pieces[0].section).toBe("round");
+    expect(ripped.pieces[0].width).toBeCloseTo(10);
+    expect(ripped.pieces[0].thickness).toBeCloseTo(10);
+    expect(ripped.pieces[1].width).toBeCloseTo(12);
     const cut = crosscut(added.piece, 875, 0, 3);
     expect(cut.ok).toBe(true);
+  });
+
+  it("keeps an array on the kept piece when a board is sawn", () => {
+    const board = blankPiece({
+      width: 90,
+      length: 800,
+      thickness: 35,
+      widthStart: 90,
+      widthEnd: 90,
+      modifiers: [{ id: "array", type: "array", enabled: true, layout: "linear", count: 3, spacing: 100, axis: "x", fitLength: null }],
+    });
+    const cut = crosscut(board, 300, 0, 3);
+    expect(cut.ok).toBe(true);
+    if (!cut.ok) return;
+    expect(cut.pieces[0].modifiers).toHaveLength(1);
+    expect(cut.pieces[1].modifiers).toHaveLength(0);
+  });
+
+  it("rounds a slot and chamfers the rim of an interior hole", () => {
+    const board = blankPiece({ width: 180, length: 400, thickness: 17, widthStart: 180, widthEnd: 180 });
+    const slot = plungeCut(board, { x: 0, z: 0, width: 25, length: 100, ends: "round" });
+    expect("piece" in slot).toBe(true);
+    if (!("piece" in slot)) return;
+    expect(sectionContains(180, 400, slot.piece.openings, 0, 0)).toBe(false);
+    expect(sectionContains(180, 400, slot.piece.openings, 12, 49)).toBe(true);
+    const mesh = buildMesh(slot.piece);
+    expect(meshHasPointNear(mesh, Math.cos(Math.PI / 4) * 12.5, 37.5 + Math.sin(Math.PI / 4) * 12.5)).toBe(true);
+    slot.piece.openings![0].rim = { profile: "chamfer", radius: 3 };
+    expect(buildMesh(slot.piece).indices.length).toBeGreaterThan(mesh.indices.length);
   });
 });

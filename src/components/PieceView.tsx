@@ -4,7 +4,8 @@ import { useLayoutEffect, useMemo, useRef, type MutableRefObject, type Ref } fro
 import { toast } from "sonner";
 import * as THREE from "three";
 import { canPlaceHole, kerfAlong, preferLegalHole, sawDistance } from "../domain/operations.ts";
-import { nearestPieceEdge, profileTarget, routeFits, sawDistanceFromStation, snapFaceHit, stationFromHit } from "../domain/picking.ts";
+import { nearestInteriorOpening, nearestPieceEdge, profileTarget, routeFits, sawDistanceFromStation, snapFaceHit, stationFromHit } from "../domain/picking.ts";
+import { explodedPosition } from "../domain/assembly.ts";
 import { faceExtent, localCopies } from "../domain/modifiers.ts";
 import { offsetOnFace } from "../domain/marks.ts";
 import { buildMesh, faceUvFromLocal, holeLocalPoint, inwardNormal, softBoxHit } from "../domain/geometry.ts";
@@ -31,18 +32,25 @@ export function PieceView({ piece }: { piece: Piece }) {
   const drag = useUi((state) => state.drag?.[piece.id]);
   const selection = useUi((state) => state.selection);
   const fasteners = useProject((state) => state.fasteners);
+  const pieces = useProject((state) => state.pieces);
+  const explode = useUi((state) => state.explode);
+  const assemblyStep = useUi((state) => state.assemblyStep);
+  const drawn = explodedPosition(piece, pieces, explode, assemblyStep);
   const selected = selection === piece.id;
   const mate = !selected && selection !== null && joined(fasteners, selection, piece.id);
-  const position = drag?.position ?? piece.position;
+  const position = drag?.position ?? drawn ?? piece.position;
   const rotation = drag?.rotation ?? piece.rotation;
   const geometry = useMemo(() => toGeometry(piece), [piece]);
-  const maps = useMemo(() => woodMaps(piece.species), [piece.species]);
+  const maps = useMemo(() => woodMaps(piece.species, piece.thickness), [piece.species, piece.thickness]);
   const faceMap = useMemo(() => {
     const map = maps.face.clone();
     map.needsUpdate = true;
     return map;
   }, [maps]);
-  const tint = piece.finish?.treatment === "bare" ? "#ffffff" : piece.finish?.color ?? "#ffffff";
+  const steel = piece.species.toLowerCase().includes("steel");
+  const painted = piece.finish?.treatment === "paint";
+  const faceTint = steel ? "#6a7178" : piece.finish?.treatment === "bare" || !piece.finish ? "#ffffff" : piece.finish.color;
+  const edgeTint = steel ? "#7c848b" : painted ? "#e7d3b0" : faceTint;
   const hardware = useProject((state) => state.hardware);
   const others = useProject((state) => state.pieces);
   const copies = localCopies(piece, others);
@@ -51,6 +59,7 @@ export function PieceView({ piece }: { piece: Piece }) {
   const previewScale = modal?.pieceId === piece.id && modal.op === "scale" ? modal.scale : ([1, 1, 1] as const);
   const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
+  const hidden = !drawn && !drag;
 
   useLayoutEffect(() => {
     return () => {
@@ -70,6 +79,8 @@ export function PieceView({ piece }: { piece: Piece }) {
     };
   }, [piece.id]);
 
+  if (hidden) return null;
+
   return (
     <group ref={groupRef} position={position} rotation={rotation} scale={previewScale}>
       {copies.map((copy, index) => (
@@ -83,7 +94,9 @@ export function PieceView({ piece }: { piece: Piece }) {
           geometry={geometry}
           faceMap={faceMap}
           edgeMap={maps.edge}
-          tint={tint}
+          faceTint={faceTint}
+          edgeTint={edgeTint}
+          steel={steel}
           selected={selected}
           hovered={hovered}
           mate={mate}
@@ -104,7 +117,9 @@ function PieceCopy({
   geometry,
   faceMap,
   edgeMap,
-  tint,
+  faceTint,
+  edgeTint,
+  steel,
   selected,
   hovered,
   mate,
@@ -119,7 +134,9 @@ function PieceCopy({
   geometry: THREE.BufferGeometry;
   faceMap: THREE.Texture;
   edgeMap: THREE.Texture;
-  tint: string;
+  faceTint: string;
+  edgeTint: string;
+  steel: boolean;
   selected: boolean;
   hovered: boolean;
   mate: boolean;
@@ -188,8 +205,8 @@ function PieceCopy({
           if (hover?.pieceId === piece.id) useUi.getState().setHover(null);
         }}
       >
-        <meshStandardMaterial attach="material-0" map={faceMap} color={tint} roughness={piece.finish?.treatment === "paint" ? 0.42 : 0.78} metalness={0.02} emissive={selected || hovered ? "#e26a1a" : "#000000"} emissiveIntensity={selected ? 0.16 : hovered ? 0.08 : 0} side={THREE.DoubleSide} />
-        <meshStandardMaterial attach="material-1" map={edgeMap} color={tint} roughness={0.86} metalness={0} side={THREE.DoubleSide} />
+        <meshStandardMaterial attach="material-0" map={steel ? undefined : faceMap} color={faceTint} roughness={steel ? 0.38 : piece.finish?.treatment === "paint" ? 0.55 : 0.72} metalness={steel ? 0.62 : 0.02} emissive={selected || hovered ? "#e26a1a" : "#000000"} emissiveIntensity={selected ? 0.16 : hovered ? 0.08 : 0} side={THREE.DoubleSide} />
+        <meshStandardMaterial attach="material-1" map={steel ? undefined : edgeMap} color={edgeTint} roughness={steel ? 0.4 : 0.8} metalness={steel ? 0.55 : 0} side={THREE.DoubleSide} />
         {selected || hovered || mate ? <Edges threshold={15} color={selected ? "#f08a2a" : "#e2b15a"} /> : null}
       </mesh>
       {(piece.holes ?? []).map((hole) => <HoleMark key={hole.id} piece={piece} hole={hole} />)}
@@ -286,6 +303,7 @@ function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "do
       z: hit.v - piece.length / 2,
       width: ui.plungeWidth,
       length: ui.plungeLength,
+      ends: ui.plungeEnds,
     });
     if (!result.ok) toast.error(result.message);
     else {
@@ -330,8 +348,11 @@ function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "do
   }
   if (tool === "router") {
     const ui = useUi.getState();
+    const opening = ui.routerKind === "profile" && hit.face === "top" ? nearestInteriorOpening(piece, hit.u, hit.v, 18) : null;
     const arris = profileTarget(piece, hit.face, hit.u, hit.v);
-    const result = ui.routerKind === "profile"
+    const result = opening
+      ? useProject.getState().profileOpening(piece.id, opening.id, ui.profile, ui.profileRadius)
+      : ui.routerKind === "profile"
       ? useProject.getState().addProfile(piece.id, ui.profile, arris.edge, ui.profileRadius, arris.side)
       : useProject.getState().addRoute(piece.id, {
           kind: ui.routerKind,

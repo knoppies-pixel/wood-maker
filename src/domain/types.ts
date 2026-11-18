@@ -159,6 +159,8 @@ export interface Piece {
   finish: Finish;
   marks: PencilMark[];
   modifiers: WoodModifier[];
+  /** Assembly order. A step-through hides pieces from later steps. */
+  step?: number;
   /**
    * Interval this part still occupies on the purchased board's length.
    * Kerf gaps are not included. Rips share a span.
@@ -185,7 +187,7 @@ export interface Fastener {
   angle?: number;
 }
 
-export type HardwareKind = "hinge" | "drawer-slide" | "handle" | "bracket" | "castor" | "latch";
+export type HardwareKind = "hinge" | "drawer-slide" | "handle" | "bracket" | "castor" | "latch" | "tool" | "bumper";
 
 /** A rectangular bite from a jigsaw or plunge cut, in local XZ. The centre may sit past an edge, which makes a notch. */
 export interface Opening {
@@ -196,6 +198,10 @@ export interface Opening {
   width: number;
   /** Along local Z. */
   length: number;
+  /** Round ends make a slot. The length includes both caps. */
+  ends?: "square" | "round";
+  /** Profile around the top of an interior hole. */
+  rim?: { profile: ProfileName; radius: number };
 }
 
 export interface HardwareItem {
@@ -212,6 +218,17 @@ export interface HardwareItem {
   height: number;
   depth: number;
   price: number;
+  /** A reference block, such as a saw, is drawn but not bought. */
+  reference?: boolean;
+}
+
+/** One line of a plan's materials list, compared with the generated lists. */
+export interface PlanBillLine {
+  label: string;
+  quantity: number;
+  kind: "board" | "fastener" | "hardware";
+  /** Board key is thickness×width×length. Fastener key is the list label. Hardware key is the catalogue id. */
+  key: string;
 }
 
 export interface ProjectData {
@@ -226,6 +243,7 @@ export interface ProjectData {
   fasteners: Fastener[];
   hardware: HardwareItem[];
   dimensions: DimensionNote[];
+  planBill?: PlanBillLine[];
 }
 
 export interface FacePoint {

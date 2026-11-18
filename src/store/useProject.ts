@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { defaultCatalog } from "../domain/catalog.ts";
 import { sampleFrame } from "../domain/example.ts";
 import { uid } from "../domain/math.ts";
-import { circleOutline, curveCut, edgeProfile, HARDWARE_CATALOG, placeHardware, planJoint, plungeCut, routeCut, taperPiece } from "../domain/features.ts";
+import { circleOutline, curveCut, edgeProfile, HARDWARE_CATALOG, placeHardware, planJoint, plungeCut, profileOpening, routeCut, taperPiece } from "../domain/features.ts";
 import { keepBottom, localToWorld } from "../domain/geometry.ts";
 import { localCopies } from "../domain/modifiers.ts";
 import {
@@ -16,9 +16,9 @@ import {
   withoutPiece,
 } from "../domain/operations.ts";
 import { emptyProject, loadStoredProject } from "../domain/project-io.ts";
-import type { FaceId, Fastener, FastenerType, Finish, Hole, Piece, ProjectData, RouterCut, StockItem, Vec3Tuple, XZPoint } from "../domain/types.ts";
+import type { FaceId, Fastener, FastenerType, Finish, Hole, Piece, PlanBillLine, ProfileName, ProjectData, RouterCut, StockItem, Vec3Tuple, XZPoint } from "../domain/types.ts";
 
-type Snapshot = Pick<ProjectData, "name" | "kerf" | "catalog" | "boards" | "pieces" | "fasteners" | "hardware" | "dimensions">;
+type Snapshot = Pick<ProjectData, "name" | "kerf" | "catalog" | "boards" | "pieces" | "fasteners" | "hardware" | "dimensions" | "planBill">;
 
 export type ActionResult = { ok: true; message?: string; selectId?: string } | { ok: false; message: string };
 
@@ -27,10 +27,11 @@ interface ProjectState extends Snapshot {
   cutPiece: (pieceId: string, mode: "crosscut" | "rip", distance: number, mitre: number, bevel?: number) => ActionResult;
   taper: (pieceId: string, widthAtStart: number, widthAtEnd: number) => ActionResult;
   curve: (pieceId: string, points: Array<{ u: number; v: number }>, waste: "left" | "right") => ActionResult;
-  plunge: (pieceId: string, opening: { x: number; z: number; width: number; length: number }, keepOffcut?: boolean) => ActionResult;
+  plunge: (pieceId: string, opening: { x: number; z: number; width: number; length: number; ends?: "square" | "round" }, keepOffcut?: boolean) => ActionResult;
   drillHole: (pieceId: string, input: Omit<Hole, "id">) => ActionResult;
   addRoute: (pieceId: string, input: Omit<RouterCut, "id">) => ActionResult;
   addProfile: (pieceId: string, profile: "round-over" | "chamfer" | "cove", edge: "left" | "right" | "start" | "end", radius: number, side?: "top" | "bottom") => ActionResult;
+  profileOpening: (pieceId: string, openingId: string, profile: ProfileName, radius: number) => ActionResult;
   join: (kind: "mortise-tenon" | "half-lap" | "dovetail" | "dowels", firstId: string, firstFace: FaceId, firstUv: { u: number; v: number }, secondId: string, secondFace: FaceId, secondUv: { u: number; v: number }, dowelDiameter?: number) => ActionResult;
   addScrew: (input: Omit<Fastener, "id" | "type"> & { type?: FastenerType }) => ActionResult;
   addHardware: (catalogId: string, pieceId: string, face: FaceId, uv: { u: number; v: number }) => ActionResult;
@@ -56,6 +57,7 @@ interface ProjectState extends Snapshot {
   renamePiece: (pieceId: string, name: string) => void;
   renameProject: (name: string) => void;
   setKerf: (kerf: number) => void;
+  setPlanBill: (planBill: PlanBillLine[]) => void;
   setTransforms: (updates: Array<{ id: string; position: Vec3Tuple; rotation: Vec3Tuple }>) => void;
   setCatalog: (catalog: StockItem[]) => void;
   resetCatalog: () => void;
@@ -79,6 +81,7 @@ export const useProject = create<ProjectState>()(
       fasteners: restored.fasteners,
       hardware: restored.hardware ?? [],
       dimensions: restored.dimensions ?? [],
+      planBill: restored.planBill,
 
       addStock: (stockId, length) => {
         const stock = get().catalog.find((item) => item.id === stockId);
@@ -181,6 +184,15 @@ export const useProject = create<ProjectState>()(
         if ("error" in result) return { ok: false, message: result.error };
         set({ pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, profiles: [...(item.profiles ?? []), result.profile] } : item)) });
         return { ok: true, message: `${profile} on the ${side} ${edge} arris.` };
+      },
+
+      profileOpening: (pieceId, openingId, profile, radius) => {
+        const piece = get().pieces.find((item) => item.id === pieceId);
+        if (!piece) return { ok: false, message: "Select a piece for the hole profile." };
+        const result = profileOpening(piece, openingId, profile, radius);
+        if ("error" in result) return { ok: false, message: result.error };
+        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? result.piece : item)) });
+        return { ok: true, message: `${profile} around the opening.` };
       },
 
       join: (kind, firstId, firstFace, firstUv, secondId, secondFace, secondUv, dowelDiameter = 8) => {
@@ -379,6 +391,8 @@ export const useProject = create<ProjectState>()(
 
       setKerf: (kerf) => set({ kerf: Math.min(12, Math.max(0.5, kerf)) }),
 
+      setPlanBill: (planBill) => set({ planBill }),
+
       setTransforms: (updates) => {
         const byId = new Map(updates.map((update) => [update.id, update]));
         let changed = false;
@@ -406,6 +420,7 @@ export const useProject = create<ProjectState>()(
           fasteners: project.fasteners,
           hardware: project.hardware ?? [],
           dimensions: project.dimensions ?? [],
+          planBill: project.planBill,
         });
       },
 
@@ -419,6 +434,7 @@ export const useProject = create<ProjectState>()(
           fasteners: [],
           hardware: [],
           dimensions: [],
+          planBill: undefined,
         });
       },
 
@@ -432,6 +448,7 @@ export const useProject = create<ProjectState>()(
           fasteners: frame.fasteners,
           hardware: frame.hardware ?? [],
           dimensions: frame.dimensions ?? [],
+          planBill: frame.planBill,
         });
       },
 
@@ -447,6 +464,7 @@ export const useProject = create<ProjectState>()(
         fasteners: get().fasteners,
         hardware: get().hardware,
         dimensions: get().dimensions,
+        planBill: get().planBill,
       }),
     }),
     {
@@ -460,6 +478,7 @@ export const useProject = create<ProjectState>()(
         fasteners: state.fasteners,
         hardware: state.hardware,
         dimensions: state.dimensions,
+        planBill: state.planBill,
       }),
       equality: (past, current) =>
         past.boards === current.boards &&
@@ -467,6 +486,7 @@ export const useProject = create<ProjectState>()(
         past.fasteners === current.fasteners &&
         past.hardware === current.hardware &&
         past.dimensions === current.dimensions &&
+        past.planBill === current.planBill &&
         past.catalog === current.catalog &&
         past.name === current.name &&
         past.kerf === current.kerf,

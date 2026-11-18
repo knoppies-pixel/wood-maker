@@ -11,8 +11,8 @@ import { holeLocalPoint, inwardNormal, localFaces, longPointAllowance, pointLeng
 import { DEG, uid, v, type Vec3 } from "../src/domain/math.ts";
 import { addStockPiece, crosscut, makeHole, rip } from "../src/domain/operations.ts";
 import { serializeProject } from "../src/domain/project-io.ts";
-import { cutList, fastenerList, shoppingList } from "../src/domain/reports.ts";
-import type { Board, FaceId, Fastener, FastenerType, HardwareItem, Piece, ProjectData, StockItem, Vec3Tuple } from "../src/domain/types.ts";
+import { checkPlan, cutList, fastenerList, shoppingList } from "../src/domain/reports.ts";
+import type { Board, FaceId, Fastener, FastenerType, HardwareItem, Piece, PlanBillLine, ProjectData, StockItem, Vec3Tuple } from "../src/domain/types.ts";
 
 const KERF = 3;
 
@@ -22,6 +22,8 @@ class Shop {
   pool: Piece[] = [];
   fasteners: Fastener[] = [];
   hardware: HardwareItem[] = [];
+  planBill: PlanBillLine[] = [];
+  step = 1;
   readonly kerf = KERF;
   catalog: StockItem[];
 
@@ -42,12 +44,14 @@ class Shop {
     const source = index >= 0 ? this.pool.splice(index, 1)[0] : this.buy(stockId, boardLength);
     if (source.length <= length + 0.5) {
       source.name = name;
+      source.step = this.step;
       this.pieces.push(source);
       return source;
     }
     const cut = crosscut(source, length, 0, this.kerf, 0);
     if (!cut.ok) throw new Error(`${name}: ${cut.reason}`);
     cut.pieces[0].name = name;
+    cut.pieces[0].step = this.step;
     this.pieces.push(cut.pieces[0]);
     this.pool.push(cut.pieces[1]);
     return cut.pieces[0];
@@ -82,8 +86,14 @@ class Shop {
       source = cut.pieces[0];
     }
     source.name = name;
+    source.step = this.step;
     this.pieces.push(source);
     return source;
+  }
+
+  /** Drop leftovers of one stock so the next group buys fresh lengths. */
+  seal(stockId: string): void {
+    this.pool = this.pool.filter((piece) => piece.stockId !== stockId);
   }
 
   ripTo(piece: Piece, width: number): Piece {
@@ -102,7 +112,7 @@ class Shop {
     return result.piece;
   }
 
-  plunge(piece: Piece, opening: { x: number; z: number; width: number; length: number }, offcutName?: string): { piece: Piece; offcut: Piece } {
+  plunge(piece: Piece, opening: { x: number; z: number; width: number; length: number; ends?: "square" | "round" }, offcutName?: string): { piece: Piece; offcut: Piece } {
     const result = plungeCut(piece, opening);
     if ("error" in result) throw new Error(`${piece.name}: ${result.error}`);
     this.replace(piece, result.piece);
@@ -133,7 +143,7 @@ class Shop {
     piece.holes.push(result.hole);
   }
 
-  project(name: string): ProjectData {
+  project(name: string, planBill: PlanBillLine[] = this.planBill): ProjectData {
     for (const piece of this.pieces) {
       if (piece.position.some((value) => !Number.isFinite(value)) || piece.rotation.some((value) => !Number.isFinite(value))) {
         throw new Error(`${piece.name} has a bad transform`);
@@ -151,6 +161,7 @@ class Shop {
       fasteners: this.fasteners,
       hardware: this.hardware,
       dimensions: [],
+      planBill,
     };
   }
 
@@ -277,7 +288,19 @@ function buildSawhorse(catalog: StockItem[]): ProjectData {
   for (const piece of [...topGroup, ...bottomGroup]) paint(piece, "Sage paint");
   const standing = Math.max(...topGroup.map(highest));
   console.log(`Sawhorse standing height ${standing.toFixed(1)} mm (leg long point 760)`);
-  return shop.project("Stackable sawhorse");
+  for (const piece of shop.pieces) {
+    piece.step = piece.name.includes("leg") ? 2 : piece.name.includes("plate") ? 3 : 1;
+  }
+  const project = shop.project("Stackable sawhorse", [
+    { label: "SA pine 35×90 × 2.4 m", quantity: 6, kind: "board", key: "35×90×2400" },
+    { label: "Plywood strip 17×300 × 1.2 m", quantity: 1, kind: "board", key: "17×300×1200" },
+    { label: "4.8×65 mm screws", quantity: 50, kind: "fastener", key: "4.8×65" },
+    { label: "4×30 mm screws", quantity: 24, kind: "fastener", key: "4×30" },
+  ]);
+  expectQty(project, "fastener", "4.8×65", 50);
+  expectQty(project, "fastener", "4×30", 24);
+  expectQty(project, "board", "35×90×2400", 6);
+  return project;
 }
 
 function cutBeam(shop: Shop, label: string, topLen: number, lowerLen: number, holes: number[]): { label: string; top: Piece; web: Piece; bottom: Piece; holes: number[] } {
@@ -336,7 +359,7 @@ function layoutHorse(shop: Shop, beam: { label: string; top: Piece; web: Piece; 
   sit(top, [0, 0, 0], [0, 142.5, 0]);
   sit(web, EDGE_Z, [0, 80, 0]);
   sit(bottom, [0, 0, 0], [0, 17.5, 0]);
-  screwFlange(shop, top, web, beam.holes);
+  screwFlange(shop, top, web, beam.holes, true);
   screwFlange(shop, bottom, web, [80, 360]);
   for (const end of [-1, 1]) {
     for (const lean of [-1, 1]) {
@@ -416,8 +439,9 @@ function topAverage(piece: Piece, footAtEnd: boolean): number {
   return footAverage(piece, !footAtEnd);
 }
 
-function screwFlange(shop: Shop, flange: Piece, web: Piece, fromEnds: number[]): void {
+function screwFlange(shop: Shop, flange: Piece, web: Piece, fromEnds: number[], centre = false): void {
   const stations = [...fromEnds, ...fromEnds.map((distance) => flange.length - distance)];
+  if (centre) stations.push(flange.length / 2);
   for (const station of stations) {
     shop.hole(flange, "top", flange.width / 2, station, 5);
     shop.screw(flange, web, "top", flange.width / 2, station, 65, 4.8);
@@ -441,11 +465,13 @@ function buildWorkbench(catalog: StockItem[]): ProjectData {
   const pine = (length: number, name: string) => shop.take("pine-35x90", length, name, 2400);
   const dar = (length: number, name: string) => shop.take("pine-19x42", length, name, 2400);
   const ply = (width: number, length: number, name: string) => shop.takeRect("ply-17", width, length, name, 2400);
-  const black = (piece: Piece) => {
-    paint(piece, "Black paint");
+  const form = (piece: Piece) => {
+    paint(piece, "Formply");
     return piece;
   };
 
+  const legStock = cutLegStock(shop);
+  shop.step = 1;
   const sideL = pine(2400, "Bottom side");
   const sideR = pine(2400, "Bottom side");
   const endN = pine(1130, "Bottom end");
@@ -459,41 +485,64 @@ function buildWorkbench(catalog: StockItem[]): ProjectData {
   sit(sideR, EDGE_Z, [582.5, 45, 0]);
   sit(endN, EDGE_X, [0, 45, -1182.5]);
   sit(endS, EDGE_X, [0, 45, 1182.5]);
-  for (const rail of [endN, endS, ...noggins]) {
-    screwInto(shop, sideL, rail, 60);
-    screwInto(shop, sideR, rail, 60);
+  for (const rail of [endN, endS]) {
+    screwInto(shop, sideL, rail, 60, 4);
+    screwInto(shop, sideR, rail, 60, 4);
   }
+  for (const rail of noggins) {
+    screwInto(shop, sideL, rail, 60, 2);
+    screwInto(shop, sideR, rail, 60, 2);
+  }
+  shop.seal("pine-35x90");
 
-  // Five posts a side. Centres from the floor checkout chain and the leg spacing.
+  // Five posts a side. Each post is two 35 mm boards face-laminated to 70 mm.
   const legZ = [-1155, -595, 235, 845, 1155];
   const legs: Piece[] = [];
+  let legCursor = 0;
   for (const x of [-547.5, 547.5]) {
     legZ.forEach((z, index) => {
       const names = ["Leg B", "Leg E", "Leg C", "Leg D", "Leg A"];
-      const leg = pine(863, names[index]);
+      const leg = legStock[legCursor];
+      const inner = legStock[legCursor + 1];
+      legCursor += 2;
+      if (!leg || !inner) throw new Error("Leg stock ran out");
+      leg.name = names[index];
+      inner.name = `${names[index]} laminate`;
       sit(leg, POST, [x, 863 / 2, z]);
+      sit(inner, POST, [x < 0 ? x + 35 : x - 35, 863 / 2, z]);
       if (index === 0 || index === 4) {
-        // Ear left by a 35 mm deep notch along the lower 90 mm, the lap the frame sits in.
         shop.plunge(leg, { x: x > 0 ? 45 - 17.5 : -45 + 17.5, z: -863 / 2 + 45, width: 35, length: 90 });
       }
+      laminate(shop, leg, inner, x);
       legs.push(leg);
       const rail = x < 0 ? sideL : sideR;
       const face: FaceId = x < 0 ? "top" : "bottom";
       const along = rail.length / 2 + z;
-      shop.screw(rail, leg, face, 30, along, 90, 10, "bolt");
-      shop.screw(rail, leg, face, 60, along, 90, 10, "bolt");
+      const bolts = index === 0 || index === 4 ? [30, 60] : [18, 36, 54, 72];
+      for (const u of bolts) shop.screw(rail, leg, face, u, along, 90, 10, "bolt");
       if (index === 0 || index === 4) shop.hardware.push(placeHardware(offer("castor-75"), leg, "start", { u: leg.width / 2, v: leg.thickness / 2 }));
     });
   }
 
-  const floor = black(ply(1200, 2400, "Bottom shelf"));
+  shop.step = 3;
+  const floor = form(ply(1200, 2400, "Bottom shelf"));
   sit(floor, [0, 0, 0], [0, 98.5, 0]);
-  for (const x of [-565, 565]) {
+  for (const x of [-530, 530]) {
     for (const z of legZ) shop.plunge(floor, { x, z, width: 70, length: 96 });
   }
   shop.screw(floor, sideL, "bottom", 80, 400, 30, 4);
   shop.screw(floor, sideR, "bottom", floor.width - 80, 400, 30, 4);
+  for (let i = 0; i < 21; i += 1) {
+    const side = i % 2 === 0 ? sideL : sideR;
+    const u = i % 2 === 0 ? 70 : floor.width - 70;
+    shop.screw(floor, side, "bottom", u, Math.min(floor.length - 40, 90 + (i % 11) * 200), 30, 4);
+  }
+  for (const [u, vPos] of [[180, 180], [180, 2200], [600, 180], [600, 2200], [400, 1200], [800, 1200]] as Array<[number, number]>) {
+    shop.hardware.push(placeHardware(offer("bumper-10"), floor, "bottom", { u, v: vPos }));
+  }
 
+  shop.step = 4;
+  shop.seal("pine-35x90");
   const back = pine(2400, "Top back rail");
   sit(back, EDGE_Z, [582.5, 908, 0]);
   shop.plunge(back, { x: 20, z: -682.5, width: 50, length: 85 });
@@ -510,85 +559,173 @@ function buildWorkbench(catalog: StockItem[]): ProjectData {
   sit(farReturn, EDGE_X, [-365, 908, 1182.5]);
   for (const leg of legs) {
     shop.screw(leg, back, "end", 45, 20, 60, 4.5);
+    shop.screw(leg, back, "end", 70, 20, 60, 4.5);
   }
+  spacedScrews(shop, endReturn, back, "bottom", 3, 60, 4.5);
+  spacedScrews(shop, farReturn, back, "bottom", 2, 60, 4.5);
+  spacedScrews(shop, wingReturn, back, "bottom", 2, 60, 4.5);
+  spacedScrews(shop, frontShort, frontReturn, "top", 2, 60, 4.5);
+  spacedScrews(shop, frontReturn, wingReturn, "top", 3, 60, 4.5);
+  shop.seal("pine-35x90");
 
-  const main = black(ply(1200, 1840, "Main benchtop"));
+  shop.step = 7;
+  const main = form(ply(1200, 1840, "Main benchtop"));
   sit(main, [0, 0, 0], [0, 961.5, 280]);
   const opening = shop.plunge(main, { x: 138, z: 0, width: 670, length: 824 }, "Flip-top panel");
   const lid = opening.offcut;
-  paint(lid, "Black paint");
-  hingeOpen(lid, [main.position[0] + 138, main.position[1] + main.thickness / 2, main.position[2] - 412]);
+  paint(lid, "Formply");
+  lid.step = 8;
+  sit(lid, [0, 0, 0], [138, 961.5, 280]);
+  const hole = main.openings?.[0];
+  if (hole) hole.rim = { profile: "chamfer", radius: 3 };
+  for (const edge of ["left", "right", "start", "end"] as const) {
+    const profile = edgeProfile({ profile: "chamfer", edge, side: "top", radius: 3 }, lid.thickness);
+    if (!("error" in profile)) lid.profiles.push(profile.profile);
+  }
   shop.hardware.push(placeHardware(offer("barrel-bolt-100"), lid, "top", { u: 50, v: 180 }));
   shop.hardware.push(placeHardware(offer("barrel-bolt-100"), lid, "top", { u: lid.width - 50, v: 180 }));
-  for (let i = 0; i < 12; i += 1) {
-    shop.hardware.push(placeHardware(offer("angle-25"), main, "bottom", { u: 80 + (i % 6) * 190, v: i < 6 ? 70 : main.length - 70 }));
+  for (let i = 0; i < 16; i += 1) {
+    shop.screw(lid, main, "bottom", 40 + (i % 4) * 150, 80 + Math.floor(i / 4) * 180, 30, 4);
   }
 
-  const wingWide = black(ply(370, 475, "Wing top"));
-  const wingNarrow = black(ply(250, 475, "Wing top"));
+  const wingWide = form(ply(370, 475, "Wing top"));
+  const wingNarrow = form(ply(250, 475, "Wing top"));
   sit(wingWide, [0, 0, 0], [600 - 185, 961.5, -1200 + 237.5]);
   sit(wingNarrow, [0, 0, 0], [-600 + 125, 961.5, -1200 + 237.5]);
-  for (const wing of [wingWide, wingNarrow]) {
-    shop.hardware.push(placeHardware(offer("angle-25"), wing, "bottom", { u: 40, v: 40 }));
-    shop.hardware.push(placeHardware(offer("angle-25"), wing, "bottom", { u: wing.width - 40, v: wing.length - 40 }));
+
+  shop.seal("pine-19x42");
+  shop.step = 5;
+  const lipA = dar(990, "Saw base lip");
+  const lipC = dar(467, "Saw base lip");
+  const trimShortA = dar(937, "Edge trim");
+  const lipB = dar(990, "Saw base lip");
+  const lipD = dar(467, "Saw base lip");
+  const trimShortB = dar(937, "Edge trim");
+  const trimEnd = dar(1130, "Edge trim");
+  const trimLong = dar(1267, "Edge trim");
+  for (const piece of [trimShortA, trimShortB, trimEnd, trimLong]) piece.step = 10;
+  for (const piece of [lipA, lipB, lipC, lipD]) piece.step = 5;
+
+  const shelf = buildSawBay(shop, pine, ply, form, [lipA, lipB, lipC, lipD]);
+  buildFlip(shop, ply, form, main, lid);
+  buildDrawer(shop, ply, form);
+  sit(trimLong, [0, 0, 0], [-579, 980, -1200 + 1267 / 2]);
+  sit(trimShortA, [0, 0, 0], [-579, 980, -1200 + 1267 + 3 + 937 / 2]);
+  sit(trimShortB, [0, 0, 0], [579, 980, -200]);
+  sit(trimEnd, EDGE_X, [0, 980, 1182]);
+  placeBrackets(shop, main, back, frontShort, wingWide, wingNarrow, endReturn);
+
+  const mitre = placeHardware(offer("mitre-saw-ref"), main, "top", { u: 400, v: 920 });
+  shop.hardware.push(mitre);
+  const tableSaw = placeHardware(offer("table-saw-ref"), shelf, "top", { u: shelf.width / 2, v: shelf.length / 2 });
+  shop.hardware.push(tableSaw);
+  for (const [u, vPos] of [[120, 200], [520, 200], [120, 700], [520, 700]] as Array<[number, number]>) {
+    shop.screw(main, lid, "bottom", u, vPos, 60, 6.5);
   }
 
-  buildSawBay(shop, pine, dar, ply, black);
-  buildFlip(shop, ply, black, main, lid);
-  buildDrawer(shop, ply, black);
-  const trim = [dar(2400, "Edge trim"), dar(2400, "Edge trim"), dar(1130, "Edge trim")];
-  sit(trim[0], [0, 0, 0], [-579, 980, 0]);
-  sit(trim[1], [0, 0, 0], [579, 980, 0]);
-  sit(trim[2], EDGE_X, [0, 980, 1182]);
-
-  return shop.project("Mitre saw workbench");
+  const project = shop.project("Mitre saw workbench", workbenchBill());
+  expectQty(project, "board", "35×90×2400", 22);
+  expectQty(project, "board", "19×42×2400", 3);
+  expectQty(project, "board", "17×1200×2400", 4);
+  expectQty(project, "board", "25×25×1200", 1);
+  expectQty(project, "fastener", "4.5×60", 156);
+  expectQty(project, "fastener", "4×30", 123);
+  expectQty(project, "fastener", "4×16", 38);
+  expectQty(project, "fastener", "4×20", 38);
+  expectQty(project, "fastener", "4×40", 2);
+  expectQty(project, "fastener", "Pocket 4×32", 6);
+  expectQty(project, "fastener", "Pocket 4×64", 12);
+  expectQty(project, "fastener", "6.5×60", 4);
+  expectQty(project, "fastener", "Bolt M10×90", 32);
+  expectQty(project, "hardware", "angle-25", 38);
+  expectQty(project, "hardware", "castor-75", 4);
+  expectQty(project, "hardware", "bumper-10", 6);
+  const report = checkPlan(project.planBill ?? [], project.boards, project.hardware, project.fasteners, project.pieces);
+  if (report.mismatches.length || report.extras.length) {
+    throw new Error(`Workbench plan check: ${JSON.stringify({ mismatches: report.mismatches, extras: report.extras })}`);
+  }
+  return project;
 }
 
-function screwInto(shop: Shop, side: Piece, rail: Piece, length: number): void {
+function screwInto(shop: Shop, side: Piece, rail: Piece, length: number, count: number): void {
   const face: FaceId = side.position[0] < 0 ? "top" : "bottom";
   const along = side.length / 2 + (rail.position[2] - side.position[2]);
-  shop.screw(side, rail, face, 28, Math.min(side.length - 25, Math.max(25, along - 16)), length, 4.5);
-  shop.screw(side, rail, face, 62, Math.min(side.length - 25, Math.max(25, along + 16)), length, 4.5);
+  for (let i = 0; i < count; i += 1) {
+    const u = 16 + (i * 58) / Math.max(1, count - 1);
+    const vPos = Math.min(side.length - 25, Math.max(25, along + (i - (count - 1) / 2) * 12));
+    shop.screw(side, rail, face, u, vPos, length, 4.5);
+  }
 }
 
-function hingeOpen(panel: Piece, hinge: Vec3Tuple): void {
-  const tilt = 58 * DEG;
-  const rotation = basis([1, 0, 0], [0, Math.cos(tilt), -Math.sin(tilt)], [0, Math.sin(tilt), Math.cos(tilt)]);
-  const pivot = apply(rotation, v(0, 0, -panel.length / 2));
-  panel.rotation = rotation;
-  panel.position = [hinge[0] - pivot.x, hinge[1] - pivot.y, hinge[2] - pivot.z];
+function cutLegStock(shop: Shop): Piece[] {
+  const legs: Piece[] = [];
+  shop.step = 2;
+  for (let stick = 0; stick < 10; stick += 1) {
+    const source = shop.buy("pine-35x90", 2400);
+    const first = crosscut(source, 863, 0, shop.kerf, 0);
+    if (!first.ok) throw new Error(first.reason);
+    const second = crosscut(first.pieces[1], 863, 0, shop.kerf, 0);
+    if (!second.ok) throw new Error(second.reason);
+    for (const piece of [first.pieces[0], second.pieces[0]]) {
+      piece.step = 2;
+      piece.name = "Leg";
+      shop.pieces.push(piece);
+      legs.push(piece);
+    }
+  }
+  shop.seal("pine-35x90");
+  return legs;
 }
 
-function buildSawBay(shop: Shop, pine: (length: number, name: string) => Piece, dar: (length: number, name: string) => Piece, ply: (width: number, length: number, name: string) => Piece, black: (piece: Piece) => Piece): void {
-  // A rectangular base in the table-saw bay, standing on the bottom frame.
+function laminate(shop: Shop, outer: Piece, inner: Piece, x: number): void {
+  const face: FaceId = x < 0 ? "bottom" : "top";
+  for (const u of [25, 65]) {
+    for (const vPos of [80, 400, 780]) shop.screw(outer, inner, face, u, vPos, 60, 4.5);
+  }
+}
+
+function spacedScrews(shop: Shop, a: Piece, b: Piece, face: FaceId, count: number, length: number, diameter = 4.5, type: FastenerType = "screw"): void {
+  const along = face === "left" || face === "right" ? a.length : face === "start" || face === "end" ? a.width : a.length;
+  const across = face === "left" || face === "right" ? a.thickness : face === "start" || face === "end" ? a.thickness : a.width;
+  for (let i = 0; i < count; i += 1) {
+    shop.screw(a, b, face, across * ((i % 3) + 1) / 4, along * (i + 1) / (count + 1), length, diameter, type);
+  }
+}
+
+function buildSawBay(shop: Shop, pine: (length: number, name: string) => Piece, ply: (width: number, length: number, name: string) => Piece, form: (piece: Piece) => Piece, lips: Piece[]): Piece {
+  shop.step = 5;
+  shop.seal("pine-35x90");
   const railA = pine(1060, "Saw base rail");
   const railB = pine(990, "Saw base rail");
   const railC = [pine(615, "Saw base end"), pine(615, "Saw base end")];
+  shop.seal("pine-35x90");
+  shop.step = 6;
+  const steppedBlanks = [pine(560, "Saw cradle side"), pine(560, "Saw cradle side")];
+  const cradleLegA = pine(370, "Saw cradle rail");
+  const frontBlanks = [pine(312, "Saw cradle leg"), pine(312, "Saw cradle leg")];
+  const cradleB = pine(250, "Saw cradle rail");
+  shop.seal("pine-35x90");
+  const cradleD = pine(300, "Saw cradle rail");
+  const plain = [pine(222, "Saw cradle leg"), pine(222, "Saw cradle leg")];
+  const cradleE = pine(180, "Saw cradle rail");
+  shop.step = 5;
   sit(railA, EDGE_X, [0, 200, -1080]);
   sit(railB, EDGE_X, [0, 200, -470]);
   sit(railC[0], EDGE_Z, [-470, 200, -775]);
   sit(railC[1], EDGE_Z, [470, 200, -775]);
-  const shelf = black(ply(525, 990, "Saw base shelf"));
+  const shelf = form(ply(525, 990, "Saw base shelf"));
   sit(shelf, [0, 0, 0], [0, 255, -775]);
-  const lip = [dar(990, "Saw base lip"), dar(990, "Saw base lip"), dar(467, "Saw base lip"), dar(467, "Saw base lip")];
+  const lip = lips;
   sit(lip[0], [0, 0, 0], [0, 274, -1080]);
   sit(lip[1], [0, 0, 0], [0, 274, -470]);
   sit(lip[2], EDGE_X, [-490, 274, -775]);
   sit(lip[3], EDGE_X, [490, 274, -775]);
 
-  // The upper cradle sits under the two small tops. Sides stand, rails tie them.
-  const cradleA = pine(370, "Saw cradle rail");
-  const cradleB = pine(250, "Saw cradle rail");
-  // plungeCut returns a new piece. Sitting the old one leaves the notched board where the stock landed.
-  const stepped = [pine(560, "Saw cradle side"), pine(560, "Saw cradle side")].map((piece) =>
-    shop.plunge(piece, { x: 45 - 25, z: piece.length / 2 - 42.5, width: 50, length: 85 }).piece,
-  );
-  const cradleD = pine(300, "Saw cradle rail");
-  const cradleE = pine(180, "Saw cradle rail");
-  const front = [pine(312, "Saw cradle leg"), pine(312, "Saw cradle leg")].map((piece) =>
+  const cradleA = cradleLegA;
+  const stepped = steppedBlanks.map((piece) => shop.plunge(piece, { x: 45 - 25, z: piece.length / 2 - 42.5, width: 50, length: 85 }).piece);
+  const front = frontBlanks.map((piece) =>
     shop.plunge(piece, { x: -45 + 17.5, z: -piece.length / 2 + (piece.length - 90) / 2, width: 35, length: piece.length - 90 }).piece,
   );
-  const plain = [pine(222, "Saw cradle leg"), pine(222, "Saw cradle leg")];
   sit(stepped[0], POST, [-300, 560, -900]);
   sit(stepped[1], POST, [220, 560, -900]);
   sit(cradleA, EDGE_X, [-300, 860, -1080]);
@@ -601,16 +738,37 @@ function buildSawBay(shop: Shop, pine: (length: number, name: string) => Piece, 
   sit(plain[1], POST, [400, 380, -620]);
   shop.screw(cradleA, stepped[0], "top", 45, 40, 64, 4, "pocket-screw");
   shop.screw(cradleB, stepped[1], "top", 45, 40, 64, 4, "pocket-screw");
+  spacedScrews(shop, railC[0], railA, "top", 3, 60, 4.5);
+  spacedScrews(shop, railC[0], railB, "top", 3, 60, 4.5);
+  spacedScrews(shop, railC[1], railA, "bottom", 3, 60, 4.5);
+  spacedScrews(shop, railC[1], railB, "bottom", 3, 60, 4.5);
+  spacedScrews(shop, shelf, railA, "bottom", 4, 60, 4.5);
+  spacedScrews(shop, shelf, railB, "bottom", 4, 60, 4.5);
+  spacedScrews(shop, cradleA, stepped[0], "bottom", 2, 60, 4.5);
+  spacedScrews(shop, cradleB, stepped[1], "bottom", 2, 60, 4.5);
+  spacedScrews(shop, cradleD, stepped[0], "bottom", 2, 60, 4.5);
+  spacedScrews(shop, cradleE, stepped[1], "bottom", 2, 60, 4.5);
+  spacedScrews(shop, front[0], cradleA, "end", 2, 60, 4.5);
+  spacedScrews(shop, front[1], cradleB, "end", 2, 60, 4.5);
+  spacedScrews(shop, plain[0], cradleD, "end", 2, 60, 4.5);
+  spacedScrews(shop, plain[1], cradleE, "end", 2, 60, 4.5);
+  spacedScrews(shop, railA, railC[0], "bottom", 3, 64, 4, "pocket-screw");
+  spacedScrews(shop, railB, railC[1], "bottom", 3, 64, 4, "pocket-screw");
+  spacedScrews(shop, front[0], stepped[0], "end", 2, 64, 4, "pocket-screw");
+  spacedScrews(shop, front[1], stepped[1], "end", 2, 64, 4, "pocket-screw");
+  return shelf;
 }
 
 function buildFlip(shop: Shop, ply: (width: number, length: number, name: string) => Piece, black: (piece: Piece) => Piece, main: Piece, lid: Piece): void {
+  shop.step = 8;
   const supports = [0, 1].map((index) => {
     const panel = black(ply(180, 1130, "Flip support"));
-    // 180 tall, 1130 spanning the width. Slot 100 × 25, 275 mm from one end, on the centre line.
     sit(panel, basis([0, 1, 0], [0, 0, 1], [1, 0, 0]), [0, 863, index === 0 ? 40 : 440]);
-    shop.plunge(panel, { x: 0, z: -1130 / 2 + 275, width: 25, length: 100 });
+    shop.plunge(panel, { x: 0, z: -1130 / 2 + 275, width: 25, length: 100, ends: "round" });
     shop.screw(panel, main, "bottom", 40, 200, 30, 4);
     shop.screw(panel, main, "bottom", 140, 900, 30, 4);
+    shop.screw(panel, main, "bottom", 80, 500, 30, 4);
+    shop.screw(panel, main, "bottom", 120, 700, 30, 4);
     return panel;
   });
   const pipe = shop.take("pipe-25", 875, "Flip pipe", 1200);
@@ -624,6 +782,13 @@ function buildFlip(shop: Shop, ply: (width: number, length: number, name: string
   sit(cleat[0], [0, 0, 0], [0, 940, 620]);
   sit(cleat[1], [0, 0, 0], [0, 850, 660]);
   shop.screw(rear, supports[1], "top", 40, 80, 30, 4);
+  shop.screw(rear, supports[0], "top", 70, 200, 30, 4);
+  shop.screw(rear, supports[0], "bottom", 40, 500, 30, 4);
+  shop.screw(rear, supports[1], "bottom", 80, 600, 30, 4);
+  for (let i = 0; i < 5; i += 1) {
+    shop.screw(cleat[0], rear, "bottom", 12, 80 + i * 140, 30, 4);
+    shop.screw(cleat[1], rear, "top", 12, 80 + i * 140, 30, 4);
+  }
 
   const sideA = [black(ply(116, 670, "Flip frame end")), black(ply(116, 670, "Flip frame end"))];
   const railB = [black(ply(116, 786, "Flip frame rail")), black(ply(116, 786, "Flip frame rail"))];
@@ -634,9 +799,14 @@ function buildFlip(shop: Shop, ply: (width: number, length: number, name: string
   sit(railB[1], basis([0, 1, 0], [-1, 0, 0], [0, 0, 1]), [335, frameY, 280]);
   shop.screw(sideA[0], railB[0], "top", 30, 40, 30, 4);
   shop.screw(sideA[0], railB[1], "top", 86, 40, 30, 4);
+  spacedScrews(shop, sideA[1], railB[0], "top", 2, 30, 4);
+  spacedScrews(shop, sideA[1], railB[1], "top", 2, 30, 4);
+  spacedScrews(shop, railB[0], sideA[0], "bottom", 1, 30, 4);
+  spacedScrews(shop, railB[1], sideA[0], "bottom", 1, 30, 4);
 
   const platform = black(ply(670, 824, "Saw platform"));
   sit(platform, [0, 0, 0], [138, frameY + 66.5, 280]);
+  for (let i = 0; i < 12; i += 1) shop.screw(platform, railB[i % 2], "bottom", 80 + (i % 4) * 120, 80 + Math.floor(i / 4) * 250, 30, 4);
   for (let i = 0; i < 4; i += 1) {
     const block = black(ply(100, 250, "Tie-down block"));
     const x = 138 - 250 + (i % 2) * 500;
@@ -644,6 +814,8 @@ function buildFlip(shop: Shop, ply: (width: number, length: number, name: string
     sit(block, [0, 0, 0], [x, platform.position[1] + 17, z]);
     shop.screw(block, platform, "bottom", 30, 40, 30, 4);
     shop.screw(block, platform, "bottom", 70, 200, 30, 4);
+    shop.screw(block, platform, "bottom", 40, 90, 30, 4);
+    shop.screw(block, platform, "bottom", 60, 160, 30, 4);
   }
   shop.screw(platform, pipe, "bottom", 200, 120, 40, 4);
   shop.screw(platform, pipe, "bottom", 470, 700, 40, 4);
@@ -651,6 +823,7 @@ function buildFlip(shop: Shop, ply: (width: number, length: number, name: string
 }
 
 function buildDrawer(shop: Shop, ply: (width: number, length: number, name: string) => Piece, black: (piece: Piece) => Piece): void {
+  shop.step = 9;
   const side = [black(ply(330, 988, "Drawer side")), black(ply(330, 988, "Drawer side"))];
   const end = [black(ply(330, 486, "Drawer end")), black(ply(330, 486, "Drawer end"))];
   const bottom = black(ply(486, 954, "Drawer bottom"));
@@ -674,11 +847,67 @@ function buildDrawer(shop: Shop, ply: (width: number, length: number, name: stri
   shop.screw(end[0], side[0], "bottom", 40, 40, 32, 4, "pocket-screw");
   shop.screw(end[0], side[1], "bottom", 290, 40, 32, 4, "pocket-screw");
   shop.screw(end[1], side[0], "top", 40, 40, 32, 4, "pocket-screw");
+  shop.screw(end[1], side[1], "top", 80, 80, 32, 4, "pocket-screw");
+  shop.screw(bottom, side[0], "bottom", 40, 200, 32, 4, "pocket-screw");
+  shop.screw(bottom, side[1], "bottom", 40, 700, 32, 4, "pocket-screw");
+  for (let i = 0; i < 20; i += 1) {
+    const host = i < 10 ? side[i % 2] : end[i % 2];
+    shop.screw(host, bottom, i < 10 ? "bottom" : "top", 40 + (i % 5) * 40, 80 + (i % 4) * 80, 30, 4);
+  }
   shop.screw(front, side[0], "top", 80, 200, 30, 4);
   shop.screw(front, side[0], "top", 270, 850, 30, 4);
+  shop.screw(front, side[1], "top", 80, 300, 30, 4);
+  shop.screw(front, side[1], "top", 200, 500, 30, 4);
+  shop.screw(front, end[0], "bottom", 120, 400, 30, 4);
+  shop.screw(front, end[1], "bottom", 160, 700, 30, 4);
   shop.hardware.push(placeHardware(offer("slide-500"), end[0], "bottom", { u: 160, v: 240 }));
   shop.hardware.push(placeHardware(offer("slide-500"), end[1], "top", { u: 160, v: 240 }));
   shop.hardware.push(placeHardware(offer("pull-128"), front, "top", { u: 175, v: 528 }));
+}
+
+function placeBrackets(shop: Shop, main: Piece, back: Piece, front: Piece, wingWide: Piece, wingNarrow: Piece, endReturn: Piece): void {
+  const add = (host: Piece, mate: Piece, u: number, vPos: number) => {
+    shop.hardware.push(placeHardware(offer("angle-25"), host, "bottom", { u, v: vPos }));
+    shop.screw(host, mate, "bottom", Math.min(host.width - 6, Math.max(6, u)), Math.min(host.length - 6, Math.max(6, vPos)), 16, 4);
+    shop.screw(mate, host, "top", Math.min(mate.width - 6, 8 + (u % 30)), Math.min(mate.length - 6, 12 + (vPos % Math.max(20, mate.length - 24))), 20, 4);
+  };
+  for (let i = 0; i < 10; i += 1) add(main, back, main.width - 40, 90 + i * 160);
+  for (let i = 0; i < 8; i += 1) add(main, front, 36, 50 + i * 70);
+  for (let i = 0; i < 6; i += 1) {
+    add(wingWide, back, 28 + (i % 3) * 90, 40 + Math.floor(i / 3) * 180);
+    add(wingNarrow, front, 28 + (i % 2) * 70, 36 + Math.floor(i / 2) * 100);
+  }
+  for (let i = 0; i < 8; i += 1) add(main, endReturn, 70 + i * 130, main.length - 48);
+}
+
+function workbenchBill(): PlanBillLine[] {
+  return [
+    { label: "SA pine 35×90 × 2.4 m", quantity: 22, kind: "board", key: "35×90×2400" },
+    { label: "DAR 19×42 × 2.4 m", quantity: 3, kind: "board", key: "19×42×2400" },
+    { label: "Formply 17 mm 1200×2400", quantity: 4, kind: "board", key: "17×1200×2400" },
+    { label: "Steel pipe 25 mm × 1.2 m", quantity: 1, kind: "board", key: "25×25×1200" },
+    { label: "60 mm screws", quantity: 156, kind: "fastener", key: "4.5×60" },
+    { label: "30 mm screws", quantity: 123, kind: "fastener", key: "4×30" },
+    { label: "16 mm bracket screws", quantity: 38, kind: "fastener", key: "4×16" },
+    { label: "20 mm bracket screws", quantity: 38, kind: "fastener", key: "4×20" },
+    { label: "40 mm screws", quantity: 2, kind: "fastener", key: "4×40" },
+    { label: "Pocket screws 32 mm", quantity: 6, kind: "fastener", key: "Pocket 4×32" },
+    { label: "Pocket screws 64 mm", quantity: 12, kind: "fastener", key: "Pocket 4×64" },
+    { label: "Roofing screws 60 mm", quantity: 4, kind: "fastener", key: "6.5×60" },
+    { label: "Cuphead bolts M10×90", quantity: 32, kind: "fastener", key: "Bolt M10×90" },
+    { label: "Angle brackets 25×25", quantity: 38, kind: "hardware", key: "angle-25" },
+    { label: "Drawer slides 500 mm", quantity: 2, kind: "hardware", key: "slide-500" },
+    { label: "Drawer pull", quantity: 1, kind: "hardware", key: "pull-128" },
+    { label: "Barrel bolts 100 mm", quantity: 2, kind: "hardware", key: "barrel-bolt-100" },
+    { label: "Retracting castors", quantity: 4, kind: "hardware", key: "castor-75" },
+    { label: "Furniture bumpers 10 mm", quantity: 6, kind: "hardware", key: "bumper-10" },
+  ];
+}
+
+function expectQty(project: ProjectData, kind: PlanBillLine["kind"], key: string, quantity: number): void {
+  const report = checkPlan([{ label: key, quantity, kind, key }], project.boards, project.hardware, project.fasteners, project.pieces);
+  const miss = report.mismatches[0];
+  if (miss) throw new Error(`${project.name} ${kind} ${key}: expected ${quantity}, got ${miss.actual}`);
 }
 
 const catalog = defaultCatalog();

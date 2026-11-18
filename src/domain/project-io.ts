@@ -1,6 +1,6 @@
 import { parseCatalog } from "./catalog.ts";
 import { normalizePiece } from "./features.ts";
-import type { Board, DimensionNote, Fastener, FastenerType, HardwareItem, Hole, Piece, ProjectData, StockItem, Vec3Tuple } from "./types.ts";
+import type { Board, DimensionNote, Fastener, FastenerType, HardwareItem, Hole, Piece, PlanBillLine, ProjectData, StockItem, Vec3Tuple } from "./types.ts";
 
 const STORAGE_KEY = "benchwork.project.v1";
 
@@ -50,6 +50,7 @@ export function parseProject(input: unknown, fallbackCatalog: StockItem[]): { pr
       fasteners,
       hardware,
       dimensions: Array.isArray(record.dimensions) ? record.dimensions.filter(isDimension) : [],
+      planBill: Array.isArray(record.planBill) ? record.planBill.filter(isPlanLine) : undefined,
     },
   };
 }
@@ -124,6 +125,12 @@ function isDimension(value: unknown): value is DimensionNote {
   if (!value || typeof value !== "object") return false;
   const note = value as DimensionNote;
   return typeof note.id === "string" && typeof note.a?.pieceId === "string" && typeof note.b?.pieceId === "string";
+}
+
+function isPlanLine(value: unknown): value is PlanBillLine {
+  if (!value || typeof value !== "object") return false;
+  const line = value as PlanBillLine;
+  return typeof line.label === "string" && typeof line.quantity === "number" && typeof line.key === "string" && (line.kind === "board" || line.kind === "fastener" || line.kind === "hardware");
 }
 
 function isHardware(value: unknown): value is HardwareItem {

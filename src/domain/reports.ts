@@ -2,7 +2,7 @@ import { describePiece } from "./features.ts";
 import { pointLengths } from "./geometry.ts";
 import { formatMm } from "./math.ts";
 import { instanceCount } from "./modifiers.ts";
-import type { Board, Fastener, HardwareItem, Piece } from "./types.ts";
+import type { Board, Fastener, HardwareItem, Piece, PlanBillLine } from "./types.ts";
 
 export interface CutPart {
   pieceId: string;
@@ -123,6 +123,7 @@ export function shoppingList(boards: Board[], hardware: HardwareItem[] = [], pie
   }
   const hardwareGroups = new Map<string, ShopLine>();
   for (const item of hardware) {
+    if (item.reference) continue;
     const key = `hw|${item.catalogId}|${item.price}`;
     const existing = hardwareGroups.get(key);
     if (existing) {
@@ -226,4 +227,57 @@ function boardsNeeded(board: Board, pieces: Piece[]): number {
 
 function trimNumber(n: number): string {
   return Number.isInteger(n) ? String(n) : String(Math.round(n * 10) / 10);
+}
+
+export interface PlanMismatch {
+  label: string;
+  kind: PlanBillLine["kind"];
+  key: string;
+  expected: number;
+  actual: number;
+}
+
+/** Compare a typed or attached materials list with the cut, fastener and hardware totals. */
+export function checkPlan(
+  bill: PlanBillLine[],
+  boards: Board[],
+  hardware: HardwareItem[],
+  fasteners: Fastener[],
+  pieces: Piece[],
+): { mismatches: PlanMismatch[]; extras: PlanMismatch[] } {
+  const actual = new Map<string, number>();
+  const shop = shoppingList(boards, hardware, pieces);
+  for (const line of shop.lines) {
+    if (line.species === "Hardware") {
+      const catalogId = line.key.split("|")[1] ?? line.name;
+      addCount(actual, `hardware:${catalogId}`, line.quantity);
+    } else {
+      addCount(actual, `board:${trimNumber(line.thickness)}×${trimNumber(line.width)}×${trimNumber(line.length)}`, line.quantity);
+    }
+  }
+  for (const line of fastenerList(fasteners, pieces)) addCount(actual, `fastener:${line.label}`, line.quantity);
+
+  const mismatches: PlanMismatch[] = [];
+  const seen = new Set<string>();
+  for (const line of bill) {
+    const id = `${line.kind}:${line.key}`;
+    seen.add(id);
+    const got = actual.get(id) ?? 0;
+    if (got !== line.quantity) {
+      mismatches.push({ label: line.label, kind: line.kind, key: line.key, expected: line.quantity, actual: got });
+    }
+  }
+  const extras: PlanMismatch[] = [];
+  for (const [id, quantity] of actual) {
+    if (seen.has(id) || quantity <= 0) continue;
+    const split = id.indexOf(":");
+    const kind = id.slice(0, split) as PlanBillLine["kind"];
+    const key = id.slice(split + 1);
+    extras.push({ label: key, kind, key, expected: 0, actual: quantity });
+  }
+  return { mismatches, extras };
+}
+
+function addCount(map: Map<string, number>, key: string, quantity: number): void {
+  map.set(key, (map.get(key) ?? 0) + quantity);
 }

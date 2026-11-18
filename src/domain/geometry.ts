@@ -280,9 +280,24 @@ export function buildMesh(piece: Piece): MeshData {
   return { positions, normals, uvs, indices, groups };
 }
 
-export function sectionContains(width: number, length: number, openings: Array<{ x: number; z: number; width: number; length: number }> | undefined, x: number, z: number): boolean {
+export function sectionContains(width: number, length: number, openings: Array<{ x: number; z: number; width: number; length: number; ends?: "square" | "round" }> | undefined, x: number, z: number): boolean {
   if (x < -width / 2 - 1e-6 || x > width / 2 + 1e-6 || z < -length / 2 - 1e-6 || z > length / 2 + 1e-6) return false;
-  return !(openings ?? []).some((opening) => Math.abs(x - opening.x) < opening.width / 2 - 1e-6 && Math.abs(z - opening.z) < opening.length / 2 - 1e-6);
+  return !(openings ?? []).some((opening) => pointInOpening(opening, x, z));
+}
+
+/** True when a local XZ point is strictly inside an opening. Round ends are semicircular caps. */
+export function pointInOpening(opening: { x: number; z: number; width: number; length: number; ends?: "square" | "round" }, x: number, z: number): boolean {
+  const dx = x - opening.x;
+  const dz = z - opening.z;
+  const hx = opening.width / 2;
+  const hz = opening.length / 2;
+  if (opening.ends !== "round" || opening.width + 0.01 >= opening.length) {
+    return Math.abs(dx) < hx - 1e-6 && Math.abs(dz) < hz - 1e-6;
+  }
+  const straight = hz - hx;
+  if (Math.abs(dz) <= straight + 1e-6 && Math.abs(dx) < hx - 1e-6) return true;
+  const cap = (dz < 0 ? -1 : 1) * straight;
+  return dx * dx + (dz - cap) * (dz - cap) < hx * hx - 1e-4;
 }
 
 /** How many separate pieces a set of rectangular openings would leave. 0 means the board is gone. */
@@ -312,6 +327,24 @@ export function openingRegions(width: number, length: number, openings: Array<{ 
 }
 
 function openingMesh(piece: Piece): MeshData {
+  const openings = piece.openings ?? [];
+  if (openings.length > 0 && openings.every((opening) => openingIsInterior(piece, opening))) {
+    const detailed = detailedOpeningMesh(piece);
+    if (detailed) return detailed;
+  }
+  return gridOpeningMesh(piece);
+}
+
+function openingIsInterior(piece: Piece, opening: NonNullable<Piece["openings"]>[number]): boolean {
+  return (
+    opening.x - opening.width / 2 > -piece.width / 2 + 0.4 &&
+    opening.x + opening.width / 2 < piece.width / 2 - 0.4 &&
+    opening.z - opening.length / 2 > -piece.length / 2 + 0.4 &&
+    opening.z + opening.length / 2 < piece.length / 2 - 0.4
+  );
+}
+
+function gridOpeningMesh(piece: Piece): MeshData {
   const grid = openingGrid(piece.width, piece.length, piece.openings ?? []);
   const half = piece.thickness / 2;
   const grain = piece.finish?.grain ?? "length";
@@ -371,6 +404,267 @@ function openingMesh(piece: Piece): MeshData {
       { start: capCount, count: indices.length - capCount, materialIndex: 1 },
     ],
   };
+}
+
+interface FlatPoint {
+  x: number;
+  z: number;
+}
+
+/** Interior holes, including rounded slots and a chamfer or round-over around the top rim. */
+function detailedOpeningMesh(piece: Piece): MeshData | null {
+  const openings = piece.openings ?? [];
+  const topRing = mergeOpenings(piece, openings.map((opening) => opening.rim?.radius ?? 0));
+  const fullRing = mergeOpenings(piece, openings.map(() => 0));
+  if (!topRing || !fullRing) return null;
+  const topTris = triangulateRing(topRing);
+  const bottomTris = triangulateRing(fullRing);
+  if (topTris.length < 3 || bottomTris.length < 3) return null;
+  const half = piece.thickness / 2;
+  const positions: number[] = [];
+  const normals: number[] = [];
+  const uvs: number[] = [];
+  const indices: number[] = [];
+  const pushVertex = (x: number, y: number, z: number, nx: number, ny: number, nz: number) => {
+    positions.push(x, y, z);
+    normals.push(nx, ny, nz);
+    uvs.push(x / 180, z / 180);
+    return positions.length / 3 - 1;
+  };
+  const pushTri = (a: number, b: number, c: number) => indices.push(a, b, c);
+  for (let i = 0; i < topTris.length; i += 3) {
+    const a = topRing[topTris[i]];
+    const b = topRing[topTris[i + 1]];
+    const c = topRing[topTris[i + 2]];
+    pushTri(pushVertex(a.x, half, a.z, 0, 1, 0), pushVertex(b.x, half, b.z, 0, 1, 0), pushVertex(c.x, half, c.z, 0, 1, 0));
+  }
+  for (let i = 0; i < bottomTris.length; i += 3) {
+    const a = fullRing[bottomTris[i]];
+    const b = fullRing[bottomTris[i + 1]];
+    const c = fullRing[bottomTris[i + 2]];
+    pushTri(pushVertex(a.x, -half, a.z, 0, -1, 0), pushVertex(c.x, -half, c.z, 0, -1, 0), pushVertex(b.x, -half, b.z, 0, -1, 0));
+  }
+  const capCount = indices.length;
+  const pushWall = (loop: FlatPoint[], y0: number, y1: number) => {
+    for (let i = 0; i < loop.length; i += 1) {
+      const a = loop[i];
+      const b = loop[(i + 1) % loop.length];
+      const nx = b.z - a.z;
+      const nz = a.x - b.x;
+      const length = Math.hypot(nx, nz) || 1;
+      const ox = nx / length;
+      const oz = nz / length;
+      const base = positions.length / 3;
+      pushVertex(a.x, y0, a.z, ox, 0, oz);
+      pushVertex(b.x, y0, b.z, ox, 0, oz);
+      pushVertex(b.x, y1, b.z, ox, 0, oz);
+      pushVertex(a.x, y1, a.z, ox, 0, oz);
+      indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
+    }
+  };
+  const outer = outerLoop(piece);
+  pushWall(outer, -half, half);
+  openings.forEach((opening, index) => {
+    const rim = opening.rim?.radius ?? 0;
+    const full = holeLoop(opening, 0);
+    const inset = holeLoop(opening, rim);
+    if (full.length < 3 || inset.length < 3 || full.length !== inset.length) return;
+    const bevel = Math.min(Math.max(rim, 0), piece.thickness - 1);
+    if (bevel > 0.4) {
+      for (let i = 0; i < inset.length; i += 1) {
+        const steps = opening.rim?.profile === "chamfer" ? 1 : 4;
+        for (let step = 0; step < steps; step += 1) {
+          const t0 = step / steps;
+          const t1 = (step + 1) / steps;
+          const lift = (t: number) => {
+            const bevelT = opening.rim?.profile === "round-over" ? Math.sin((t * Math.PI) / 2) : t;
+            const drop = opening.rim?.profile === "cove" ? 1 - Math.cos((t * Math.PI) / 2) : bevelT;
+            return half - bevel * drop;
+          };
+          const a0 = inset[i];
+          const b0 = inset[(i + 1) % inset.length];
+          const a1 = full[i];
+          const b1 = full[(i + 1) % full.length];
+          const mix = (p: FlatPoint, q: FlatPoint, t: number) => ({ x: p.x + (q.x - p.x) * t, z: p.z + (q.z - p.z) * t });
+          const p0 = mix(a0, a1, t0);
+          const p1 = mix(b0, b1, t0);
+          const p2 = mix(b0, b1, t1);
+          const p3 = mix(a0, a1, t1);
+          const yTop = lift(t0);
+          const yBot = lift(t1);
+          const nx = p1.z - p0.z;
+          const nz = p0.x - p1.x;
+          const span = Math.hypot(nx, nz) || 1;
+          const base = positions.length / 3;
+          pushVertex(p0.x, yTop, p0.z, nx / span, 0.4, nz / span);
+          pushVertex(p1.x, yTop, p1.z, nx / span, 0.4, nz / span);
+          pushVertex(p2.x, yBot, p2.z, nx / span, 0.2, nz / span);
+          pushVertex(p3.x, yBot, p3.z, nx / span, 0.2, nz / span);
+          indices.push(base, base + 1, base + 2, base, base + 2, base + 3);
+        }
+      }
+    }
+    pushWall(full, -half, half - Math.min(Math.max(rim, 0), piece.thickness - 1));
+    void index;
+  });
+  if (indices.length < 12) return null;
+  return {
+    positions: Float32Array.from(positions),
+    normals: Float32Array.from(normals),
+    uvs: Float32Array.from(uvs),
+    indices: new Uint32Array(indices),
+    groups: [
+      { start: 0, count: capCount, materialIndex: 0 },
+      { start: capCount, count: indices.length - capCount, materialIndex: 1 },
+    ],
+  };
+}
+
+function outerLoop(piece: Piece): FlatPoint[] {
+  const hx = piece.width / 2;
+  const hz = piece.length / 2;
+  return [
+    { x: -hx, z: -hz },
+    { x: hx, z: -hz },
+    { x: hx, z: hz },
+    { x: -hx, z: hz },
+  ];
+}
+
+function holeLoop(opening: NonNullable<Piece["openings"]>[number], inset: number): FlatPoint[] {
+  const round = opening.ends === "round" && opening.length > opening.width + 1;
+  if (!round) {
+    const hx = opening.width / 2 - inset;
+    const hz = opening.length / 2 - inset;
+    if (hx < 1 || hz < 1) return [];
+    return [
+      { x: opening.x - hx, z: opening.z - hz },
+      { x: opening.x - hx, z: opening.z + hz },
+      { x: opening.x + hx, z: opening.z + hz },
+      { x: opening.x + hx, z: opening.z - hz },
+    ];
+  }
+  const radius = opening.width / 2 - inset;
+  const straight = opening.length / 2 - opening.width / 2;
+  if (radius < 1) return [];
+  const segments = 8;
+  const points: FlatPoint[] = [];
+  const arc = (sign: number, from: number, to: number, skipFirst: boolean) => {
+    for (let i = skipFirst ? 1 : 0; i <= segments; i += 1) {
+      const angle = from + ((to - from) * i) / segments;
+      points.push({
+        x: opening.x + Math.cos(angle) * radius,
+        z: opening.z + sign * straight + Math.sin(angle) * radius,
+      });
+    }
+  };
+  arc(1, Math.PI, 0, false);
+  arc(-1, 0, -Math.PI, false);
+  if (points.length > 2) {
+    const first = points[0];
+    const last = points[points.length - 1];
+    if (Math.hypot(first.x - last.x, first.z - last.z) < 0.05) points.pop();
+  }
+  return points;
+}
+
+function mergeOpenings(piece: Piece, insets: number[]): FlatPoint[] | null {
+  let ring = outerLoop(piece);
+  const openings = piece.openings ?? [];
+  for (let i = 0; i < openings.length; i += 1) {
+    const hole = orient(holeLoop(openings[i], insets[i] ?? 0), false);
+    if (hole.length < 3) return null;
+    ring = bridgeHole(ring, hole);
+  }
+  return ring;
+}
+
+function orient(ring: FlatPoint[], ccw: boolean): FlatPoint[] {
+  if (ring.length < 3) return ring;
+  return ringArea(ring) > 0 === ccw ? ring : [...ring].reverse();
+}
+
+function ringArea(ring: FlatPoint[]): number {
+  let sum = 0;
+  for (let i = 0; i < ring.length; i += 1) {
+    const a = ring[i];
+    const b = ring[(i + 1) % ring.length];
+    sum += a.x * b.z - b.x * a.z;
+  }
+  return sum / 2;
+}
+
+function bridgeHole(outer: FlatPoint[], hole: FlatPoint[]): FlatPoint[] {
+  let right = 0;
+  for (let i = 1; i < hole.length; i += 1) if (hole[i].x > hole[right].x) right = i;
+  const point = hole[right];
+  let best = Infinity;
+  let edge = 0;
+  for (let i = 0; i < outer.length; i += 1) {
+    const a = outer[i];
+    const b = outer[(i + 1) % outer.length];
+    if (Math.abs(b.z - a.z) < 1e-9) continue;
+    const t = (point.z - a.z) / (b.z - a.z);
+    if (t < -1e-5 || t > 1 + 1e-5) continue;
+    const x = a.x + t * (b.x - a.x);
+    if (x < point.x - 1e-4) continue;
+    if (x < best) {
+      best = x;
+      edge = i;
+    }
+  }
+  const next = (edge + 1) % outer.length;
+  const connect = outer[edge].x >= outer[next].x ? edge : next;
+  const result: FlatPoint[] = [];
+  for (let i = 0; i < outer.length; i += 1) {
+    result.push(outer[(connect + i) % outer.length]);
+    if (i === 0) {
+      for (let k = 0; k <= hole.length; k += 1) result.push(hole[(right + k) % hole.length]);
+      result.push(outer[connect]);
+    }
+  }
+  return result;
+}
+
+function triangulateRing(ring: FlatPoint[]): number[] {
+  const index = ring.map((_, i) => i);
+  const triangles: number[] = [];
+  const turn = (a: FlatPoint, b: FlatPoint, c: FlatPoint) => (b.x - a.x) * (c.z - a.z) - (b.z - a.z) * (c.x - a.x);
+  let guard = 0;
+  while (index.length > 3 && guard++ < index.length * index.length + 8) {
+    let clipped = false;
+    for (let i = 0; i < index.length; i += 1) {
+      const i0 = index[(i + index.length - 1) % index.length];
+      const i1 = index[i];
+      const i2 = index[(i + 1) % index.length];
+      if (turn(ring[i0], ring[i1], ring[i2]) <= 1e-7) continue;
+      const contains = index.some((other) => {
+        if (other === i0 || other === i1 || other === i2) return false;
+        const point = ring[other];
+        if (samePoint(point, ring[i0]) || samePoint(point, ring[i1]) || samePoint(point, ring[i2])) return false;
+        return pointInsideTri(point, ring[i0], ring[i1], ring[i2]);
+      });
+      if (contains) continue;
+      triangles.push(i0, i1, i2);
+      index.splice(i, 1);
+      clipped = true;
+      break;
+    }
+    if (!clipped) break;
+  }
+  if (index.length === 3) triangles.push(index[0], index[1], index[2]);
+  return triangles;
+}
+
+function samePoint(a: FlatPoint, b: FlatPoint): boolean {
+  return Math.hypot(a.x - b.x, a.z - b.z) < 0.05;
+}
+
+function pointInsideTri(p: FlatPoint, a: FlatPoint, b: FlatPoint, c: FlatPoint): boolean {
+  const ab = (b.x - a.x) * (p.z - a.z) - (b.z - a.z) * (p.x - a.x);
+  const bc = (c.x - b.x) * (p.z - b.z) - (c.z - b.z) * (p.x - b.x);
+  const ca = (a.x - c.x) * (p.z - c.z) - (a.z - c.z) * (p.x - c.x);
+  return ab > 1e-4 && bc > 1e-4 && ca > 1e-4;
 }
 
 function openingGrid(width: number, length: number, openings: Array<{ x: number; z: number; width: number; length: number }>): { xs: number[]; zs: number[]; solid: boolean[][] } | null {

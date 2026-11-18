@@ -128,6 +128,8 @@ export function crosscut(piece: Piece, distanceFromStart: number, mitreDeg: numb
     joinery: shiftJoinery(piece, 0, distanceFromStart),
     spanEnd: piece.spanStart + distanceFromStart,
     name: partName(piece.name, distanceFromStart),
+    // The array describes the uncut piece. The offcut is a new part and does not repeat it.
+    modifiers: piece.modifiers,
   });
   const b = makeChild(piece, {
     length: len2,
@@ -145,12 +147,12 @@ export function crosscut(piece: Piece, distanceFromStart: number, mitreDeg: numb
     joinery: shiftJoinery(piece, distanceFromStart + consumed, piece.length),
     spanStart: piece.spanStart + distanceFromStart + consumed,
     name: partName(piece.name, len2),
+    modifiers: [],
   });
   return { ok: true, pieces: [a, b], droppedFasteners: 0 };
 }
 
 export function rip(piece: Piece, distanceFromLeft: number, kerf: number): CutOk | CutErr {
-  if (piece.section === "round") return { ok: false, reason: "Rip a rectangular board. Round stock is only crosscut." };
   const remain = piece.width - distanceFromLeft - kerf;
   if (!(distanceFromLeft >= MIN_PART_MM && remain >= MIN_PART_MM)) {
     return {
@@ -174,6 +176,7 @@ export function rip(piece: Piece, distanceFromLeft: number, kerf: number): CutOk
     holes: holes.a,
     openings: openings.a,
     name: partName(piece.name, piece.length),
+    modifiers: piece.modifiers,
   });
   const rightFraction = 1 - fraction - kerfFraction;
   const b = makeChild(piece, {
@@ -184,7 +187,19 @@ export function rip(piece: Piece, distanceFromLeft: number, kerf: number): CutOk
     holes: holes.b,
     openings: openings.b,
     name: partName(piece.name, piece.length),
+    modifiers: [],
   });
+  if (piece.section === "round") {
+    // A lengthwise split of round stock leaves two smaller rounds, one each side of the kerf.
+    a.thickness = a.width;
+    a.widthStart = a.width;
+    a.widthEnd = a.width;
+    b.thickness = b.width;
+    b.widthStart = b.width;
+    b.widthEnd = b.width;
+    a.section = "round";
+    b.section = "round";
+  }
   if (a.name === b.name) b.name = `${b.name} b`;
   return { ok: true, pieces: [a, b], droppedFasteners: 0 };
 }

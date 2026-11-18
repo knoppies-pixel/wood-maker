@@ -66,6 +66,9 @@ async function loadExample(file: string, label: string): Promise<void> {
     }
     useProject.getState().replaceProject(parsed.project);
     useUi.getState().select(null);
+    useUi.getState().setExplode(0);
+    useUi.getState().setAssemblyStep(null);
+    useUi.getState().requestView("frame");
     toast.success(`${label} loaded. Undo puts your previous bench back.`);
   } catch {
     toast.error("Could not load that example.");
@@ -106,8 +109,9 @@ export function Toolbar() {
   }
 
   return (
-    <header className="z-30 flex items-center gap-2 overflow-x-auto border-b bg-card px-3 py-1.5">
-      <div className="mr-1 flex items-center gap-2">
+    <header className="z-30 flex flex-col border-b bg-card">
+      <div className="flex items-center gap-2 px-3 py-1.5">
+      <div className="mr-1 flex shrink-0 items-center gap-2">
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => useUi.getState().setStockOpen(!useUi.getState().stockOpen)} aria-label="Stock library">
           <PanelLeft />
         </Button>
@@ -116,30 +120,6 @@ export function Toolbar() {
           <div className="text-[15px] leading-none font-semibold tracking-tight">Benchwork</div>
           <div className="mt-0.5 text-[10px] tracking-[0.16em] text-muted-foreground uppercase">Workshop</div>
         </div>
-      </div>
-
-      <div className="mx-auto flex items-center gap-0.5 rounded-lg border border-border bg-background/70 p-0.5">
-        {tools.map((item) => (
-          <Tooltip key={item.id}>
-            <TooltipTrigger asChild>
-              <button
-                type="button"
-                aria-pressed={tool === item.id}
-                onClick={() => setTool(item.id)}
-                className={cn(
-                  "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors",
-                  tool === item.id ? "bg-primary text-primary-foreground" : "hover:bg-muted",
-                )}
-              >
-                <ToolGlyph id={item.id} />
-                <span className="hidden sm:inline">{item.label}</span>
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {item.hint} · {item.key}
-            </TooltipContent>
-          </Tooltip>
-        ))}
       </div>
 
       <div className="ml-auto flex items-center gap-1">
@@ -209,6 +189,30 @@ export function Toolbar() {
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => useUi.getState().setInspectorOpen(!useUi.getState().inspectorOpen)} aria-label="Inspector">
           <PanelRight />
         </Button>
+      </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5 px-3 pb-2">
+        {tools.map((item) => (
+          <Tooltip key={item.id}>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                aria-pressed={tool === item.id}
+                onClick={() => setTool(item.id)}
+                className={cn(
+                  "flex shrink-0 items-center gap-1.5 rounded-lg border border-transparent px-3 py-1.5 text-sm font-medium transition-colors",
+                  tool === item.id ? "border-primary bg-primary text-primary-foreground" : "bg-background hover:bg-muted",
+                )}
+              >
+                <ToolGlyph id={item.id} />
+                <span>{item.label}</span>
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {item.hint} · {item.key}
+            </TooltipContent>
+          </Tooltip>
+        ))}
       </div>
       <input
         ref={fileRef}

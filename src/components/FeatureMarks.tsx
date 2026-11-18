@@ -135,10 +135,64 @@ function DovetailMesh({
   );
 }
 
+function ToolModel({ point, item }: { point: { x: number; y: number; z: number }; item: HardwareItem }) {
+  const mitre = item.catalogId.includes("mitre") || item.name.toLowerCase().includes("mitre");
+  const sign = item.face === "bottom" ? -1 : 1;
+  return (
+    <group position={[point.x, point.y, point.z]} scale={[1, sign, 1]} raycast={() => null}>
+      {mitre ? (
+        <>
+          <mesh position={[0, 45, 0]}>
+            <boxGeometry args={[500, 90, 400]} />
+            <meshStandardMaterial color="#f0c400" roughness={0.42} metalness={0.25} />
+          </mesh>
+          <mesh position={[0, 115, -170]}>
+            <boxGeometry args={[500, 40, 28]} />
+            <meshStandardMaterial color="#d5dde3" metalness={0.65} roughness={0.28} />
+          </mesh>
+          <mesh position={[0, 190, 30]}>
+            <boxGeometry args={[170, 160, 210]} />
+            <meshStandardMaterial color="#3c4248" metalness={0.4} roughness={0.4} />
+          </mesh>
+          <mesh position={[0, 270, 30]}>
+            <boxGeometry args={[36, 24, 300]} />
+            <meshStandardMaterial color="#c5ccd1" metalness={0.7} roughness={0.25} />
+          </mesh>
+        </>
+      ) : (
+        <>
+          <mesh position={[0, 145, 0]}>
+            <boxGeometry args={[520, 290, 520]} />
+            <meshStandardMaterial color="#3e454c" metalness={0.35} roughness={0.45} />
+          </mesh>
+          <mesh position={[0, 310, 0]}>
+            <boxGeometry args={[578, 40, 578]} />
+            <meshStandardMaterial color="#d7dee3" metalness={0.55} roughness={0.28} />
+          </mesh>
+          <mesh position={[0, 365, 70]}>
+            <boxGeometry args={[260, 70, 18]} />
+            <meshStandardMaterial color="#f0c400" metalness={0.3} roughness={0.4} />
+          </mesh>
+        </>
+      )}
+    </group>
+  );
+}
+
 function HardwareMark({ piece, item }: { piece: Piece; item: HardwareItem }) {
   const point = holeLocalPoint(piece, item.face, item.u, item.v);
   const inward = inwardNormal(item.face, piece);
   const outward = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), new THREE.Vector3(-inward.x, -inward.y, -inward.z).normalize());
+  if (item.kind === "tool") return <ToolModel point={point} item={item} />;
+  if (item.kind === "bumper") {
+    const sign = item.face === "bottom" ? -1 : 1;
+    return (
+      <mesh position={[point.x, point.y + sign * 2, point.z]} rotation={item.face === "top" || item.face === "bottom" ? [0, 0, 0] : [Math.PI / 2, 0, 0]} raycast={() => null}>
+        <cylinderGeometry args={[5, 5, 4, 16]} />
+        <meshStandardMaterial color="#2b2b2b" roughness={0.92} />
+      </mesh>
+    );
+  }
   const color = item.kind === "hinge" ? "#c6a15a" : item.kind === "drawer-slide" ? "#c5ccd1" : item.kind === "bracket" ? "#d5dde3" : item.kind === "castor" ? "#3e4650" : item.kind === "latch" ? "#c2a36a" : "#1f2428";
   if (item.face === "top" || item.face === "bottom") {
     const lift = item.face === "top" ? item.depth / 2 : -item.depth / 2;

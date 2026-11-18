@@ -37,6 +37,9 @@ export const HARDWARE_CATALOG: HardwareOffer[] = [
   { id: "angle-50", kind: "bracket", name: "Angle bracket 50×50 mm", width: 50, height: 50, depth: 20, price: 14 },
   { id: "castor-75", kind: "castor", name: "Retracting castor 75 mm", width: 75, height: 110, depth: 75, price: 250 },
   { id: "barrel-bolt-100", kind: "latch", name: "Barrel bolt 100 mm", width: 32, height: 100, depth: 18, price: 55 },
+  { id: "bumper-10", kind: "bumper", name: "Furniture bumper 10 mm", width: 10, height: 10, depth: 4, price: 8 },
+  { id: "mitre-saw-ref", kind: "tool", name: "DeWalt mitre saw reference", width: 500, height: 400, depth: 90, price: 0 },
+  { id: "table-saw-ref", kind: "tool", name: "DeWalt table saw reference", width: 578, height: 578, depth: 330, price: 0 },
 ];
 
 export const FINISH_PRESETS: Finish[] = [
@@ -46,6 +49,7 @@ export const FINISH_PRESETS: Finish[] = [
   { grain: "length", treatment: "stain", color: "#5c3317", label: "Jacobean stain" },
   { grain: "length", treatment: "paint", color: "#f4f1ea", label: "White paint" },
   { grain: "length", treatment: "paint", color: "#2c3338", label: "Black paint" },
+  { grain: "length", treatment: "paint", color: "#5e6368", label: "Formply" },
   { grain: "length", treatment: "paint", color: "#7d8c74", label: "Sage paint" },
 ];
 
@@ -108,7 +112,7 @@ export function taperPiece(piece: Piece, widthAtStart: number, widthAtEnd: numbe
 /** A jigsaw or plunge-router rectangle. A bite that crosses an edge is a notch. The offcut is kept. */
 export function plungeCut(
   piece: Piece,
-  input: { x: number; z: number; width: number; length: number },
+  input: { x: number; z: number; width: number; length: number; ends?: "square" | "round" },
 ): { piece: Piece; offcut: Piece } | { error: string } {
   if (piece.section === "round") return { error: "Plunge a flat face. Round stock is crosscut or drilled." };
   if (piece.outline) return { error: "Plunge a rectangular piece. The curved outline is already the saw path." };
@@ -130,7 +134,7 @@ export function plungeCut(
   const iz0 = Math.max(board.z0, hole.z0);
   const iz1 = Math.min(board.z1, hole.z1);
   if (ix1 - ix0 < MIN_PART_MM || iz1 - iz0 < MIN_PART_MM) return { error: "That opening misses the piece." };
-  const opening = { id: uid("open"), x: input.x, z: input.z, width: input.width, length: input.length };
+  const opening = { id: uid("open"), x: input.x, z: input.z, width: input.width, length: input.length, ends: input.ends ?? "square" };
   const regions = openingRegions(piece.width, piece.length, [...(piece.openings ?? []), opening]);
   if (regions === 0) return { error: "That opening removes the whole piece." };
   if (regions > 1) return { error: "That opening would split the piece in two. Crosscut or rip it instead." };
@@ -222,9 +226,29 @@ export function routeCut(
   piece: Piece,
   input: Omit<RouterCut, "id">,
 ): { route: RouterCut } | { error: string } {
-  if (input.depth < 0.5 || input.depth >= piece.thickness) return { error: "Router depth has to stop short of cutting through." };
+  if (input.depth < 0.5 || input.depth > piece.thickness + 0.01) return { error: `Router depth has to stay within the ${Math.round(piece.thickness)} mm thickness.` };
   if (input.width < 2) return { error: "The bit needs at least 2 mm of width." };
   return { route: { ...input, id: uid("route") } };
+}
+
+/** Chamfer, round-over or cove around an interior hole, not only the outer arris. */
+export function profileOpening(
+  piece: Piece,
+  openingId: string,
+  profile: ProfileName,
+  radius: number,
+): { piece: Piece } | { error: string } {
+  const openings = piece.openings ?? [];
+  if (!openings.some((opening) => opening.id === openingId)) return { error: "That opening is not on this piece." };
+  if (radius < 1 || radius > piece.thickness / 2) {
+    return { error: `Use a radius between 1 mm and ${Math.floor(piece.thickness / 2)} mm so the profile stays on the edge.` };
+  }
+  return {
+    piece: {
+      ...piece,
+      openings: openings.map((opening) => (opening.id === openingId ? { ...opening, rim: { profile, radius } } : opening)),
+    },
+  };
 }
 
 export function edgeProfile(input: Omit<EdgeProfile, "id">, thickness: number): { profile: EdgeProfile } | { error: string } {
@@ -403,6 +427,7 @@ export function placeHardware(
     height: offer.height,
     depth: offer.depth,
     price: offer.price,
+    reference: offer.kind === "tool" ? true : undefined,
   };
 }
 

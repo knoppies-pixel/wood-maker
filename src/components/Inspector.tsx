@@ -15,8 +15,8 @@ import { FINISH_PRESETS } from "../domain/features.ts";
 import { DEG, formatMm, formatZar } from "../domain/math.ts";
 import { axisExtent } from "../domain/modifiers.ts";
 import { connectedIds } from "../domain/operations.ts";
-import { cutList, fastenerList, profileLabel, shoppingList } from "../domain/reports.ts";
-import type { Piece, Vec3Tuple } from "../domain/types.ts";
+import { checkPlan, cutList, fastenerList, profileLabel, shoppingList, type CutPart } from "../domain/reports.ts";
+import type { Piece, PlanBillLine, Vec3Tuple } from "../domain/types.ts";
 import { useProject } from "../store/useProject.ts";
 import { useUi } from "../store/useUi.ts";
 import { cn } from "cn";
@@ -355,6 +355,7 @@ function CutPane({ rows }: { rows: ReturnType<typeof cutList> }) {
           <div className="nums text-xs text-muted-foreground">
             {profileLabel(board.thickness, board.width)} · bought {formatMm(board.boardLength)} mm · {formatZar(board.price)}
           </div>
+          <CutDiagram boardLength={board.boardLength} parts={board.parts} />
           <table className="mt-2 w-full text-left text-sm">
             <thead className="text-[11px] tracking-wide text-muted-foreground uppercase">
               <tr>
@@ -388,6 +389,52 @@ function CutPane({ rows }: { rows: ReturnType<typeof cutList> }) {
   );
 }
 
+function rowOf(parts: CutPart[]): number[] {
+  const rows: Array<Array<{ start: number; end: number }>> = [];
+  return parts.map((part) => {
+    for (let index = 0; index < rows.length; index += 1) {
+      const clear = rows[index].every((span) => part.spanEnd <= span.start + 0.5 || part.spanStart >= span.end - 0.5);
+      if (clear) {
+        rows[index].push({ start: part.spanStart, end: part.spanEnd });
+        return index;
+      }
+    }
+    rows.push([{ start: part.spanStart, end: part.spanEnd }]);
+    return rows.length - 1;
+  });
+}
+
+function CutDiagram({ boardLength, parts }: { boardLength: number; parts: CutPart[] }) {
+  if (parts.length === 0 || boardLength <= 0) return null;
+  const rows = rowOf(parts);
+  const rowCount = Math.max(1, ...rows.map((row) => row + 1));
+  const width = 280;
+  const rowH = 16;
+  const height = 8 + rowCount * (rowH + 3);
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="mt-2 w-full rounded border bg-[#f6efe4]" role="img" aria-label="Cut diagram">
+      <rect x={1} y={1} width={width - 2} height={height - 2} fill="#f3e6cf" stroke="#c4b39a" />
+      {parts.map((part, index) => {
+        const row = rows[index] ?? 0;
+        const x = (part.spanStart / boardLength) * (width - 4) + 2;
+        const w = Math.max(3, ((part.spanEnd - part.spanStart) / boardLength) * (width - 4));
+        const y = 4 + row * (rowH + 3);
+        return (
+          <g key={part.pieceId}>
+            <rect x={x} y={y} width={w} height={rowH} fill="#e7b56a" stroke="#8a5a2b" />
+            <title>{`${part.name} ${Math.round(part.length)}×${Math.round(part.width)}`}</title>
+            {w > 36 ? (
+              <text x={x + 3} y={y + 11} fontSize={8} fill="#3d2914">
+                {part.name.slice(0, Math.floor(w / 5))}
+              </text>
+            ) : null}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 function ShopPane({ lines, total }: { lines: ReturnType<typeof shoppingList>["lines"]; total: number }) {
   if (lines.length === 0) {
     return <p className="text-sm text-muted-foreground">The shopping list counts boards you pulled from the catalogue, not the offcuts you sawed off them.</p>;
@@ -417,6 +464,78 @@ function ShopPane({ lines, total }: { lines: ReturnType<typeof shoppingList>["li
           ))}
         </tbody>
       </table>
+      <PlanCheck />
+    </div>
+  );
+}
+
+function PlanCheck() {
+  const bill = useProject((state) => state.planBill ?? []);
+  const boards = useProject((state) => state.boards);
+  const hardware = useProject((state) => state.hardware);
+  const fasteners = useProject((state) => state.fasteners);
+  const pieces = useProject((state) => state.pieces);
+  const report = checkPlan(bill, boards, hardware, fasteners, pieces);
+  const [label, setLabel] = useState("");
+  const [key, setKey] = useState("");
+  const [quantity, setQuantity] = useState("1");
+  const [kind, setKind] = useState<PlanBillLine["kind"]>("board");
+
+  function save(next: PlanBillLine[]) {
+    useProject.getState().setPlanBill(next);
+  }
+
+  return (
+    <div className="mt-4 rounded-xl border p-3">
+      <div className="font-semibold">Plan check</div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Compare this bench with a materials list. Board keys look like 35×90×2400. Fastener keys match the screw list, such as 4.5×60 or Pocket 4×32. Hardware keys are catalogue ids.
+      </p>
+      {bill.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">No plan list yet. Add a line, or load an example that carries one.</p> : null}
+      {bill.length > 0 && report.mismatches.length === 0 ? <p className="mt-2 text-sm text-emerald-700">Every plan line matches.</p> : null}
+      <ul className="mt-2 flex flex-col gap-1 text-sm">
+        {report.mismatches.map((line) => (
+          <li key={`${line.kind}:${line.key}`} className="text-destructive">
+            {line.label}: plan {line.expected}, bench {line.actual}
+          </li>
+        ))}
+        {report.extras.map((line) => (
+          <li key={`extra:${line.kind}:${line.key}`} className="text-amber-700">
+            Not on the plan: {line.kind} {line.key} × {line.actual}
+          </li>
+        ))}
+      </ul>
+      <ul className="mt-2 flex flex-col gap-1">
+        {bill.map((line, index) => (
+          <li key={`${line.kind}:${line.key}:${index}`} className="flex items-center justify-between gap-2 text-xs">
+            <span>{line.quantity} × {line.label}</span>
+            <Button variant="ghost" size="xs" onClick={() => save(bill.filter((_, item) => item !== index))}>Remove</Button>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-2 flex flex-col gap-1">
+        <select className="h-8 rounded-md border bg-background px-2 text-sm" value={kind} onChange={(event) => setKind(event.target.value as PlanBillLine["kind"])}>
+          <option value="board">Board</option>
+          <option value="fastener">Fastener</option>
+          <option value="hardware">Hardware</option>
+        </select>
+        <Input value={label} placeholder="Label" onChange={(event) => setLabel(event.target.value)} />
+        <Input value={key} placeholder="Key" onChange={(event) => setKey(event.target.value)} />
+        <Input value={quantity} placeholder="Qty" onChange={(event) => setQuantity(event.target.value)} />
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            const qty = Number(quantity);
+            if (!label.trim() || !key.trim() || !(qty > 0)) return;
+            save([...bill, { label: label.trim(), key: key.trim(), quantity: qty, kind }]);
+            setLabel("");
+            setKey("");
+          }}
+        >
+          Add plan line
+        </Button>
+      </div>
     </div>
   );
 }

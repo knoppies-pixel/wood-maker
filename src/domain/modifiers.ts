@@ -37,10 +37,11 @@ function arrayCopies(piece: Piece, copies: LocalCopy[], modifier: Extract<WoodMo
     const next: LocalCopy[] = [];
     for (const copy of copies) {
       for (let index = 0; index < count; index += 1) {
+        // The circle is centred on the piece. Spacing is the radius.
         const angle = (index / count) * Math.PI * 2;
         next.push({
           position: [
-            copy.position[0] + (Math.cos(angle) - 1) * modifier.spacing,
+            copy.position[0] + Math.cos(angle) * modifier.spacing,
             copy.position[1],
             copy.position[2] + Math.sin(angle) * modifier.spacing,
           ],

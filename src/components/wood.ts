@@ -7,11 +7,11 @@ export interface WoodMaps {
 
 const cache = new Map<string, WoodMaps>();
 
-export function woodMaps(species: string): WoodMaps {
-  const key = species.toLowerCase();
+export function woodMaps(species: string, thickness = 0): WoodMaps {
+  const key = `${species.toLowerCase()}|${thickness <= 22 && thickness > 0 ? "fine" : "stock"}`;
   const cached = cache.get(key);
   if (cached) return cached;
-  const look = speciesLook(key);
+  const look = speciesLook(key, thickness);
   const maps = {
     face: texture(paintFace(look)),
     edge: texture(paintEdge(look)),
@@ -27,8 +27,8 @@ interface Look {
   edge: "grain" | "ply" | "mdf" | "chip";
 }
 
-function speciesLook(species: string): Look {
-  if (species.includes("ply")) return { base: "#e4c89a", dark: "#a67c4e", light: "#f6e6c8", edge: "ply" };
+function speciesLook(species: string, thickness: number): Look {
+  if (species.includes("ply")) return { base: "#f2d8b4", dark: "#c49a62", light: "#fbf0dc", edge: "ply" };
   if (species.includes("mdf")) return { base: "#cbb89a", dark: "#9d8b72", light: "#ddd0b8", edge: "mdf" };
   if (species.includes("supa") || species.includes("chip") || species.includes("melamine")) {
     return { base: "#f4f1ea", dark: "#c9bba6", light: "#fbf9f5", edge: "chip" };
@@ -36,7 +36,11 @@ function speciesLook(species: string): Look {
   if (species.includes("meranti")) return { base: "#c4623e", dark: "#7c341e", light: "#e39470", edge: "grain" };
   if (species.includes("saligna") || species.includes("eucal")) return { base: "#d19b4c", dark: "#8a5e2c", light: "#ebc888", edge: "grain" };
   if (species.includes("oak")) return { base: "#c9a56c", dark: "#8b6840", light: "#e6d2a6", edge: "grain" };
-  return { base: "#e7c88c", dark: "#b3894e", light: "#f6e3bf", edge: "grain" };
+  if (species.includes("pine") && thickness > 0 && thickness <= 22) {
+    return { base: "#f6e0bc", dark: "#e4c48a", light: "#fff4e2", edge: "grain" };
+  }
+  if (species.includes("pine")) return { base: "#e7a85a", dark: "#b86a2e", light: "#f8d7a6", edge: "grain" };
+  return { base: "#e7b56c", dark: "#b07a3e", light: "#f6ddb4", edge: "grain" };
 }
 
 function texture(canvas: HTMLCanvasElement): THREE.CanvasTexture {
@@ -92,7 +96,7 @@ function paintEdge(look: Look): HTMLCanvasElement {
   if (look.edge === "ply") {
     const bands = 9;
     for (let i = 0; i < bands; i += 1) {
-      ctx.fillStyle = i % 2 === 0 ? "#c8956a" : "#f3e6cf";
+      ctx.fillStyle = i % 2 === 0 ? "#d7a56e" : "#f8efe2";
       ctx.fillRect(0, (256 / bands) * i, 256, 256 / bands + 1);
     }
     return canvas;

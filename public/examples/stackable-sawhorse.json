@@ -587,7 +587,7 @@
   ],
   "boards": [
     {
-      "id": "board-1-p9tp6",
+      "id": "board-1-dofr0",
       "stockId": "pine-35x90",
       "name": "Construction pine 35×90",
       "species": "SA Pine",
@@ -598,7 +598,7 @@
       "sheet": false
     },
     {
-      "id": "board-7-l149r",
+      "id": "board-7-nk6tv",
       "stockId": "pine-35x90",
       "name": "Construction pine 35×90",
       "species": "SA Pine",
@@ -609,7 +609,7 @@
       "sheet": false
     },
     {
-      "id": "board-d-u4qle",
+      "id": "board-d-u3to8",
       "stockId": "pine-35x90",
       "name": "Construction pine 35×90",
       "species": "SA Pine",
@@ -620,7 +620,7 @@
       "sheet": false
     },
     {
-      "id": "board-j-yrcfj",
+      "id": "board-j-7h60e",
       "stockId": "ply-17-300",
       "name": "Plywood 17×300",
       "species": "Plywood",
@@ -631,7 +631,7 @@
       "sheet": false
     },
     {
-      "id": "board-11-pjh8p",
+      "id": "board-11-coxbt",
       "stockId": "pine-35x90",
       "name": "Construction pine 35×90",
       "species": "SA Pine",
@@ -642,7 +642,7 @@
       "sheet": false
     },
     {
-      "id": "board-19-isham",
+      "id": "board-19-ubj58",
       "stockId": "pine-35x90",
       "name": "Construction pine 35×90",
       "species": "SA Pine",
@@ -653,7 +653,7 @@
       "sheet": false
     },
     {
-      "id": "board-1h-j28ev",
+      "id": "board-1h-i7ly2",
       "stockId": "pine-35x90",
       "name": "Construction pine 35×90",
       "species": "SA Pine",
@@ -666,9 +666,9 @@
   ],
   "pieces": [
     {
-      "id": "piece-3-q3tkf",
+      "id": "piece-3-lgkyc",
       "name": "Top sawhorse top",
-      "boardId": "board-1-p9tp6",
+      "boardId": "board-1-dofr0",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -706,7 +706,7 @@
       ],
       "holes": [
         {
-          "id": "hole-1n-z5h2x",
+          "id": "hole-1n-8h98s",
           "face": "top",
           "u": 45,
           "v": 80,
@@ -716,7 +716,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-1p-h788d",
+          "id": "hole-1p-b9gfy",
           "face": "top",
           "u": 45,
           "v": 386,
@@ -726,7 +726,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-1r-cni5r",
+          "id": "hole-1r-ppiqv",
           "face": "top",
           "u": 45,
           "v": 1000,
@@ -736,10 +736,20 @@
           "style": "twist"
         },
         {
-          "id": "hole-1t-klsti",
+          "id": "hole-1t-dto89",
           "face": "top",
           "u": 45,
           "v": 694,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-1v-gdofr",
+          "face": "top",
+          "u": 45,
+          "v": 540,
           "diameter": 5,
           "depth": 35,
           "through": true,
@@ -748,12 +758,13 @@
       ],
       "section": "rect",
       "spanStart": 0,
-      "spanEnd": 1080
+      "spanEnd": 1080,
+      "step": 1
     },
     {
-      "id": "piece-5-gd3b3",
+      "id": "piece-5-w3g8m",
       "name": "Top sawhorse web",
-      "boardId": "board-1-p9tp6",
+      "boardId": "board-1-dofr0",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -792,12 +803,13 @@
       "holes": [],
       "section": "rect",
       "spanStart": 1083,
-      "spanEnd": 2103
+      "spanEnd": 2103,
+      "step": 1
     },
     {
-      "id": "piece-9-pl68m",
+      "id": "piece-9-jz0sb",
       "name": "Top sawhorse bottom",
-      "boardId": "board-7-l149r",
+      "boardId": "board-7-nk6tv",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -835,7 +847,7 @@
       ],
       "holes": [
         {
-          "id": "hole-1v-qza36",
+          "id": "hole-1x-aqusg",
           "face": "top",
           "u": 45,
           "v": 80,
@@ -845,7 +857,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-1x-dyang",
+          "id": "hole-1z-o2ose",
           "face": "top",
           "u": 45,
           "v": 360,
@@ -855,7 +867,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-1z-r87lt",
+          "id": "hole-21-km25z",
           "face": "top",
           "u": 45,
           "v": 940,
@@ -865,7 +877,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-21-kk5ow",
+          "id": "hole-23-j7bst",
           "face": "top",
           "u": 45,
           "v": 660,
@@ -877,12 +889,13 @@
       ],
       "section": "rect",
       "spanStart": 0,
-      "spanEnd": 1020
+      "spanEnd": 1020,
+      "step": 1
     },
     {
-      "id": "piece-b-ytcnc",
+      "id": "piece-b-618fo",
       "name": "Bottom sawhorse top",
-      "boardId": "board-7-l149r",
+      "boardId": "board-7-nk6tv",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -920,7 +933,7 @@
       ],
       "holes": [
         {
-          "id": "hole-3n-g5brd",
+          "id": "hole-3p-4et1c",
           "face": "top",
           "u": 45,
           "v": 80,
@@ -930,7 +943,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-3p-kps27",
+          "id": "hole-3r-d3rwx",
           "face": "top",
           "u": 45,
           "v": 360,
@@ -940,7 +953,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-3r-ccnb8",
+          "id": "hole-3t-2dpol",
           "face": "top",
           "u": 45,
           "v": 920,
@@ -950,10 +963,20 @@
           "style": "twist"
         },
         {
-          "id": "hole-3t-rf14c",
+          "id": "hole-3v-3efaq",
           "face": "top",
           "u": 45,
           "v": 640,
+          "diameter": 5,
+          "depth": 35,
+          "through": true,
+          "style": "twist"
+        },
+        {
+          "id": "hole-3x-emz30",
+          "face": "top",
+          "u": 45,
+          "v": 500,
           "diameter": 5,
           "depth": 35,
           "through": true,
@@ -962,12 +985,13 @@
       ],
       "section": "rect",
       "spanStart": 1023,
-      "spanEnd": 2023
+      "spanEnd": 2023,
+      "step": 1
     },
     {
-      "id": "piece-f-gvrsn",
+      "id": "piece-f-slfn1",
       "name": "Bottom sawhorse web",
-      "boardId": "board-d-u4qle",
+      "boardId": "board-d-u3to8",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -1006,12 +1030,13 @@
       "holes": [],
       "section": "rect",
       "spanStart": 0,
-      "spanEnd": 940
+      "spanEnd": 940,
+      "step": 1
     },
     {
-      "id": "piece-h-vzdzj",
+      "id": "piece-h-u8pbd",
       "name": "Bottom sawhorse bottom",
-      "boardId": "board-d-u4qle",
+      "boardId": "board-d-u3to8",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -1049,7 +1074,7 @@
       ],
       "holes": [
         {
-          "id": "hole-3v-j9m7s",
+          "id": "hole-3z-85yx1",
           "face": "top",
           "u": 45,
           "v": 80,
@@ -1059,7 +1084,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-3x-zn0bm",
+          "id": "hole-41-lccqs",
           "face": "top",
           "u": 45,
           "v": 360,
@@ -1069,7 +1094,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-3z-v7ji3",
+          "id": "hole-43-5329b",
           "face": "top",
           "u": 45,
           "v": 860,
@@ -1079,7 +1104,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-41-dilsy",
+          "id": "hole-45-f25ql",
           "face": "top",
           "u": 45,
           "v": 580,
@@ -1091,12 +1116,13 @@
       ],
       "section": "rect",
       "spanStart": 943,
-      "spanEnd": 1883
+      "spanEnd": 1883,
+      "step": 1
     },
     {
-      "id": "piece-n-9o91k",
+      "id": "piece-n-4se4c",
       "name": "Sawhorse end plate",
-      "boardId": "board-j-yrcfj",
+      "boardId": "board-j-7h60e",
       "stockId": "ply-17-300",
       "species": "Plywood",
       "profileName": "Plywood 17×300",
@@ -1134,7 +1160,7 @@
       ],
       "holes": [
         {
-          "id": "hole-2j-psupq",
+          "id": "hole-2l-iqbez",
           "face": "bottom",
           "u": 31.255319148936167,
           "v": 30,
@@ -1144,7 +1170,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-2l-49xxr",
+          "id": "hole-2n-ljsfk",
           "face": "bottom",
           "u": 218.74468085106383,
           "v": 30,
@@ -1154,7 +1180,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-2n-4fr51",
+          "id": "hole-2p-munlx",
           "face": "bottom",
           "u": 58.40425531914893,
           "v": 118,
@@ -1164,7 +1190,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-2p-4hy3a",
+          "id": "hole-2r-crdua",
           "face": "bottom",
           "u": 191.59574468085106,
           "v": 118,
@@ -1174,7 +1200,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-2r-gyz33",
+          "id": "hole-2t-isac6",
           "face": "bottom",
           "u": 85.24468085106383,
           "v": 205,
@@ -1184,7 +1210,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-2t-zlicv",
+          "id": "hole-2v-1leir",
           "face": "bottom",
           "u": 164.75531914893617,
           "v": 205,
@@ -1196,12 +1222,13 @@
       ],
       "section": "rect",
       "spanStart": 0,
-      "spanEnd": 235
+      "spanEnd": 235,
+      "step": 3
     },
     {
-      "id": "piece-r-1chas",
+      "id": "piece-r-q9mqe",
       "name": "Sawhorse end plate",
-      "boardId": "board-j-yrcfj",
+      "boardId": "board-j-7h60e",
       "stockId": "ply-17-300",
       "species": "Plywood",
       "profileName": "Plywood 17×300",
@@ -1239,7 +1266,7 @@
       ],
       "holes": [
         {
-          "id": "hole-3b-bdp6z",
+          "id": "hole-3d-pcndf",
           "face": "bottom",
           "u": 31.255319148936167,
           "v": 30,
@@ -1249,7 +1276,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-3d-16fwa",
+          "id": "hole-3f-kwgfe",
           "face": "bottom",
           "u": 218.74468085106383,
           "v": 30,
@@ -1259,7 +1286,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-3f-ehmep",
+          "id": "hole-3h-xmy44",
           "face": "bottom",
           "u": 58.40425531914893,
           "v": 118,
@@ -1269,7 +1296,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-3h-moz2o",
+          "id": "hole-3j-3p2a5",
           "face": "bottom",
           "u": 191.59574468085106,
           "v": 118,
@@ -1279,7 +1306,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-3j-f5wzm",
+          "id": "hole-3l-2lh59",
           "face": "bottom",
           "u": 85.24468085106383,
           "v": 205,
@@ -1289,7 +1316,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-3l-zxwwu",
+          "id": "hole-3n-4115m",
           "face": "bottom",
           "u": 164.75531914893617,
           "v": 205,
@@ -1301,12 +1328,13 @@
       ],
       "section": "rect",
       "spanStart": 238,
-      "spanEnd": 473
+      "spanEnd": 473,
+      "step": 3
     },
     {
-      "id": "piece-v-3e968",
+      "id": "piece-v-z3ml5",
       "name": "Sawhorse end plate",
-      "boardId": "board-j-yrcfj",
+      "boardId": "board-j-7h60e",
       "stockId": "ply-17-300",
       "species": "Plywood",
       "profileName": "Plywood 17×300",
@@ -1344,7 +1372,7 @@
       ],
       "holes": [
         {
-          "id": "hole-4j-2h8o8",
+          "id": "hole-4n-b006n",
           "face": "bottom",
           "u": 31.255319148936167,
           "v": 30,
@@ -1354,7 +1382,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-4l-da01b",
+          "id": "hole-4p-uj2in",
           "face": "bottom",
           "u": 218.74468085106383,
           "v": 30,
@@ -1364,7 +1392,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-4n-jp5eh",
+          "id": "hole-4r-ijx8l",
           "face": "bottom",
           "u": 58.40425531914893,
           "v": 118,
@@ -1374,7 +1402,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-4p-5gpm2",
+          "id": "hole-4t-y46pv",
           "face": "bottom",
           "u": 191.59574468085106,
           "v": 118,
@@ -1384,7 +1412,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-4r-2p5wg",
+          "id": "hole-4v-g2m19",
           "face": "bottom",
           "u": 85.24468085106383,
           "v": 205,
@@ -1394,7 +1422,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-4t-nj144",
+          "id": "hole-4x-2dxt8",
           "face": "bottom",
           "u": 164.75531914893617,
           "v": 205,
@@ -1406,12 +1434,13 @@
       ],
       "section": "rect",
       "spanStart": 476,
-      "spanEnd": 711
+      "spanEnd": 711,
+      "step": 3
     },
     {
-      "id": "piece-z-cik26",
+      "id": "piece-z-68br6",
       "name": "Sawhorse end plate",
-      "boardId": "board-j-yrcfj",
+      "boardId": "board-j-7h60e",
       "stockId": "ply-17-300",
       "species": "Plywood",
       "profileName": "Plywood 17×300",
@@ -1449,7 +1478,7 @@
       ],
       "holes": [
         {
-          "id": "hole-5b-2h9sz",
+          "id": "hole-5f-oie0z",
           "face": "bottom",
           "u": 31.255319148936167,
           "v": 30,
@@ -1459,7 +1488,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-5d-7mvev",
+          "id": "hole-5h-dsp1b",
           "face": "bottom",
           "u": 218.74468085106383,
           "v": 30,
@@ -1469,7 +1498,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-5f-7uupj",
+          "id": "hole-5j-3peyc",
           "face": "bottom",
           "u": 58.40425531914893,
           "v": 118,
@@ -1479,7 +1508,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-5h-0295w",
+          "id": "hole-5l-n010e",
           "face": "bottom",
           "u": 191.59574468085106,
           "v": 118,
@@ -1489,7 +1518,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-5j-9931t",
+          "id": "hole-5n-zic13",
           "face": "bottom",
           "u": 85.24468085106383,
           "v": 205,
@@ -1499,7 +1528,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-5l-pgdk5",
+          "id": "hole-5p-dgyvm",
           "face": "bottom",
           "u": 164.75531914893617,
           "v": 205,
@@ -1511,12 +1540,13 @@
       ],
       "section": "rect",
       "spanStart": 714,
-      "spanEnd": 949
+      "spanEnd": 949,
+      "step": 3
     },
     {
-      "id": "piece-13-ia3su",
+      "id": "piece-13-8nbgp",
       "name": "Sawhorse leg",
-      "boardId": "board-11-pjh8p",
+      "boardId": "board-11-coxbt",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -1554,7 +1584,7 @@
       ],
       "holes": [
         {
-          "id": "hole-23-5wgec",
+          "id": "hole-25-fjkqp",
           "face": "top",
           "u": 25,
           "v": 25,
@@ -1564,7 +1594,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-25-bui4d",
+          "id": "hole-27-ycwtf",
           "face": "top",
           "u": 25,
           "v": 140,
@@ -1574,7 +1604,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-27-26t47",
+          "id": "hole-29-twpj0",
           "face": "top",
           "u": 65,
           "v": 25,
@@ -1584,7 +1614,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-29-c078r",
+          "id": "hole-2b-eu1e8",
           "face": "top",
           "u": 65,
           "v": 140,
@@ -1596,12 +1626,13 @@
       ],
       "section": "rect",
       "spanStart": 0,
-      "spanEnd": 754.6497130744734
+      "spanEnd": 754.6497130744734,
+      "step": 2
     },
     {
-      "id": "piece-15-9u9cs",
+      "id": "piece-15-eroi2",
       "name": "Sawhorse leg",
-      "boardId": "board-11-pjh8p",
+      "boardId": "board-11-coxbt",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -1639,7 +1670,7 @@
       ],
       "holes": [
         {
-          "id": "hole-2b-nte3l",
+          "id": "hole-2d-ork8k",
           "face": "top",
           "u": 25,
           "v": 729.6497130744734,
@@ -1649,7 +1680,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-2d-yws63",
+          "id": "hole-2f-b1nqv",
           "face": "top",
           "u": 25,
           "v": 614.6497130744734,
@@ -1659,7 +1690,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-2f-d2uhw",
+          "id": "hole-2h-5ydcq",
           "face": "top",
           "u": 65,
           "v": 729.6497130744734,
@@ -1669,7 +1700,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-2h-ziuld",
+          "id": "hole-2j-wbjlw",
           "face": "top",
           "u": 65,
           "v": 614.6497130744734,
@@ -1681,12 +1712,13 @@
       ],
       "section": "rect",
       "spanStart": 757.7867883439349,
-      "spanEnd": 1512.4365014184082
+      "spanEnd": 1512.4365014184082,
+      "step": 2
     },
     {
-      "id": "piece-17-9xynf",
+      "id": "piece-17-so471",
       "name": "Sawhorse leg",
-      "boardId": "board-11-pjh8p",
+      "boardId": "board-11-coxbt",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -1724,7 +1756,7 @@
       ],
       "holes": [
         {
-          "id": "hole-2v-7b6ft",
+          "id": "hole-2x-vzpq3",
           "face": "top",
           "u": 25,
           "v": 25,
@@ -1734,7 +1766,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-2x-94npt",
+          "id": "hole-2z-wtuud",
           "face": "top",
           "u": 25,
           "v": 140,
@@ -1744,7 +1776,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-2z-ijugo",
+          "id": "hole-31-lvpci",
           "face": "top",
           "u": 65,
           "v": 25,
@@ -1754,7 +1786,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-31-22qzd",
+          "id": "hole-33-x7v3i",
           "face": "top",
           "u": 65,
           "v": 140,
@@ -1766,12 +1798,13 @@
       ],
       "section": "rect",
       "spanStart": 1515.4365014184082,
-      "spanEnd": 2270.0862144928815
+      "spanEnd": 2270.0862144928815,
+      "step": 2
     },
     {
-      "id": "piece-1b-qxi37",
+      "id": "piece-1b-4012j",
       "name": "Sawhorse leg",
-      "boardId": "board-19-isham",
+      "boardId": "board-19-ubj58",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -1809,7 +1842,7 @@
       ],
       "holes": [
         {
-          "id": "hole-33-xcvbf",
+          "id": "hole-35-ig2f9",
           "face": "bottom",
           "u": 25,
           "v": 25,
@@ -1819,7 +1852,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-35-njs6h",
+          "id": "hole-37-ju0gj",
           "face": "bottom",
           "u": 25,
           "v": 140,
@@ -1829,7 +1862,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-37-goxnz",
+          "id": "hole-39-l82iu",
           "face": "bottom",
           "u": 65,
           "v": 25,
@@ -1839,7 +1872,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-39-frcgz",
+          "id": "hole-3b-r5jsh",
           "face": "bottom",
           "u": 65,
           "v": 140,
@@ -1851,12 +1884,13 @@
       ],
       "section": "rect",
       "spanStart": 0,
-      "spanEnd": 754.6497130744734
+      "spanEnd": 754.6497130744734,
+      "step": 2
     },
     {
-      "id": "piece-1d-b12go",
+      "id": "piece-1d-dsme2",
       "name": "Sawhorse leg",
-      "boardId": "board-19-isham",
+      "boardId": "board-19-ubj58",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -1894,7 +1928,7 @@
       ],
       "holes": [
         {
-          "id": "hole-43-bxboj",
+          "id": "hole-47-ilg93",
           "face": "bottom",
           "u": 25,
           "v": 729.6497130744734,
@@ -1904,7 +1938,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-45-5fyxg",
+          "id": "hole-49-v41p2",
           "face": "bottom",
           "u": 25,
           "v": 614.6497130744734,
@@ -1914,7 +1948,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-47-a5udx",
+          "id": "hole-4b-vhku4",
           "face": "bottom",
           "u": 65,
           "v": 729.6497130744734,
@@ -1924,7 +1958,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-49-ypsgg",
+          "id": "hole-4d-3jwhv",
           "face": "bottom",
           "u": 65,
           "v": 614.6497130744734,
@@ -1936,12 +1970,13 @@
       ],
       "section": "rect",
       "spanStart": 757.7867883439349,
-      "spanEnd": 1512.4365014184082
+      "spanEnd": 1512.4365014184082,
+      "step": 2
     },
     {
-      "id": "piece-1f-wzt94",
+      "id": "piece-1f-setnm",
       "name": "Sawhorse leg",
-      "boardId": "board-19-isham",
+      "boardId": "board-19-ubj58",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -1979,7 +2014,7 @@
       ],
       "holes": [
         {
-          "id": "hole-4b-j7f8o",
+          "id": "hole-4f-8vc88",
           "face": "bottom",
           "u": 25,
           "v": 25,
@@ -1989,7 +2024,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-4d-an3l9",
+          "id": "hole-4h-ko0g2",
           "face": "bottom",
           "u": 25,
           "v": 140,
@@ -1999,7 +2034,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-4f-fj2dn",
+          "id": "hole-4j-yjivx",
           "face": "bottom",
           "u": 65,
           "v": 25,
@@ -2009,7 +2044,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-4h-noiqf",
+          "id": "hole-4l-call0",
           "face": "bottom",
           "u": 65,
           "v": 140,
@@ -2021,12 +2056,13 @@
       ],
       "section": "rect",
       "spanStart": 1515.4365014184082,
-      "spanEnd": 2270.0862144928815
+      "spanEnd": 2270.0862144928815,
+      "step": 2
     },
     {
-      "id": "piece-1j-yuz4q",
+      "id": "piece-1j-f2xro",
       "name": "Sawhorse leg",
-      "boardId": "board-1h-j28ev",
+      "boardId": "board-1h-i7ly2",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -2064,7 +2100,7 @@
       ],
       "holes": [
         {
-          "id": "hole-4v-ehuzd",
+          "id": "hole-4z-cniua",
           "face": "top",
           "u": 25,
           "v": 25,
@@ -2074,7 +2110,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-4x-jz504",
+          "id": "hole-51-g0h63",
           "face": "top",
           "u": 25,
           "v": 140,
@@ -2084,7 +2120,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-4z-bhkmr",
+          "id": "hole-53-on3if",
           "face": "top",
           "u": 65,
           "v": 25,
@@ -2094,7 +2130,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-51-6v7kv",
+          "id": "hole-55-fu0sd",
           "face": "top",
           "u": 65,
           "v": 140,
@@ -2106,12 +2142,13 @@
       ],
       "section": "rect",
       "spanStart": 0,
-      "spanEnd": 754.6497130744734
+      "spanEnd": 754.6497130744734,
+      "step": 2
     },
     {
-      "id": "piece-1l-t9dia",
+      "id": "piece-1l-rj5a3",
       "name": "Sawhorse leg",
-      "boardId": "board-1h-j28ev",
+      "boardId": "board-1h-i7ly2",
       "stockId": "pine-35x90",
       "species": "SA Pine",
       "profileName": "Construction pine 35×90",
@@ -2149,7 +2186,7 @@
       ],
       "holes": [
         {
-          "id": "hole-53-rdy2r",
+          "id": "hole-57-5ldk1",
           "face": "top",
           "u": 25,
           "v": 729.6497130744734,
@@ -2159,7 +2196,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-55-jp73g",
+          "id": "hole-59-o53xb",
           "face": "top",
           "u": 25,
           "v": 614.6497130744734,
@@ -2169,7 +2206,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-57-gv16a",
+          "id": "hole-5b-cvocl",
           "face": "top",
           "u": 65,
           "v": 729.6497130744734,
@@ -2179,7 +2216,7 @@
           "style": "twist"
         },
         {
-          "id": "hole-59-78ni4",
+          "id": "hole-5d-v1g4t",
           "face": "top",
           "u": 65,
           "v": 614.6497130744734,
@@ -2191,15 +2228,16 @@
       ],
       "section": "rect",
       "spanStart": 757.7867883439349,
-      "spanEnd": 1512.4365014184082
+      "spanEnd": 1512.4365014184082,
+      "step": 2
     }
   ],
   "fasteners": [
     {
-      "id": "screw-1o-n9chj",
+      "id": "screw-1o-2qqor",
       "type": "screw",
-      "pieceAId": "piece-3-q3tkf",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-3-lgkyc",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         0,
         17.5,
@@ -2214,10 +2252,10 @@
       "length": 65
     },
     {
-      "id": "screw-1q-vkb2m",
+      "id": "screw-1q-ygbz6",
       "type": "screw",
-      "pieceAId": "piece-3-q3tkf",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-3-lgkyc",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         0,
         17.5,
@@ -2232,10 +2270,10 @@
       "length": 65
     },
     {
-      "id": "screw-1s-7bywy",
+      "id": "screw-1s-8cwrj",
       "type": "screw",
-      "pieceAId": "piece-3-q3tkf",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-3-lgkyc",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         0,
         17.5,
@@ -2250,10 +2288,10 @@
       "length": 65
     },
     {
-      "id": "screw-1u-3bkoq",
+      "id": "screw-1u-0s1p2",
       "type": "screw",
-      "pieceAId": "piece-3-q3tkf",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-3-lgkyc",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         0,
         17.5,
@@ -2268,10 +2306,28 @@
       "length": 65
     },
     {
-      "id": "screw-1w-m1qlg",
+      "id": "screw-1w-uya9i",
       "type": "screw",
-      "pieceAId": "piece-9-pl68m",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-3-lgkyc",
+      "pieceBId": "piece-5-w3g8m",
+      "localPosition": [
+        0,
+        17.5,
+        0
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-1y-bff7c",
+      "type": "screw",
+      "pieceAId": "piece-9-jz0sb",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         0,
         17.5,
@@ -2286,10 +2342,10 @@
       "length": 65
     },
     {
-      "id": "screw-1y-qzok6",
+      "id": "screw-20-av01h",
       "type": "screw",
-      "pieceAId": "piece-9-pl68m",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-9-jz0sb",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         0,
         17.5,
@@ -2304,10 +2360,10 @@
       "length": 65
     },
     {
-      "id": "screw-20-npyrf",
+      "id": "screw-22-hkca1",
       "type": "screw",
-      "pieceAId": "piece-9-pl68m",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-9-jz0sb",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         0,
         17.5,
@@ -2322,10 +2378,10 @@
       "length": 65
     },
     {
-      "id": "screw-22-ap1w4",
+      "id": "screw-24-6l8ex",
       "type": "screw",
-      "pieceAId": "piece-9-pl68m",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-9-jz0sb",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         0,
         17.5,
@@ -2340,10 +2396,10 @@
       "length": 65
     },
     {
-      "id": "screw-24-skuun",
+      "id": "screw-26-di2r4",
       "type": "screw",
-      "pieceAId": "piece-13-ia3su",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-13-8nbgp",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -20,
         17.5,
@@ -2358,10 +2414,10 @@
       "length": 65
     },
     {
-      "id": "screw-26-neb72",
+      "id": "screw-28-ygoqm",
       "type": "screw",
-      "pieceAId": "piece-13-ia3su",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-13-8nbgp",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -20,
         17.5,
@@ -2376,10 +2432,10 @@
       "length": 65
     },
     {
-      "id": "screw-28-ajn8b",
+      "id": "screw-2a-n8oeh",
       "type": "screw",
-      "pieceAId": "piece-13-ia3su",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-13-8nbgp",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         20,
         17.5,
@@ -2394,10 +2450,10 @@
       "length": 65
     },
     {
-      "id": "screw-2a-expth",
+      "id": "screw-2c-ei7yh",
       "type": "screw",
-      "pieceAId": "piece-13-ia3su",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-13-8nbgp",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         20,
         17.5,
@@ -2412,10 +2468,10 @@
       "length": 65
     },
     {
-      "id": "screw-2c-avc3x",
+      "id": "screw-2e-08t4n",
       "type": "screw",
-      "pieceAId": "piece-15-9u9cs",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-15-eroi2",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -20,
         17.5,
@@ -2430,10 +2486,10 @@
       "length": 65
     },
     {
-      "id": "screw-2e-ycz46",
+      "id": "screw-2g-qvgny",
       "type": "screw",
-      "pieceAId": "piece-15-9u9cs",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-15-eroi2",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -20,
         17.5,
@@ -2448,10 +2504,10 @@
       "length": 65
     },
     {
-      "id": "screw-2g-vzks5",
+      "id": "screw-2i-a4tl8",
       "type": "screw",
-      "pieceAId": "piece-15-9u9cs",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-15-eroi2",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         20,
         17.5,
@@ -2466,10 +2522,10 @@
       "length": 65
     },
     {
-      "id": "screw-2i-ow8me",
+      "id": "screw-2k-xn4ws",
       "type": "screw",
-      "pieceAId": "piece-15-9u9cs",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-15-eroi2",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         20,
         17.5,
@@ -2484,10 +2540,10 @@
       "length": 65
     },
     {
-      "id": "screw-2k-2trmk",
+      "id": "screw-2m-z46i7",
       "type": "screw",
-      "pieceAId": "piece-n-9o91k",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-n-4se4c",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -93.74468085106383,
         -8.5,
@@ -2502,10 +2558,10 @@
       "length": 30
     },
     {
-      "id": "screw-2m-k7izc",
+      "id": "screw-2o-2x0he",
       "type": "screw",
-      "pieceAId": "piece-n-9o91k",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-n-4se4c",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         93.74468085106383,
         -8.5,
@@ -2520,10 +2576,10 @@
       "length": 30
     },
     {
-      "id": "screw-2o-vqnqy",
+      "id": "screw-2q-zhif1",
       "type": "screw",
-      "pieceAId": "piece-n-9o91k",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-n-4se4c",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -66.59574468085107,
         -8.5,
@@ -2538,10 +2594,10 @@
       "length": 30
     },
     {
-      "id": "screw-2q-h2vdh",
+      "id": "screw-2s-yvv67",
       "type": "screw",
-      "pieceAId": "piece-n-9o91k",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-n-4se4c",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         66.59574468085106,
         -8.5,
@@ -2556,10 +2612,10 @@
       "length": 30
     },
     {
-      "id": "screw-2s-rrdrz",
+      "id": "screw-2u-s6soa",
       "type": "screw",
-      "pieceAId": "piece-n-9o91k",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-n-4se4c",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -39.75531914893617,
         -8.5,
@@ -2574,10 +2630,10 @@
       "length": 30
     },
     {
-      "id": "screw-2u-ff4ux",
+      "id": "screw-2w-3rplc",
       "type": "screw",
-      "pieceAId": "piece-n-9o91k",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-n-4se4c",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         39.75531914893617,
         -8.5,
@@ -2592,10 +2648,10 @@
       "length": 30
     },
     {
-      "id": "screw-2w-gcioa",
+      "id": "screw-2y-41pdk",
       "type": "screw",
-      "pieceAId": "piece-17-9xynf",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-17-so471",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -20,
         17.5,
@@ -2610,10 +2666,10 @@
       "length": 65
     },
     {
-      "id": "screw-2y-l4sls",
+      "id": "screw-30-z8xt9",
       "type": "screw",
-      "pieceAId": "piece-17-9xynf",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-17-so471",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -20,
         17.5,
@@ -2628,10 +2684,10 @@
       "length": 65
     },
     {
-      "id": "screw-30-11vz7",
+      "id": "screw-32-0srqb",
       "type": "screw",
-      "pieceAId": "piece-17-9xynf",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-17-so471",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         20,
         17.5,
@@ -2646,10 +2702,10 @@
       "length": 65
     },
     {
-      "id": "screw-32-k8fno",
+      "id": "screw-34-o6s1a",
       "type": "screw",
-      "pieceAId": "piece-17-9xynf",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-17-so471",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         20,
         17.5,
@@ -2664,10 +2720,10 @@
       "length": 65
     },
     {
-      "id": "screw-34-hoe9g",
+      "id": "screw-36-7z9a1",
       "type": "screw",
-      "pieceAId": "piece-1b-qxi37",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-1b-4012j",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -20,
         -17.5,
@@ -2682,10 +2738,10 @@
       "length": 65
     },
     {
-      "id": "screw-36-5vuvv",
+      "id": "screw-38-x9vpg",
       "type": "screw",
-      "pieceAId": "piece-1b-qxi37",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-1b-4012j",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -20,
         -17.5,
@@ -2700,10 +2756,10 @@
       "length": 65
     },
     {
-      "id": "screw-38-cg4if",
+      "id": "screw-3a-px1cl",
       "type": "screw",
-      "pieceAId": "piece-1b-qxi37",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-1b-4012j",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         20,
         -17.5,
@@ -2718,10 +2774,10 @@
       "length": 65
     },
     {
-      "id": "screw-3a-qnlbk",
+      "id": "screw-3c-lg6jp",
       "type": "screw",
-      "pieceAId": "piece-1b-qxi37",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-1b-4012j",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         20,
         -17.5,
@@ -2736,10 +2792,10 @@
       "length": 65
     },
     {
-      "id": "screw-3c-f6yp0",
+      "id": "screw-3e-q49uj",
       "type": "screw",
-      "pieceAId": "piece-r-1chas",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-r-q9mqe",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -93.74468085106383,
         -8.5,
@@ -2754,10 +2810,10 @@
       "length": 30
     },
     {
-      "id": "screw-3e-d8vii",
+      "id": "screw-3g-9rht9",
       "type": "screw",
-      "pieceAId": "piece-r-1chas",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-r-q9mqe",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         93.74468085106383,
         -8.5,
@@ -2772,10 +2828,10 @@
       "length": 30
     },
     {
-      "id": "screw-3g-nizv7",
+      "id": "screw-3i-qwylk",
       "type": "screw",
-      "pieceAId": "piece-r-1chas",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-r-q9mqe",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -66.59574468085107,
         -8.5,
@@ -2790,10 +2846,10 @@
       "length": 30
     },
     {
-      "id": "screw-3i-k2ubp",
+      "id": "screw-3k-4py04",
       "type": "screw",
-      "pieceAId": "piece-r-1chas",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-r-q9mqe",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         66.59574468085106,
         -8.5,
@@ -2808,10 +2864,10 @@
       "length": 30
     },
     {
-      "id": "screw-3k-zs0m5",
+      "id": "screw-3m-5c86l",
       "type": "screw",
-      "pieceAId": "piece-r-1chas",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-r-q9mqe",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         -39.75531914893617,
         -8.5,
@@ -2826,10 +2882,10 @@
       "length": 30
     },
     {
-      "id": "screw-3m-n09ef",
+      "id": "screw-3o-3dzcq",
       "type": "screw",
-      "pieceAId": "piece-r-1chas",
-      "pieceBId": "piece-5-gd3b3",
+      "pieceAId": "piece-r-q9mqe",
+      "pieceBId": "piece-5-w3g8m",
       "localPosition": [
         39.75531914893617,
         -8.5,
@@ -2844,10 +2900,10 @@
       "length": 30
     },
     {
-      "id": "screw-3o-jar87",
+      "id": "screw-3q-w57np",
       "type": "screw",
-      "pieceAId": "piece-b-ytcnc",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-b-618fo",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         0,
         17.5,
@@ -2862,10 +2918,10 @@
       "length": 65
     },
     {
-      "id": "screw-3q-puiih",
+      "id": "screw-3s-r72e8",
       "type": "screw",
-      "pieceAId": "piece-b-ytcnc",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-b-618fo",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         0,
         17.5,
@@ -2880,10 +2936,10 @@
       "length": 65
     },
     {
-      "id": "screw-3s-91gs2",
+      "id": "screw-3u-zd9n7",
       "type": "screw",
-      "pieceAId": "piece-b-ytcnc",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-b-618fo",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         0,
         17.5,
@@ -2898,10 +2954,10 @@
       "length": 65
     },
     {
-      "id": "screw-3u-vgwqv",
+      "id": "screw-3w-zih30",
       "type": "screw",
-      "pieceAId": "piece-b-ytcnc",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-b-618fo",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         0,
         17.5,
@@ -2916,10 +2972,28 @@
       "length": 65
     },
     {
-      "id": "screw-3w-dliik",
+      "id": "screw-3y-wd60u",
       "type": "screw",
-      "pieceAId": "piece-h-vzdzj",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-b-618fo",
+      "pieceBId": "piece-f-slfn1",
+      "localPosition": [
+        0,
+        17.5,
+        0
+      ],
+      "localDirection": [
+        0,
+        -1,
+        0
+      ],
+      "diameter": 4.8,
+      "length": 65
+    },
+    {
+      "id": "screw-40-xzxlh",
+      "type": "screw",
+      "pieceAId": "piece-h-u8pbd",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         0,
         17.5,
@@ -2934,10 +3008,10 @@
       "length": 65
     },
     {
-      "id": "screw-3y-torx4",
+      "id": "screw-42-4ee6f",
       "type": "screw",
-      "pieceAId": "piece-h-vzdzj",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-h-u8pbd",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         0,
         17.5,
@@ -2952,10 +3026,10 @@
       "length": 65
     },
     {
-      "id": "screw-40-xv5hv",
+      "id": "screw-44-rn9ml",
       "type": "screw",
-      "pieceAId": "piece-h-vzdzj",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-h-u8pbd",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         0,
         17.5,
@@ -2970,10 +3044,10 @@
       "length": 65
     },
     {
-      "id": "screw-42-th3k3",
+      "id": "screw-46-91ytv",
       "type": "screw",
-      "pieceAId": "piece-h-vzdzj",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-h-u8pbd",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         0,
         17.5,
@@ -2988,10 +3062,10 @@
       "length": 65
     },
     {
-      "id": "screw-44-djumv",
+      "id": "screw-48-16cvv",
       "type": "screw",
-      "pieceAId": "piece-1d-b12go",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1d-dsme2",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -20,
         -17.5,
@@ -3006,10 +3080,10 @@
       "length": 65
     },
     {
-      "id": "screw-46-ossxm",
+      "id": "screw-4a-r0miq",
       "type": "screw",
-      "pieceAId": "piece-1d-b12go",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1d-dsme2",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -20,
         -17.5,
@@ -3024,10 +3098,10 @@
       "length": 65
     },
     {
-      "id": "screw-48-9bi7r",
+      "id": "screw-4c-a5o5d",
       "type": "screw",
-      "pieceAId": "piece-1d-b12go",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1d-dsme2",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         20,
         -17.5,
@@ -3042,10 +3116,10 @@
       "length": 65
     },
     {
-      "id": "screw-4a-ialab",
+      "id": "screw-4e-2usj3",
       "type": "screw",
-      "pieceAId": "piece-1d-b12go",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1d-dsme2",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         20,
         -17.5,
@@ -3060,10 +3134,10 @@
       "length": 65
     },
     {
-      "id": "screw-4c-ngwg5",
+      "id": "screw-4g-0qajv",
       "type": "screw",
-      "pieceAId": "piece-1f-wzt94",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1f-setnm",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -20,
         -17.5,
@@ -3078,10 +3152,10 @@
       "length": 65
     },
     {
-      "id": "screw-4e-f38hk",
+      "id": "screw-4i-9nz7e",
       "type": "screw",
-      "pieceAId": "piece-1f-wzt94",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1f-setnm",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -20,
         -17.5,
@@ -3096,10 +3170,10 @@
       "length": 65
     },
     {
-      "id": "screw-4g-kv63x",
+      "id": "screw-4k-wyigf",
       "type": "screw",
-      "pieceAId": "piece-1f-wzt94",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1f-setnm",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         20,
         -17.5,
@@ -3114,10 +3188,10 @@
       "length": 65
     },
     {
-      "id": "screw-4i-q5vn2",
+      "id": "screw-4m-wup31",
       "type": "screw",
-      "pieceAId": "piece-1f-wzt94",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1f-setnm",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         20,
         -17.5,
@@ -3132,10 +3206,10 @@
       "length": 65
     },
     {
-      "id": "screw-4k-blkcr",
+      "id": "screw-4o-ws6rd",
       "type": "screw",
-      "pieceAId": "piece-v-3e968",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-v-z3ml5",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -93.74468085106383,
         -8.5,
@@ -3150,10 +3224,10 @@
       "length": 30
     },
     {
-      "id": "screw-4m-okabp",
+      "id": "screw-4q-0174z",
       "type": "screw",
-      "pieceAId": "piece-v-3e968",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-v-z3ml5",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         93.74468085106383,
         -8.5,
@@ -3168,10 +3242,10 @@
       "length": 30
     },
     {
-      "id": "screw-4o-79vbl",
+      "id": "screw-4s-gvqfx",
       "type": "screw",
-      "pieceAId": "piece-v-3e968",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-v-z3ml5",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -66.59574468085107,
         -8.5,
@@ -3186,10 +3260,10 @@
       "length": 30
     },
     {
-      "id": "screw-4q-136zp",
+      "id": "screw-4u-vpjfi",
       "type": "screw",
-      "pieceAId": "piece-v-3e968",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-v-z3ml5",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         66.59574468085106,
         -8.5,
@@ -3204,10 +3278,10 @@
       "length": 30
     },
     {
-      "id": "screw-4s-a4elx",
+      "id": "screw-4w-tmm7y",
       "type": "screw",
-      "pieceAId": "piece-v-3e968",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-v-z3ml5",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -39.75531914893617,
         -8.5,
@@ -3222,10 +3296,10 @@
       "length": 30
     },
     {
-      "id": "screw-4u-0wi23",
+      "id": "screw-4y-f5pst",
       "type": "screw",
-      "pieceAId": "piece-v-3e968",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-v-z3ml5",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         39.75531914893617,
         -8.5,
@@ -3240,10 +3314,10 @@
       "length": 30
     },
     {
-      "id": "screw-4w-988gv",
+      "id": "screw-50-eot28",
       "type": "screw",
-      "pieceAId": "piece-1j-yuz4q",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1j-f2xro",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -20,
         17.5,
@@ -3258,10 +3332,10 @@
       "length": 65
     },
     {
-      "id": "screw-4y-y9vfc",
+      "id": "screw-52-hvgmu",
       "type": "screw",
-      "pieceAId": "piece-1j-yuz4q",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1j-f2xro",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -20,
         17.5,
@@ -3276,10 +3350,10 @@
       "length": 65
     },
     {
-      "id": "screw-50-sm99u",
+      "id": "screw-54-2fz35",
       "type": "screw",
-      "pieceAId": "piece-1j-yuz4q",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1j-f2xro",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         20,
         17.5,
@@ -3294,10 +3368,10 @@
       "length": 65
     },
     {
-      "id": "screw-52-4omku",
+      "id": "screw-56-5d8vx",
       "type": "screw",
-      "pieceAId": "piece-1j-yuz4q",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1j-f2xro",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         20,
         17.5,
@@ -3312,10 +3386,10 @@
       "length": 65
     },
     {
-      "id": "screw-54-9fm75",
+      "id": "screw-58-1kmdr",
       "type": "screw",
-      "pieceAId": "piece-1l-t9dia",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1l-rj5a3",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -20,
         17.5,
@@ -3330,10 +3404,10 @@
       "length": 65
     },
     {
-      "id": "screw-56-4q8ef",
+      "id": "screw-5a-u54wv",
       "type": "screw",
-      "pieceAId": "piece-1l-t9dia",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1l-rj5a3",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -20,
         17.5,
@@ -3348,10 +3422,10 @@
       "length": 65
     },
     {
-      "id": "screw-58-w87wv",
+      "id": "screw-5c-jh3a0",
       "type": "screw",
-      "pieceAId": "piece-1l-t9dia",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1l-rj5a3",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         20,
         17.5,
@@ -3366,10 +3440,10 @@
       "length": 65
     },
     {
-      "id": "screw-5a-mui86",
+      "id": "screw-5e-lw0xu",
       "type": "screw",
-      "pieceAId": "piece-1l-t9dia",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-1l-rj5a3",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         20,
         17.5,
@@ -3384,10 +3458,10 @@
       "length": 65
     },
     {
-      "id": "screw-5c-dggmx",
+      "id": "screw-5g-nq19h",
       "type": "screw",
-      "pieceAId": "piece-z-cik26",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-z-68br6",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -93.74468085106383,
         -8.5,
@@ -3402,10 +3476,10 @@
       "length": 30
     },
     {
-      "id": "screw-5e-gz3go",
+      "id": "screw-5i-xef41",
       "type": "screw",
-      "pieceAId": "piece-z-cik26",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-z-68br6",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         93.74468085106383,
         -8.5,
@@ -3420,10 +3494,10 @@
       "length": 30
     },
     {
-      "id": "screw-5g-5m3ih",
+      "id": "screw-5k-jxm92",
       "type": "screw",
-      "pieceAId": "piece-z-cik26",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-z-68br6",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -66.59574468085107,
         -8.5,
@@ -3438,10 +3512,10 @@
       "length": 30
     },
     {
-      "id": "screw-5i-wfxic",
+      "id": "screw-5m-tpcnw",
       "type": "screw",
-      "pieceAId": "piece-z-cik26",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-z-68br6",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         66.59574468085106,
         -8.5,
@@ -3456,10 +3530,10 @@
       "length": 30
     },
     {
-      "id": "screw-5k-t456d",
+      "id": "screw-5o-1hk84",
       "type": "screw",
-      "pieceAId": "piece-z-cik26",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-z-68br6",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         -39.75531914893617,
         -8.5,
@@ -3474,10 +3548,10 @@
       "length": 30
     },
     {
-      "id": "screw-5m-1wz0i",
+      "id": "screw-5q-54bli",
       "type": "screw",
-      "pieceAId": "piece-z-cik26",
-      "pieceBId": "piece-f-gvrsn",
+      "pieceAId": "piece-z-68br6",
+      "pieceBId": "piece-f-slfn1",
       "localPosition": [
         39.75531914893617,
         -8.5,
@@ -3493,5 +3567,31 @@
     }
   ],
   "hardware": [],
-  "dimensions": []
+  "dimensions": [],
+  "planBill": [
+    {
+      "label": "SA pine 35×90 × 2.4 m",
+      "quantity": 6,
+      "kind": "board",
+      "key": "35×90×2400"
+    },
+    {
+      "label": "Plywood strip 17×300 × 1.2 m",
+      "quantity": 1,
+      "kind": "board",
+      "key": "17×300×1200"
+    },
+    {
+      "label": "4.8×65 mm screws",
+      "quantity": 50,
+      "kind": "fastener",
+      "key": "4.8×65"
+    },
+    {
+      "label": "4×30 mm screws",
+      "quantity": 24,
+      "kind": "fastener",
+      "key": "4×30"
+    }
+  ]
 }

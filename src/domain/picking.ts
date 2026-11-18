@@ -1,4 +1,4 @@
-import type { FaceId, FacePoint, PencilMark, Piece } from "./types.ts";
+import type { FaceId, FacePoint, Opening, PencilMark, Piece } from "./types.ts";
 
 type Sized = Pick<Piece, "length" | "width" | "thickness">;
 
@@ -68,6 +68,44 @@ export function profileTarget(piece: Sized, face: FaceId, u: number, v: number):
   if (nearest === toV0) return { edge: face, side: "bottom" };
   if (nearest === toV1) return { edge: face, side: "top" };
   return { edge: nearest === toU0 ? "left" : "right", side: upper ? "top" : "bottom" };
+}
+
+/** An interior opening whose boundary is within reach of a top-face hit, so a router can profile the hole. */
+export function nearestInteriorOpening(piece: Piece, u: number, v: number, reach = 18): Opening | null {
+  const x = u - piece.width / 2;
+  const z = v - piece.length / 2;
+  let best: Opening | null = null;
+  let bestDistance = reach;
+  for (const opening of piece.openings ?? []) {
+    if (!openingIsInside(piece, opening)) continue;
+    const distance = distanceToOpening(opening, x, z);
+    if (distance <= bestDistance) {
+      best = opening;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
+function openingIsInside(piece: Piece, opening: Opening): boolean {
+  const margin = 0.4;
+  const halfW = opening.width / 2;
+  const halfL = opening.length / 2;
+  return (
+    opening.x - halfW > -piece.width / 2 + margin &&
+    opening.x + halfW < piece.width / 2 - margin &&
+    opening.z - halfL > -piece.length / 2 + margin &&
+    opening.z + halfL < piece.length / 2 - margin
+  );
+}
+
+function distanceToOpening(opening: Opening, x: number, z: number): number {
+  const dx = Math.abs(x - opening.x) - opening.width / 2;
+  const dz = Math.abs(z - opening.z) - opening.length / 2;
+  if (dx > 0 && dz > 0) return Math.hypot(dx, dz);
+  if (dx > 0) return dx;
+  if (dz > 0) return dz;
+  return Math.min(-dx, -dz);
 }
 
 /** Slider units: from the reference end, or from the far end when that toggle is on. */
@@ -264,5 +302,5 @@ function faceSizeOf(piece: Sized, face: FaceId): { u: number; v: number } {
 }
 
 export function routeFits(piece: Piece, depth: number): boolean {
-  return depth > 0 && depth < piece.thickness - 0.2;
+  return depth > 0 && depth <= piece.thickness + 0.01;
 }

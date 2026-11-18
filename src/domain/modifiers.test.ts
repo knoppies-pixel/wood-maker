@@ -82,15 +82,20 @@ describe("modifiers", () => {
     expect(angle[1]?.u).toBeCloseTo(angle[1]?.v ?? 0);
   });
 
-  it("keeps the original piece put when a radial array spins around it", () => {
+  it("puts a radial array on a circle centred on the piece", () => {
     const source = piece({
       modifiers: [{ id: "r", type: "array", enabled: true, layout: "radial", count: 4, spacing: 200, axis: "y", fitLength: null }],
     });
     const copies = localCopies(source, [source]);
     expect(copies).toHaveLength(4);
-    expect(copies[0]?.position).toEqual([0, 0, 0]);
-    expect(copies[1]?.position[0]).toBeCloseTo(-200);
+    expect(copies[0]?.position[0]).toBeCloseTo(200);
+    expect(copies[0]?.position[2]).toBeCloseTo(0);
+    expect(copies[1]?.position[0]).toBeCloseTo(0);
     expect(copies[1]?.position[2]).toBeCloseTo(200);
+    const centreX = copies.reduce((sum, copy) => sum + copy.position[0], 0) / copies.length;
+    const centreZ = copies.reduce((sum, copy) => sum + copy.position[2], 0) / copies.length;
+    expect(centreX).toBeCloseTo(0);
+    expect(centreZ).toBeCloseTo(0);
   });
 
   it("spaces extra copies evenly between two pieces", () => {

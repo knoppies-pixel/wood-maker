@@ -6,7 +6,8 @@ import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { faceSize, localToWorld, longPointAllowance, pointLengths, rayDistanceOnAxis, snapTranslation, worldCorners } from "../domain/geometry.ts";
+import { explodedPosition } from "../domain/assembly.ts";
+import { faceSize, localFaces, localToWorld, longPointAllowance, pointLengths, rayDistanceOnAxis, snapTranslation, worldCorners } from "../domain/geometry.ts";
 import { HARDWARE_CATALOG } from "../domain/features.ts";
 import { offsetOnFace } from "../domain/marks.ts";
 import { faceExtent } from "../domain/modifiers.ts";
@@ -45,31 +46,31 @@ export function Viewport() {
         dpr={[1, 1.75]}
         shadows
         camera={{ position: [980, 760, 1280], fov: 38, near: 8, far: 20000 }}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
+        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.15 }}
         onPointerMissed={() => undefined}
         onCreated={({ gl }) => {
           gl.shadowMap.type = THREE.PCFSoftShadowMap;
         }}
       >
         <color attach="background" args={["#8a847b"]} />
-        <hemisphereLight args={["#f4efe6", "#5c564e", 0.45]} />
-        <ambientLight intensity={0.18} />
+        <hemisphereLight args={["#f7f1e6", "#6a6258", 0.62]} />
+        <ambientLight intensity={0.38} />
         <directionalLight
           position={[640, 1680, 820]}
-          intensity={2.6}
+          intensity={2.4}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
           shadow-camera-near={200}
-          shadow-camera-far={4200}
-          shadow-camera-left={-1600}
-          shadow-camera-right={1600}
-          shadow-camera-top={1400}
-          shadow-camera-bottom={-1400}
+          shadow-camera-far={9000}
+          shadow-camera-left={-3600}
+          shadow-camera-right={3600}
+          shadow-camera-top={3200}
+          shadow-camera-bottom={-3200}
           shadow-bias={-0.0006}
         />
         <directionalLight position={[-900, 700, -500]} intensity={0.35} color="#d9c7a4" />
-        <Workshop />
+        <Stage pieces={pieces} />
         <Grid
           args={[10, 10]}
           cellSize={100}
@@ -78,13 +79,13 @@ export function Viewport() {
           sectionSize={500}
           sectionThickness={1}
           sectionColor="#3d3228"
-          fadeDistance={1600}
-          fadeStrength={1.8}
+          fadeDistance={isLargeBuild(pieces) ? 7000 : 1600}
+          fadeStrength={1.4}
           infiniteGrid
-          position={[0, 0.6, 80]}
+          position={[0, isLargeBuild(pieces) ? 0.4 : 0.6, isLargeBuild(pieces) ? 0 : 80]}
           raycast={() => null}
         />
-        <ContactShadows frames={1} position={[0, 0.4, 80]} opacity={0.42} scale={2400} blur={2.4} far={280} color="#1c1814" resolution={512} />
+        {isLargeBuild(pieces) ? null : <ContactShadows frames={1} position={[0, 0.4, 80]} opacity={0.42} scale={2400} blur={2.4} far={280} color="#1c1814" resolution={512} />}
         {pieces.map((piece) => (
           <PieceView key={piece.id} piece={piece} />
         ))}
@@ -106,6 +107,7 @@ export function Viewport() {
         <MissSelect />
         <ViewRig signal={resetSignal} />
         <ViewBridge />
+        <CameraMode />
         <ModalPointer />
       </Canvas>
 
@@ -124,15 +126,94 @@ export function Viewport() {
       <div className="pointer-events-none absolute top-3 left-3 rounded-md border bg-card/90 px-2.5 py-1 text-xs text-muted-foreground shadow-sm backdrop-blur-sm">
         Grid <span className="nums">100</span> mm · bold lines <span className="nums">500</span> mm
       </div>
-      <button
-        type="button"
-        className="absolute top-3 right-3 rounded-md border bg-card/90 px-2.5 py-1 text-xs shadow-sm backdrop-blur-sm hover:bg-accent hover:text-accent-foreground"
-        onClick={() => setResetSignal((value) => value + 1)}
-      >
-        Reset view
-      </button>
+      <div className="absolute top-3 right-3 flex items-center gap-2">
+        <AssemblyBar />
+        <button
+          type="button"
+          className="rounded-md border bg-card/90 px-2.5 py-1 text-xs shadow-sm backdrop-blur-sm hover:bg-accent hover:text-accent-foreground"
+          onClick={() => setResetSignal((value) => value + 1)}
+        >
+          Reset view
+        </button>
+      </div>
       <StatusLine />
       <ToolDock />
+    </div>
+  );
+}
+
+function isLargeBuild(pieces: Piece[]): boolean {
+  if (pieces.length >= 18) return true;
+  return pieces.some((piece) => Math.abs(piece.position[0]) > 900 || Math.abs(piece.position[2]) > 700 || piece.position[1] > 320 || piece.length > 1500 || piece.width > 1000);
+}
+
+function Stage({ pieces }: { pieces: Piece[] }) {
+  if (!isLargeBuild(pieces)) return <Workshop />;
+  return (
+    <group>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.5, 0]} receiveShadow>
+        <planeGeometry args={[14000, 10000]} />
+        <meshStandardMaterial color="#6d6860" roughness={0.96} />
+      </mesh>
+      <mesh position={[0, 1100, -3200]} receiveShadow>
+        <planeGeometry args={[14000, 3200]} />
+        <meshStandardMaterial color="#9a948a" roughness={0.94} />
+      </mesh>
+      <mesh position={[-500, 3, 1900]}>
+        <boxGeometry args={[1000, 6, 22]} />
+        <meshStandardMaterial color="#1c1916" />
+      </mesh>
+      <mesh position={[-1000, 10, 1900]}>
+        <boxGeometry args={[10, 22, 36]} />
+        <meshStandardMaterial color="#1c1916" />
+      </mesh>
+      <mesh position={[0, 10, 1900]}>
+        <boxGeometry args={[10, 22, 36]} />
+        <meshStandardMaterial color="#1c1916" />
+      </mesh>
+      <Html position={[-500, 70, 1900]} center>
+        <div className="rounded bg-card/90 px-1.5 py-0.5 text-[11px] font-medium shadow-sm">1000 mm</div>
+      </Html>
+    </group>
+  );
+}
+
+function AssemblyBar() {
+  const explode = useUi((state) => state.explode);
+  const step = useUi((state) => state.assemblyStep);
+  const ortho = useUi((state) => state.ortho);
+  const maxStep = useProject((state) => state.pieces.reduce((max, piece) => Math.max(max, piece.step ?? 1), 1));
+  const stepped = useProject((state) => state.pieces.some((piece) => piece.step != null));
+  return (
+    <div className="flex items-center gap-2 rounded-md border bg-card/90 px-2 py-1 text-xs shadow-sm backdrop-blur-sm">
+      {ortho ? <span className="font-semibold tracking-wide uppercase">Ortho</span> : null}
+      <label className="flex items-center gap-1.5">
+        Explode
+        <input
+          aria-label="Explode"
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={explode}
+          className="w-24"
+          onChange={(event) => useUi.getState().setExplode(Number(event.target.value))}
+        />
+      </label>
+      {stepped ? (
+        <span className="flex items-center gap-1">
+          <button type="button" className="rounded border px-1.5 py-0.5" onClick={() => useUi.getState().setAssemblyStep(step == null ? maxStep : Math.max(1, step - 1))}>Prev</button>
+          <button type="button" className="rounded border px-1.5 py-0.5" onClick={() => useUi.getState().setAssemblyStep(null)}>All</button>
+          <button
+            type="button"
+            className="rounded border px-1.5 py-0.5"
+            onClick={() => useUi.getState().setAssemblyStep(step == null ? 1 : Math.min(maxStep, step + 1))}
+          >
+            Next
+          </button>
+          <span className="nums">{step == null ? `1–${maxStep}` : `${step}/${maxStep}`}</span>
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -198,45 +279,121 @@ function Workshop() {
   );
 }
 
+function focusFrame(pieces: Piece[]): { target: THREE.Vector3; distance: number } {
+  if (pieces.length === 0) return { target: new THREE.Vector3(0, 40, 0), distance: 1400 };
+  const box = new THREE.Box3();
+  for (const piece of pieces) {
+    const euler = new THREE.Euler(...piece.rotation, "XYZ");
+    for (const face of localFaces(piece)) {
+      for (const corner of face.corners) {
+        box.expandByPoint(new THREE.Vector3(corner.x, corner.y, corner.z).applyEuler(euler).add(new THREE.Vector3(...piece.position)));
+      }
+    }
+  }
+  const target = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3());
+  const half = Math.max(size.x, size.y, size.z, 200) / 2;
+  const distance = Math.max(500, (half / Math.tan((19 * Math.PI) / 180)) * 1.28);
+  return { target, distance };
+}
+
+function fitOrtho(camera: THREE.Camera, distance: number, aspect: number): void {
+  const orth = camera as THREE.OrthographicCamera;
+  if (!orth.isOrthographicCamera) return;
+  const halfH = Math.tan((19 * Math.PI) / 180) * Math.max(80, distance);
+  orth.top = halfH;
+  orth.bottom = -halfH;
+  orth.left = -halfH * aspect;
+  orth.right = halfH * aspect;
+  orth.zoom = 1;
+  orth.near = 8;
+  orth.far = 20000;
+  orth.updateProjectionMatrix();
+}
+
 function ViewBridge() {
   const request = useUi((state) => state.viewRequest);
-  const ortho = useUi((state) => state.ortho);
   const camera = useThree((state) => state.camera);
+  const size = useThree((state) => state.size);
   const controls = useThree((state) => state.controls) as OrbitControlsImpl | null;
   useEffect(() => {
-    const persp = camera as THREE.PerspectiveCamera;
-    if (persp.isPerspectiveCamera) {
-      persp.fov = ortho ? 4 : 38;
-      persp.updateProjectionMatrix();
-    }
     if (!request || !controls) return;
     const pieces = useProject.getState().pieces;
     const selectedId = useUi.getState().selection;
     const focus = request.kind === "frame" && selectedId ? pieces.filter((item) => item.id === selectedId) : pieces;
-    const target = focus.length === 0
-      ? new THREE.Vector3(0, 40, 0)
-      : focus.reduce((sum, item) => sum.add(new THREE.Vector3(...item.position)), new THREE.Vector3()).multiplyScalar(1 / focus.length);
-    const span = focus.reduce((max, item) => Math.max(max, item.length, item.width), 500);
-    const dist = Math.max(ortho ? 2800 : 700, span * (ortho ? 6 : 1.7));
+    const frame = focusFrame(focus);
+    const aspect = size.width / Math.max(1, size.height);
     if (request.kind === "reset") {
       camera.position.set(980, 760, 1280);
       controls.target.set(0, 40, 0);
+      fitOrtho(camera, camera.position.distanceTo(controls.target), aspect);
     } else if (request.kind === "frame") {
       const offset = camera.position.clone().sub(controls.target);
-      if (offset.lengthSq() < 1) offset.set(1, 0.6, 1);
-      camera.position.copy(target.clone().add(offset.setLength(dist)));
-      controls.target.copy(target);
+      if (offset.lengthSq() < 1) offset.set(1, 0.62, 1);
+      camera.position.copy(frame.target.clone().add(offset.setLength(frame.distance)));
+      controls.target.copy(frame.target);
+      fitOrtho(camera, frame.distance, aspect);
     } else {
       const offset = request.kind === "front"
-        ? new THREE.Vector3(0, span * 0.25, dist)
+        ? new THREE.Vector3(0, frame.distance * 0.18, frame.distance)
         : request.kind === "side"
-          ? new THREE.Vector3(dist, span * 0.25, 0)
-          : new THREE.Vector3(0, dist, span * 0.02);
-      camera.position.copy(target.clone().add(offset));
-      controls.target.copy(target);
+          ? new THREE.Vector3(frame.distance, frame.distance * 0.18, 0)
+          : new THREE.Vector3(0, frame.distance, frame.distance * 0.02);
+      camera.position.copy(frame.target.clone().add(offset));
+      controls.target.copy(frame.target);
+      fitOrtho(camera, frame.distance, aspect);
     }
+    camera.lookAt(controls.target);
     controls.update();
-  }, [request, ortho, camera, controls]);
+  }, [request, camera, controls, size.width, size.height]);
+  return null;
+}
+
+function CameraMode() {
+  const orthoOn = useUi((state) => state.ortho);
+  const set = useThree((state) => state.set);
+  const get = useThree((state) => state.get);
+  const size = useThree((state) => state.size);
+  const controls = useThree((state) => state.controls) as OrbitControlsImpl | null;
+  const perspRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const orthoRef = useRef<THREE.OrthographicCamera | null>(null);
+  useEffect(() => {
+    const current = get().camera;
+    if (!perspRef.current && (current as THREE.PerspectiveCamera).isPerspectiveCamera) perspRef.current = current as THREE.PerspectiveCamera;
+    if (!orthoRef.current) orthoRef.current = new THREE.OrthographicCamera(-1, 1, 1, -1, 8, 20000);
+    const persp = perspRef.current;
+    const orth = orthoRef.current;
+    if (!persp || !orth) return;
+    const target = controls?.target ?? new THREE.Vector3(0, 40, 0);
+    const next = orthoOn ? orth : persp;
+    const aspect = size.width / Math.max(1, size.height);
+    if (current !== next) {
+      next.position.copy(current.position);
+      next.quaternion.copy(current.quaternion);
+      next.up.copy(current.up);
+    }
+    if (orthoOn) {
+      if (current !== orth) fitOrtho(orth, orth.position.distanceTo(target), aspect);
+      else {
+        const halfH = orth.top || 400;
+        orth.left = -halfH * aspect;
+        orth.right = halfH * aspect;
+        orth.updateProjectionMatrix();
+      }
+    } else {
+      persp.fov = 38;
+      persp.aspect = aspect;
+      persp.near = 8;
+      persp.far = 20000;
+      persp.updateProjectionMatrix();
+    }
+    next.lookAt(target);
+    set({ camera: next });
+    if (controls) {
+      controls.object = next;
+      controls.update();
+    }
+  }, [orthoOn, size.width, size.height, set, get, controls]);
   return null;
 }
 
@@ -268,9 +425,11 @@ function ModalPointer() {
       if (Math.hypot(dx, dy) > 1) moved = true;
       lastX = event.clientX;
       lastY = event.clientY;
-      const fov = (camera as THREE.PerspectiveCamera).isPerspectiveCamera ? (camera as THREE.PerspectiveCamera).fov : 38;
       const distance = camera.position.distanceTo(new THREE.Vector3(...current.originPosition));
-      const mm = (2 * Math.tan((fov * Math.PI) / 360) * distance) / gl.domElement.clientHeight;
+      const orth = camera as THREE.OrthographicCamera;
+      const mm = orth.isOrthographicCamera
+        ? (orth.top - orth.bottom) / Math.max(0.05, orth.zoom) / gl.domElement.clientHeight
+        : (2 * Math.tan((((camera as THREE.PerspectiveCamera).fov ?? 38) * Math.PI) / 360) * distance) / gl.domElement.clientHeight;
       const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
       const up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
       if (current.op === "grab") {
@@ -768,13 +927,17 @@ function Fasteners() {
   const fasteners = useProject((state) => state.fasteners);
   const pieces = useProject((state) => state.pieces);
   const drag = useUi((state) => state.drag);
+  const explode = useUi((state) => state.explode);
+  const assemblyStep = useUi((state) => state.assemblyStep);
   return (
     <>
       {fasteners.map((fastener) => {
         const piece = pieces.find((item) => item.id === fastener.pieceAId);
         if (!piece) return null;
         const pose = drag?.[piece.id];
-        const posed = pose ? { ...piece, position: pose.position, rotation: pose.rotation } : piece;
+        const drawn = explodedPosition(piece, pieces, explode, assemblyStep);
+        if (!drawn && !pose) return null;
+        const posed = pose ? { ...piece, position: pose.position, rotation: pose.rotation } : { ...piece, position: drawn ?? piece.position };
         const head = localToWorld(posed, { x: fastener.localPosition[0], y: fastener.localPosition[1], z: fastener.localPosition[2] });
         const direction = new THREE.Vector3(...fastener.localDirection).applyEuler(new THREE.Euler(...posed.rotation, "XYZ")).normalize();
         const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
@@ -856,6 +1019,7 @@ function SawDock({ piece }: { piece: Piece | undefined }) {
   const longPoint = useUi((state) => state.sawLongPoint);
   const plungeWidth = useUi((state) => state.plungeWidth);
   const plungeLength = useUi((state) => state.plungeLength);
+  const plungeEnds = useUi((state) => state.plungeEnds);
   const kerf = useProject((state) => state.kerf);
   const span = piece ? (mode === "rip" ? piece.width : piece.length) : 0;
   const consumed = piece && mode === "crosscut" ? kerfAlong(kerf, mitre, bevel) : kerf;
@@ -882,7 +1046,7 @@ function SawDock({ piece }: { piece: Piece | undefined }) {
       return;
     }
     if (mode === "plunge") {
-      const result = useProject.getState().plunge(piece.id, { x: 0, z: 0, width: plungeWidth, length: plungeLength });
+      const result = useProject.getState().plunge(piece.id, { x: 0, z: 0, width: plungeWidth, length: plungeLength, ends: useUi.getState().plungeEnds });
       if (!result.ok) toast.error(result.message);
       else {
         toast.success(result.message ?? "Opening cut.");
@@ -935,6 +1099,7 @@ function SawDock({ piece }: { piece: Piece | undefined }) {
         <div className="flex flex-wrap items-center gap-2">
           <NumberSlider label="Width" min={MIN_PART_MM} max={Math.max(piece?.width ?? 80, MIN_PART_MM + 1)} value={plungeWidth} onCommit={(value) => useUi.getState().setPlungeWidth(value)} />
           <NumberSlider label="Length" min={MIN_PART_MM} max={Math.max(piece?.length ?? 80, MIN_PART_MM + 1)} value={plungeLength} onCommit={(value) => useUi.getState().setPlungeLength(value)} />
+          <Toggle on={plungeEnds === "round"} onClick={() => useUi.getState().setPlungeEnds(plungeEnds === "round" ? "square" : "round")}>Round ends</Toggle>
         </div>
       ) : null}
       {mode === "taper" ? <TaperControls piece={piece} /> : null}
@@ -1086,6 +1251,8 @@ function RouterDock() {
   const kind = useUi((state) => state.routerKind);
   const width = useUi((state) => state.routerWidth);
   const depth = useUi((state) => state.routerDepth);
+  const selection = useUi((state) => state.selection);
+  const stockThickness = useProject((state) => state.pieces.find((item) => item.id === selection)?.thickness ?? 40);
   const profile = useUi((state) => state.profile);
   const radius = useUi((state) => state.profileRadius);
   return (
@@ -1106,10 +1273,10 @@ function RouterDock() {
       ) : (
         <div className="flex flex-wrap items-center gap-3">
           <NumberSlider label="Width" min={3} max={30} value={width} onCommit={(value) => useUi.getState().setRouterWidth(value)} />
-          <NumberSlider label="Depth" min={1} max={18} value={depth} onCommit={(value) => useUi.getState().setRouterDepth(value)} />
+          <NumberSlider label="Depth" min={1} max={Math.max(1, stockThickness)} value={Math.min(depth, stockThickness)} onCommit={(value) => useUi.getState().setRouterDepth(value)} />
         </div>
       )}
-      <p className="text-xs text-muted-foreground">Hover to see the cut. A dado, groove, rebate or edge profile lands on the face or edge under the cursor. Red means it will not fit.</p>
+      <p className="text-xs text-muted-foreground">Hover to see the cut. Depth can run to the thickness of the selected piece. An edge profile on the rim of an interior hole chamfers that opening. Red means it will not fit.</p>
     </div>
   );
 }
@@ -1146,6 +1313,9 @@ function HardwareDock() {
     ["slide-500", "Slide 500"],
     ["castor-75", "Castor"],
     ["barrel-bolt-100", "Barrel bolt"],
+    ["bumper-10", "Bumper"],
+    ["mitre-saw-ref", "Mitre saw"],
+    ["table-saw-ref", "Table saw"],
   ] as const;
   return (
     <div className="flex flex-col gap-2">

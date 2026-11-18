@@ -68,6 +68,7 @@ interface UiState {
   sawLongPoint: boolean;
   plungeWidth: number;
   plungeLength: number;
+  plungeEnds: "square" | "round";
   taperStart: number;
   taperEnd: number;
   curvePoints: Array<{ u: number; v: number }>;
@@ -103,6 +104,8 @@ interface UiState {
   modal: TransformModal | null;
   viewRequest: ViewRequest | null;
   ortho: boolean;
+  explode: number;
+  assemblyStep: number | null;
   cheatOpen: boolean;
   clipboard: Piece | null;
   stockOpen: boolean;
@@ -134,6 +137,7 @@ interface UiState {
   setSawLongPoint: (on: boolean) => void;
   setPlungeWidth: (width: number) => void;
   setPlungeLength: (length: number) => void;
+  setPlungeEnds: (ends: "square" | "round") => void;
   setTaperStart: (width: number) => void;
   setTaperEnd: (width: number) => void;
   setCurvePoints: (points: Array<{ u: number; v: number }>) => void;
@@ -167,6 +171,8 @@ interface UiState {
   setModal: (modal: TransformModal | null) => void;
   requestView: (kind: ViewKind) => void;
   setOrtho: (ortho: boolean) => void;
+  setExplode: (explode: number) => void;
+  setAssemblyStep: (step: number | null) => void;
   setCheatOpen: (open: boolean) => void;
   setClipboard: (piece: Piece | null) => void;
   setStockOpen: (open: boolean) => void;
@@ -201,6 +207,7 @@ export const useUi = create<UiState>((set) => ({
   sawLongPoint: false,
   plungeWidth: 80,
   plungeLength: 40,
+  plungeEnds: "square",
   taperStart: 76,
   taperEnd: 38,
   curvePoints: [],
@@ -236,6 +243,8 @@ export const useUi = create<UiState>((set) => ({
   modal: null,
   viewRequest: null,
   ortho: false,
+  explode: 0,
+  assemblyStep: null,
   cheatOpen: false,
   clipboard: null,
   stockOpen: false,
@@ -267,6 +276,7 @@ export const useUi = create<UiState>((set) => ({
   setSawLongPoint: (sawLongPoint) => set({ sawLongPoint }),
   setPlungeWidth: (plungeWidth) => set({ plungeWidth }),
   setPlungeLength: (plungeLength) => set({ plungeLength }),
+  setPlungeEnds: (plungeEnds) => set({ plungeEnds }),
   setTaperStart: (taperStart) => set({ taperStart }),
   setTaperEnd: (taperEnd) => set({ taperEnd }),
   setCurvePoints: (curvePoints) => set({ curvePoints }),
@@ -304,6 +314,8 @@ export const useUi = create<UiState>((set) => ({
   setModal: (modal) => set({ modal }),
   requestView: (kind) => set({ viewRequest: { kind, nonce: Date.now() } }),
   setOrtho: (ortho) => set({ ortho }),
+  setExplode: (explode) => set({ explode }),
+  setAssemblyStep: (assemblyStep) => set({ assemblyStep }),
   setCheatOpen: (cheatOpen) => set({ cheatOpen }),
   setClipboard: (clipboard) => set({ clipboard }),
   setStockOpen: (stockOpen) => set({ stockOpen }),
