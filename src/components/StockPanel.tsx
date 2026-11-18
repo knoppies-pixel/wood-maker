@@ -29,7 +29,10 @@ export function StockPanel() {
       toast.error(result.message);
       return;
     }
-    if (result.selectId) useUi.getState().select(result.selectId);
+    if (result.selectId) {
+      useUi.getState().select(result.selectId);
+      useUi.getState().requestView("frame");
+    }
     toast.success(result.message ?? "Stock added");
   }
 
@@ -125,7 +128,7 @@ export function StockPanel() {
             CSV
           </Button>
           <Button variant="ghost" size="sm" onClick={() => { resetCatalog(); toast.success("Sample catalogue restored."); }}>
-            <RotateCcw /> Reset
+            <RotateCcw /> Restore catalogue
           </Button>
         </div>
         <input

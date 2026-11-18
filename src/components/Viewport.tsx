@@ -6,7 +6,7 @@ import * as THREE from "three";
 import type { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { faceSize, localToWorld, rayDistanceOnAxis, snapTranslation } from "../domain/geometry.ts";
+import { faceSize, localToWorld, rayDistanceOnAxis, snapTranslation, worldCorners } from "../domain/geometry.ts";
 import { HARDWARE_CATALOG } from "../domain/features.ts";
 import { offsetOnFace } from "../domain/marks.ts";
 import { faceExtent } from "../domain/modifiers.ts";
@@ -21,7 +21,7 @@ import { DimensionNotes, facePoint } from "./Marks.tsx";
 import { NumberSlider } from "./fields.tsx";
 import { modalLabel } from "../input/modal.ts";
 import { commitModal, previewModal } from "../input/modal.ts";
-import { PieceView, pieceGroups } from "./PieceView.tsx";
+import { PieceView, lastPiecePointer, pieceGroups } from "./PieceView.tsx";
 import { shopMaps } from "./wood.ts";
 import { cn } from "cn";
 
@@ -46,9 +46,7 @@ export function Viewport() {
         shadows
         camera={{ position: [980, 760, 1280], fov: 38, near: 8, far: 20000 }}
         gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.05 }}
-        onPointerMissed={(event) => {
-          if (event.type === "click" && useUi.getState().tool === "select") useUi.getState().select(null);
-        }}
+        onPointerMissed={() => undefined}
         onCreated={({ gl }) => {
           gl.shadowMap.type = THREE.PCFSoftShadowMap;
         }}
@@ -105,6 +103,7 @@ export function Viewport() {
           maxDistance={16000}
         />
         <CameraButtons />
+        <MissSelect />
         <ViewRig signal={resetSignal} />
         <ViewBridge />
         <ModalPointer />
@@ -323,6 +322,42 @@ function ModalPointer() {
     };
   }, [modal?.op, modal?.pieceId, camera, gl, controls]);
   return null;
+}
+
+function MissSelect() {
+  const camera = useThree((state) => state.camera);
+  const gl = useThree((state) => state.gl);
+  useEffect(() => {
+    const element = gl.domElement;
+    function onClick(event: MouseEvent) {
+      if (event.button !== 0) return;
+      if (useUi.getState().tool !== "select" || useUi.getState().modal) return;
+      if (performance.now() - lastPiecePointer < 150) return;
+      const rect = element.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(new THREE.Vector2(x, y), camera);
+      useUi.getState().select(fatPick(raycaster.ray, useProject.getState().pieces));
+    }
+    element.addEventListener("click", onClick);
+    return () => element.removeEventListener("click", onClick);
+  }, [camera, gl]);
+  return null;
+}
+
+function fatPick(ray: THREE.Ray, pieces: Piece[]): string | null {
+  let best: { id: string; distance: number } | null = null;
+  const point = new THREE.Vector3();
+  for (const piece of pieces) {
+    const box = new THREE.Box3();
+    for (const corner of worldCorners(piece)) box.expandByPoint(point.set(corner.x, corner.y, corner.z));
+    box.expandByScalar(36);
+    if (!ray.intersectsBox(box)) continue;
+    const distance = ray.distanceToPoint(box.getCenter(point));
+    if (!best || distance < best.distance) best = { id: piece.id, distance };
+  }
+  return best?.id ?? null;
 }
 
 function CameraButtons() {

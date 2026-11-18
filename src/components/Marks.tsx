@@ -1,4 +1,5 @@
-import { Html, Line } from "@react-three/drei";
+import { Html } from "@react-three/drei";
+import * as THREE from "three";
 import { holeLocalPoint, inwardNormal, localToWorld } from "../domain/geometry.ts";
 import { formatMm } from "../domain/math.ts";
 import { anchorDistance } from "../domain/marks.ts";
@@ -12,19 +13,55 @@ export function facePoint(piece: Piece, face: FaceId, point: FacePoint, lift = 0
   return [local.x - inward.x * lift, local.y - inward.y * lift, local.z - inward.z * lift];
 }
 
-export function PencilMarks({ piece }: { piece: Piece }) {
+export function PencilMarks({ piece, annotate = true }: { piece: Piece; annotate?: boolean }) {
   const draft = useUi((state) => (state.pencilPieceId === piece.id ? state.pencilDraft : null));
   const face = useUi((state) => state.pencilFace);
   const marks = piece.marks ?? [];
   return (
     <group>
-      {marks.map((mark) => (
-        <Line key={mark.id} points={mark.points.map((point) => facePoint(piece, mark.face, point))} color="#221c16" lineWidth={2} raycast={() => null} />
-      ))}
-      {draft && face && draft.length > 0 ? (
-        <Line points={draft.map((point) => facePoint(piece, face, point))} color="#e26a1a" lineWidth={2} raycast={() => null} />
-      ) : null}
+      {marks.map((mark) => {
+        const points = mark.points.map((point) => facePoint(piece, mark.face, point, 1.4));
+        const labelAt = points[points.length - 1];
+        return (
+          <group key={mark.id}>
+            <Stroke points={points} color="#1a120c" radius={1.3} />
+            {annotate && mark.label && labelAt ? (
+              <Html position={labelAt} center style={{ pointerEvents: "none" }}>
+                <div className="nums rounded bg-[#2a261f] px-1 py-0.5 text-[10px] text-[#f6efe4]">{mark.label}</div>
+              </Html>
+            ) : null}
+          </group>
+        );
+      })}
+      {draft && face && draft.length > 0 ? <Stroke points={draft.map((point) => facePoint(piece, face, point, 1.6))} color="#e26a1a" radius={1.3} /> : null}
     </group>
+  );
+}
+
+/** WebGL ignores line width, so a pencil stroke is a thin rod that stays visible on the face. */
+function Stroke({ points, color, radius }: { points: Vec3Tuple[]; color: string; radius: number }) {
+  return (
+    <group>
+      {points.slice(1).map((point, index) => {
+        const previous = points[index];
+        if (!previous) return null;
+        return <Rod key={`${index}:${point.join(":")}`} a={previous} b={point} color={color} radius={radius} />;
+      })}
+    </group>
+  );
+}
+
+function Rod({ a, b, color, radius }: { a: Vec3Tuple; b: Vec3Tuple; color: string; radius: number }) {
+  const length = Math.max(0.4, Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]));
+  const mid: Vec3Tuple = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
+  const direction = new THREE.Vector3(b[0] - a[0], b[1] - a[1], b[2] - a[2]).normalize();
+  if (direction.lengthSq() < 1e-8) return null;
+  const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+  return (
+    <mesh position={mid} quaternion={quaternion} raycast={() => null}>
+      <cylinderGeometry args={[radius, radius, length, 6]} />
+      <meshBasicMaterial color={color} />
+    </mesh>
   );
 }
 
@@ -45,7 +82,7 @@ export function DimensionNotes() {
         const distance = Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
         return (
           <group key={note.id}>
-            <Line points={[[a.x, a.y, a.z], [b.x, b.y, b.z]]} color="#e2b122" lineWidth={1.5} raycast={() => null} />
+            <Rod a={[a.x, a.y + 1.2, a.z]} b={[b.x, b.y + 1.2, b.z]} color="#e2b122" radius={1.1} />
             <Html position={mid} center style={{ pointerEvents: "none" }}>
               <button
                 type="button"

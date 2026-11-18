@@ -1,6 +1,6 @@
 import { Edges } from "@react-three/drei";
 import type { ThreeEvent } from "@react-three/fiber";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef, type MutableRefObject, type Ref } from "react";
 import { toast } from "sonner";
 import * as THREE from "three";
 import { canPlaceHole, kerfAlong } from "../domain/operations.ts";
@@ -8,7 +8,7 @@ import { nearestPieceEdge, profileTarget, routeFits, sawDistanceFromStation, sna
 import { faceExtent, localCopies } from "../domain/modifiers.ts";
 import { offsetOnFace } from "../domain/marks.ts";
 import { buildMesh, faceUvFromLocal, holeLocalPoint, inwardNormal } from "../domain/geometry.ts";
-import type { Hole, PencilMark, Piece } from "../domain/types.ts";
+import type { HardwareItem, Hole, PencilMark, Piece } from "../domain/types.ts";
 import { useProject } from "../store/useProject.ts";
 import { useUi, type HoverHit } from "../store/useUi.ts";
 import { FeatureMarks, HardwareMarks } from "./FeatureMarks.tsx";
@@ -17,6 +17,15 @@ import { woodMaps } from "./wood.ts";
 
 export const pieceGroups = new Map<string, THREE.Group>();
 export const pieceMeshes = new Map<string, THREE.Mesh>();
+/** Every visible copy, so a click or a screw ray hits the board you are looking at. */
+export const hitMeshes = new Set<THREE.Mesh>();
+
+export function rayTargets(): THREE.Mesh[] {
+  return hitMeshes.size > 0 ? [...hitMeshes] : [...pieceMeshes.values()];
+}
+
+/** Set when a piece mesh handles a click, so an empty-canvas click does not immediately undo it. */
+export let lastPiecePointer = 0;
 
 export function PieceView({ piece }: { piece: Piece }) {
   const drag = useUi((state) => state.drag?.[piece.id]);
@@ -38,6 +47,7 @@ export function PieceView({ piece }: { piece: Piece }) {
   const others = useProject((state) => state.pieces);
   const copies = localCopies(piece, others);
   const modal = useUi((state) => state.modal);
+  const hovered = useUi((state) => state.hover?.pieceId === piece.id);
   const previewScale = modal?.pieceId === piece.id && modal.op === "scale" ? modal.scale : ([1, 1, 1] as const);
   const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
@@ -63,32 +73,99 @@ export function PieceView({ piece }: { piece: Piece }) {
   return (
     <group ref={groupRef} position={position} rotation={rotation} scale={previewScale}>
       {copies.map((copy, index) => (
-        <group key={`${copy.position.join(":")}:${index}`} position={copy.position} rotation={copy.rotation} scale={copy.scale}>
-          <mesh
-            ref={index === 0 ? meshRef : undefined}
-            geometry={geometry}
-            castShadow
-            receiveShadow
-            userData={{ pieceId: piece.id }}
-            raycast={index === 0 ? undefined : () => null}
-            onPointerDown={index === 0 ? (event) => onPiecePointer(event, piece, "down") : undefined}
-            onPointerMove={index === 0 ? (event) => onPiecePointer(event, piece, "move") : undefined}
-            onPointerUp={index === 0 ? () => finishFreehand(piece) : undefined}
-            onPointerOut={index === 0 ? () => {
-              const hover = useUi.getState().hover;
-              if (hover?.pieceId === piece.id) useUi.getState().setHover(null);
-            } : undefined}
-          >
-            <meshStandardMaterial attach="material-0" map={faceMap} color={tint} roughness={piece.finish?.treatment === "paint" ? 0.42 : 0.78} metalness={0.02} emissive={selected ? "#e26a1a" : "#000000"} emissiveIntensity={selected ? 0.16 : 0} side={THREE.DoubleSide} />
-            <meshStandardMaterial attach="material-1" map={maps.edge} color={tint} roughness={0.86} metalness={0} side={THREE.DoubleSide} />
-            {index === 0 && (selected || mate) ? <Edges threshold={20} color={selected ? "#f08a2a" : "#d7b98a"} /> : null}
-          </mesh>
-          {index === 0 ? (piece.holes ?? []).map((hole) => <HoleMark key={hole.id} piece={piece} hole={hole} />) : null}
-          {index === 0 ? <FeatureMarks piece={piece} /> : null}
-          {index === 0 ? <HardwareMarks piece={piece} items={hardware ?? []} /> : null}
-          <PencilMarks piece={piece} />
-        </group>
+        <PieceCopy
+          key={`${copy.position.join(":")}:${copy.rotation.join(":")}:${index}`}
+          piece={piece}
+          index={index}
+          position={copy.position}
+          rotation={copy.rotation}
+          scale={copy.scale}
+          geometry={geometry}
+          faceMap={faceMap}
+          edgeMap={maps.edge}
+          tint={tint}
+          selected={selected}
+          hovered={hovered}
+          mate={mate}
+          hardware={hardware ?? []}
+          meshRef={index === 0 ? meshRef : undefined}
+        />
       ))}
+    </group>
+  );
+}
+
+function PieceCopy({
+  piece,
+  index,
+  position,
+  rotation,
+  scale,
+  geometry,
+  faceMap,
+  edgeMap,
+  tint,
+  selected,
+  hovered,
+  mate,
+  hardware,
+  meshRef,
+}: {
+  piece: Piece;
+  index: number;
+  position: [number, number, number];
+  rotation: [number, number, number];
+  scale: [number, number, number];
+  geometry: THREE.BufferGeometry;
+  faceMap: THREE.Texture;
+  edgeMap: THREE.Texture;
+  tint: string;
+  selected: boolean;
+  hovered: boolean;
+  mate: boolean;
+  hardware: HardwareItem[];
+  meshRef?: Ref<THREE.Mesh>;
+}) {
+  const localRef = useRef<THREE.Mesh>(null);
+  useLayoutEffect(() => {
+    const mesh = localRef.current;
+    if (!mesh) return;
+    hitMeshes.add(mesh);
+    if (index === 0) pieceMeshes.set(piece.id, mesh);
+    return () => {
+      hitMeshes.delete(mesh);
+      if (pieceMeshes.get(piece.id) === mesh) pieceMeshes.delete(piece.id);
+    };
+  }, [piece.id, index]);
+
+  return (
+    <group position={position} rotation={rotation} scale={scale}>
+      <mesh
+        ref={(node) => {
+          localRef.current = node;
+          if (typeof meshRef === "function") meshRef(node);
+          else if (meshRef) (meshRef as MutableRefObject<THREE.Mesh | null>).current = node;
+        }}
+        geometry={geometry}
+        castShadow
+        receiveShadow
+        userData={{ pieceId: piece.id }}
+        onPointerDown={(event) => onPiecePointer(event, piece, "down")}
+        onPointerMove={(event) => onPiecePointer(event, piece, "move")}
+        onPointerUp={() => finishFreehand(piece)}
+        onPointerOut={() => {
+          const hover = useUi.getState().hover;
+          if (hover?.pieceId === piece.id) useUi.getState().setHover(null);
+        }}
+      >
+        <meshStandardMaterial attach="material-0" map={faceMap} color={tint} roughness={piece.finish?.treatment === "paint" ? 0.42 : 0.78} metalness={0.02} emissive={selected || hovered ? "#e26a1a" : "#000000"} emissiveIntensity={selected ? 0.16 : hovered ? 0.08 : 0} side={THREE.DoubleSide} />
+        <meshStandardMaterial attach="material-1" map={edgeMap} color={tint} roughness={0.86} metalness={0} side={THREE.DoubleSide} />
+        {selected || hovered || mate ? <Edges threshold={15} color={selected ? "#f08a2a" : "#e2b15a"} /> : null}
+      </mesh>
+      {(piece.holes ?? []).map((hole) => <HoleMark key={hole.id} piece={piece} hole={hole} />)}
+      <FeatureMarks piece={piece} />
+      <HardwareMarks piece={piece} items={hardware} />
+      <PencilMarks piece={piece} annotate={index === 0} />
     </group>
   );
 }
@@ -149,10 +226,11 @@ function HoleMark({ piece, hole }: { piece: Piece; hole: Hole }) {
 
 function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "down" | "move") {
   event.stopPropagation();
+  if (kind === "down") lastPiecePointer = performance.now();
   if (useUi.getState().modal) return;
   const tool = useUi.getState().tool;
   const hit = readHit(event, piece);
-  if (hit && tool !== "select") useUi.getState().setHover(hit);
+  if (hit) useUi.getState().setHover(hit);
   if (kind === "move" && tool === "pencil" && hit && useUi.getState().pencilDrawing && useUi.getState().pencilFace === hit.face) {
     const draft = useUi.getState().pencilDraft ?? [];
     const last = draft[draft.length - 1];
@@ -267,7 +345,7 @@ function placeScrew(event: ThreeEvent<PointerEvent>, piece: Piece, hit: HoverHit
   if (pocket) direction.applyAxisAngle(new THREE.Vector3(1, 0, 0), (15 * Math.PI) / 180);
   const origin = event.point.clone().addScaledVector(direction, 0.4);
   const raycaster = new THREE.Raycaster(origin, direction, 0, length + 80);
-  const hits = raycaster.intersectObjects([...pieceMeshes.values()], false);
+  const hits = raycaster.intersectObjects(rayTargets(), false);
   const other = hits.find((item) => item.object.userData.pieceId !== piece.id);
   if (!other) {
     toast.error("No second piece on that line. Butt the parts together and click the outside face.");
@@ -363,7 +441,7 @@ function readHit(event: ThreeEvent<PointerEvent>, piece: Piece): HoverHit | null
   if (tool === "screw" && ui.fastenerKind !== "glue") {
     const direction = worldNormal.clone().negate();
     const raycaster = new THREE.Raycaster(event.point.clone().addScaledVector(direction, 0.4), direction, 0, ui.screwLength + 4);
-    valid = raycaster.intersectObjects([...pieceMeshes.values()], false).some((item) => item.object.userData.pieceId !== piece.id && item.distance <= ui.screwLength - 2);
+    valid = raycaster.intersectObjects(rayTargets(), false).some((item) => item.object.userData.pieceId !== piece.id && item.distance <= ui.screwLength - 2);
   }
   const placed = holeLocalPoint(piece, uv.face, snapped.u, snapped.v);
   const world = parent.localToWorld(new THREE.Vector3(placed.x, placed.y, placed.z));

@@ -96,6 +96,9 @@ function ProjectPane() {
 
 function PiecePane({ piece, joined }: { piece: Piece; joined: boolean }) {
   const board = useProject((state) => state.boards.find((item) => item.id === piece.boardId));
+  const pose = useUi((state) => state.drag?.[piece.id]);
+  const position = pose?.position ?? piece.position;
+  const rotation = pose?.rotation ?? piece.rotation;
   return (
     <div className="flex flex-col gap-4">
       <div>
@@ -125,14 +128,14 @@ function PiecePane({ piece, joined }: { piece: Piece; joined: boolean }) {
         <CommitNumber label="Thickness" value={piece.thickness} min={5} max={6000} onCommit={(value) => useProject.getState().resizePiece(piece.id, { thickness: value })} />
       </div>
       <div className="grid grid-cols-3 gap-2">
-        <AxisField label="X" value={piece.position[0]} onCommit={(value) => move(piece, 0, value)} />
-        <AxisField label="Y" value={piece.position[1]} onCommit={(value) => move(piece, 1, value)} />
-        <AxisField label="Z" value={piece.position[2]} onCommit={(value) => move(piece, 2, value)} />
+        <AxisField label="X" value={position[0]} onCommit={(value) => move(piece, 0, value)} />
+        <AxisField label="Y" value={position[1]} onCommit={(value) => move(piece, 1, value)} />
+        <AxisField label="Z" value={position[2]} onCommit={(value) => move(piece, 2, value)} />
       </div>
       <div className="grid grid-cols-3 gap-2">
-        <AxisField label="Rot X" suffix="°" value={piece.rotation[0] / DEG} onCommit={(value) => turn(piece, 0, value * DEG)} />
-        <AxisField label="Rot Y" suffix="°" value={piece.rotation[1] / DEG} onCommit={(value) => turn(piece, 1, value * DEG)} />
-        <AxisField label="Rot Z" suffix="°" value={piece.rotation[2] / DEG} onCommit={(value) => turn(piece, 2, value * DEG)} />
+        <AxisField label="Rot X" suffix="°" value={rotation[0] / DEG} onCommit={(value) => turn(piece, 0, value * DEG)} />
+        <AxisField label="Rot Y" suffix="°" value={rotation[1] / DEG} onCommit={(value) => turn(piece, 1, value * DEG)} />
+        <AxisField label="Rot Z" suffix="°" value={rotation[2] / DEG} onCommit={(value) => turn(piece, 2, value * DEG)} />
       </div>
 
       <ModifierStack piece={piece} />
