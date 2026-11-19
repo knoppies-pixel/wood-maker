@@ -45,7 +45,7 @@ export function Viewport() {
       <Canvas
         dpr={[1, 1.75]}
         shadows
-        camera={{ position: [980, 760, 1280], fov: 38, near: 8, far: 20000 }}
+        camera={{ position: [-1900, 1100, 1350], fov: 38, near: 8, far: 20000 }}
         gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.15 }}
         onPointerMissed={() => undefined}
         onCreated={({ gl }) => {
@@ -123,8 +123,15 @@ export function Viewport() {
         </div>
       ) : null}
 
-      <div className="pointer-events-none absolute top-3 left-3 rounded-md border bg-card/90 px-2.5 py-1 text-xs text-muted-foreground shadow-sm backdrop-blur-sm">
-        Grid <span className="nums">100</span> mm · bold lines <span className="nums">500</span> mm
+      <div className="pointer-events-none absolute top-3 left-3 flex items-center gap-1">
+        <div className="rounded-md border bg-card/90 px-2.5 py-1 text-xs text-muted-foreground shadow-sm backdrop-blur-sm">
+          Grid <span className="nums">100</span> mm · bold lines <span className="nums">500</span> mm
+        </div>
+        {isLargeBuild(pieces) ? (
+          <div className="rounded-md border bg-card/90 px-2.5 py-1 text-xs font-medium shadow-sm backdrop-blur-sm">
+            Floor bar <span className="nums">1000</span> mm
+          </div>
+        ) : null}
       </div>
       <div className="absolute top-3 right-3 flex items-center gap-2">
         <AssemblyBar />
@@ -159,21 +166,18 @@ function Stage({ pieces }: { pieces: Piece[] }) {
         <planeGeometry args={[14000, 3200]} />
         <meshStandardMaterial color="#9a948a" roughness={0.94} />
       </mesh>
-      <mesh position={[-500, 3, 1900]}>
-        <boxGeometry args={[1000, 6, 22]} />
+      <mesh position={[-1500, 3, -700]}>
+        <boxGeometry args={[22, 6, 1000]} />
         <meshStandardMaterial color="#1c1916" />
       </mesh>
-      <mesh position={[-1000, 10, 1900]}>
-        <boxGeometry args={[10, 22, 36]} />
+      <mesh position={[-1500, 10, -1200]}>
+        <boxGeometry args={[36, 22, 10]} />
         <meshStandardMaterial color="#1c1916" />
       </mesh>
-      <mesh position={[0, 10, 1900]}>
-        <boxGeometry args={[10, 22, 36]} />
+      <mesh position={[-1500, 10, -200]}>
+        <boxGeometry args={[36, 22, 10]} />
         <meshStandardMaterial color="#1c1916" />
       </mesh>
-      <Html position={[-500, 70, 1900]} center>
-        <div className="rounded bg-card/90 px-1.5 py-0.5 text-[11px] font-medium shadow-sm">1000 mm</div>
-      </Html>
     </group>
   );
 }
@@ -324,12 +328,12 @@ function ViewBridge() {
     const frame = focusFrame(focus);
     const aspect = size.width / Math.max(1, size.height);
     if (request.kind === "reset") {
-      camera.position.set(980, 760, 1280);
-      controls.target.set(0, 40, 0);
+      camera.position.set(-1900, 1100, 1350);
+      controls.target.set(0, 400, 0);
       fitOrtho(camera, camera.position.distanceTo(controls.target), aspect);
-    } else if (request.kind === "frame") {
-      const offset = camera.position.clone().sub(controls.target);
-      if (offset.lengthSq() < 1) offset.set(1, 0.62, 1);
+    } else if (request.kind === "frame" || request.kind === "quarter") {
+      const offset = request.kind === "quarter" ? new THREE.Vector3(-1.55, 0.78, 1.05) : camera.position.clone().sub(controls.target);
+      if (offset.lengthSq() < 1) offset.set(-1.55, 0.78, 1.05);
       camera.position.copy(frame.target.clone().add(offset.setLength(frame.distance)));
       controls.target.copy(frame.target);
       fitOrtho(camera, frame.distance, aspect);
@@ -535,8 +539,8 @@ function ViewRig({ signal }: { signal: number }) {
   const controls = useThree((state) => state.controls) as OrbitControlsImpl | null;
   useEffect(() => {
     if (!signal || !controls) return;
-    camera.position.set(980, 760, 1280);
-    controls.target.set(0, 40, 0);
+    camera.position.set(-1900, 1100, 1350);
+    controls.target.set(0, 400, 0);
     controls.update();
   }, [signal, camera, controls]);
   return null;

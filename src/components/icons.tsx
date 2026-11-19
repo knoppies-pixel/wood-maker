@@ -19,6 +19,32 @@ export function DrillIcon({ className }: { className?: string }) {
   );
 }
 
+export function RouterIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path fill="currentColor" d="M9 3h6v3h2.2a2 2 0 0 1 2 1.7l.6 4.2H20a2 2 0 0 1 2 2v1.2a2 2 0 0 1-2 2h-1.1l-.4 2.4A2 2 0 0 1 14.6 21H9.4a2 2 0 0 1-2-1.5l-.4-2.4H6a2 2 0 0 1-2-2V14a2 2 0 0 1 2-2h.2l.6-4.3A2 2 0 0 1 8.8 6H9V3Zm1.6 3h2.8V4.6h-2.8V6Z" />
+      <path fill="currentColor" d="M8 14.2h8v1.6H8z" />
+    </svg>
+  );
+}
+
+export function JointIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path fill="currentColor" d="M3 4h8v6H8v2H6v2H3V4Zm10 0h8v10h-3v-2h-2v-2h-3V4Z" />
+      <path fill="currentColor" d="M4 16h7v4H4zm9 2h7v2h-7z" />
+    </svg>
+  );
+}
+
+export function HardwareIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path fill="currentColor" d="M7 3h4l1 4h5v3h-2.2l.7 2.2 2.5.4v2.2l-2.6.5-.8 2.2H12l-1 4H7l1-4H5.2L4.5 15.3 2 14.8v-2.2l2.6-.5.7-2.2H8L7 3Z" />
+    </svg>
+  );
+}
+
 export function ScrewIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">

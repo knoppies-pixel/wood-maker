@@ -5,7 +5,7 @@ export type ToolId = "select" | "saw" | "drill" | "screw" | "router" | "joint" |
 export type PencilMode = "line" | "freehand" | "erase";
 export type MeasureMode = "tape" | "angle" | "offset";
 export type ModalOp = "grab" | "rotate" | "scale";
-export type ViewKind = "front" | "side" | "top" | "frame" | "reset";
+export type ViewKind = "front" | "side" | "top" | "frame" | "quarter" | "reset";
 
 export interface TransformModal {
   op: ModalOp;

@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { DrillIcon, SawIcon, ScrewIcon } from "./icons.tsx";
+import { DrillIcon, HardwareIcon, JointIcon, RouterIcon, SawIcon, ScrewIcon } from "./icons.tsx";
 import { downloadText, parseProject, saveStoredProject } from "../domain/project-io.ts";
 import { useProject } from "../store/useProject.ts";
 import { useUi, type ToolId } from "../store/useUi.ts";
@@ -68,7 +68,7 @@ async function loadExample(file: string, label: string): Promise<void> {
     useUi.getState().select(null);
     useUi.getState().setExplode(0);
     useUi.getState().setAssemblyStep(null);
-    useUi.getState().requestView("frame");
+    useUi.getState().requestView("quarter");
     toast.success(`${label} loaded. Undo puts your previous bench back.`);
   } catch {
     toast.error("Could not load that example.");
@@ -234,7 +234,10 @@ function ToolGlyph({ id }: { id: ToolId }) {
   if (id === "drill") return <DrillIcon className="size-4" />;
   if (id === "pencil") return <Pencil className="size-4" />;
   if (id === "measure") return <Ruler className="size-4" />;
-  if (id === "screw" || id === "joint" || id === "hardware" || id === "router") return <ScrewIcon className="size-4" />;
+  if (id === "router") return <RouterIcon className="size-4" />;
+  if (id === "joint") return <JointIcon className="size-4" />;
+  if (id === "hardware") return <HardwareIcon className="size-4" />;
+  if (id === "screw") return <ScrewIcon className="size-4" />;
   return <Move3D className="size-4" />;
 }
 
