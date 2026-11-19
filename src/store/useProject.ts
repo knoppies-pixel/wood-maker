@@ -16,9 +16,9 @@ import {
   withoutPiece,
 } from "../domain/operations.ts";
 import { emptyProject, loadStoredProject } from "../domain/project-io.ts";
-import type { FaceId, Fastener, FastenerType, Finish, Hole, Piece, PlanBillLine, ProfileName, ProjectData, RouterCut, StockItem, Vec3Tuple, XZPoint } from "../domain/types.ts";
+import type { FaceId, Fastener, FastenerType, Finish, Guide, Hole, Piece, PlanBillLine, ProfileName, ProjectData, RouterCut, StockItem, Vec3Tuple, XZPoint } from "../domain/types.ts";
 
-type Snapshot = Pick<ProjectData, "name" | "kerf" | "catalog" | "boards" | "pieces" | "fasteners" | "hardware" | "dimensions" | "planBill">;
+type Snapshot = Pick<ProjectData, "name" | "kerf" | "catalog" | "boards" | "pieces" | "fasteners" | "hardware" | "dimensions" | "planBill"> & { guides: Guide[] };
 
 export type ActionResult = { ok: true; message?: string; selectId?: string } | { ok: false; message: string };
 
@@ -55,6 +55,11 @@ interface ProjectState extends Snapshot {
   removeFastener: (fastenerId: string) => void;
   deletePiece: (pieceId: string) => void;
   renamePiece: (pieceId: string, name: string) => void;
+  makeComponent: (pieceId: string) => ActionResult;
+  makeUnique: (pieceId: string) => ActionResult;
+  addGuide: (guide: Guide) => void;
+  removeGuide: (id: string) => void;
+  clearGuides: () => void;
   renameProject: (name: string) => void;
   setKerf: (kerf: number) => void;
   setPlanBill: (planBill: PlanBillLine[]) => void;
@@ -81,6 +86,7 @@ export const useProject = create<ProjectState>()(
       fasteners: restored.fasteners,
       hardware: restored.hardware ?? [],
       dimensions: restored.dimensions ?? [],
+      guides: restored.guides ?? [],
       planBill: restored.planBill,
 
       addStock: (stockId, length) => {
@@ -101,8 +107,9 @@ export const useProject = create<ProjectState>()(
         const result = mode === "rip" ? rip(piece, distance, get().kerf) : crosscut(piece, distance, mitre, get().kerf, bevel);
         if (!result.ok) return { ok: false, message: result.reason };
         const dropped = dropFasteners(get().fasteners, pieceId);
+        const made = result.pieces.map((item) => ({ ...item, componentId: undefined }));
         set({
-          pieces: get().pieces.flatMap((item) => (item.id === pieceId ? result.pieces : [item])),
+          pieces: get().pieces.flatMap((item) => (item.id === pieceId ? made : [item])),
           fasteners: dropped.fasteners,
         });
         const note = dropped.dropped > 0 ? " Screws in that piece were removed." : "";
@@ -118,7 +125,7 @@ export const useProject = create<ProjectState>()(
         if (!piece) return { ok: false, message: "Select a piece to taper." };
         const result = taperPiece(piece, widthAtStart, widthAtEnd);
         if ("error" in result) return { ok: false, message: result.error };
-        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? result.piece : item)) });
+        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? { ...result.piece, componentId: undefined } : item)) });
         return { ok: true, message: `Tapered from ${Math.round(widthAtStart)} mm to ${Math.round(widthAtEnd)} mm.` };
       },
 
@@ -128,13 +135,13 @@ export const useProject = create<ProjectState>()(
         const result = plungeCut(piece, opening);
         if ("error" in result) return { ok: false, message: result.error };
         const offcut = keepOffcut
-          ? { ...result.offcut, position: [result.offcut.position[0] + result.offcut.width / 2 + 30, result.offcut.position[1], result.offcut.position[2]] as Vec3Tuple }
+          ? { ...result.offcut, componentId: undefined, position: [result.offcut.position[0] + result.offcut.width / 2 + 30, result.offcut.position[1], result.offcut.position[2]] as Vec3Tuple }
           : null;
         set({
-          pieces: [
+          pieces: mirrorInstances([
             ...get().pieces.map((item) => (item.id === pieceId ? result.piece : item)),
             ...(offcut ? [offcut] : []),
-          ],
+          ], pieceId),
         });
         return {
           ok: true,
@@ -148,7 +155,7 @@ export const useProject = create<ProjectState>()(
         if (!piece) return { ok: false, message: "Select a piece, then draw the cut on its face." };
         const result = curveCut(piece, points, waste);
         if ("error" in result) return { ok: false, message: result.error };
-        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? result.piece : item)) });
+        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? { ...result.piece, componentId: undefined } : item)) });
         return { ok: true, message: "Curved cut. The waste side is off the piece." };
       },
 
@@ -159,10 +166,10 @@ export const useProject = create<ProjectState>()(
         if ("error" in result) return { ok: false, message: result.error };
         const extra = input.style === "hole-saw" ? holeSawDisc(piece, result.hole) : null;
         set({
-          pieces: [
+          pieces: mirrorInstances([
             ...get().pieces.map((item) => (item.id === pieceId ? { ...item, holes: [...item.holes, result.hole] } : item)),
             ...(extra ? [extra] : []),
-          ],
+          ], pieceId),
         });
         const label = input.style === "countersink" ? "Countersink" : input.style === "forstner" ? "Forstner" : input.style === "hole-saw" ? "Hole saw" : "Hole";
         return { ok: true, selectId: extra?.id, message: `${label} ⌀${trim(input.diameter)}${extra ? ". The plug is a separate piece." : "."}` };
@@ -173,7 +180,7 @@ export const useProject = create<ProjectState>()(
         if (!piece) return { ok: false, message: "Select a piece to rout." };
         const result = routeCut(piece, input);
         if ("error" in result) return { ok: false, message: result.error };
-        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, routes: [...(item.routes ?? []), result.route] } : item)) });
+        set({ pieces: mirrorInstances(get().pieces.map((item) => (item.id === pieceId ? { ...item, routes: [...(item.routes ?? []), result.route] } : item)), pieceId) });
         return { ok: true, message: `${input.kind[0].toUpperCase()}${input.kind.slice(1)} cut, ${trim(input.width)} mm wide and ${trim(input.depth)} mm deep.` };
       },
 
@@ -182,7 +189,7 @@ export const useProject = create<ProjectState>()(
         if (!piece) return { ok: false, message: "Select a piece for the edge profile." };
         const result = edgeProfile({ profile, edge, radius, side }, piece.thickness);
         if ("error" in result) return { ok: false, message: result.error };
-        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, profiles: [...(item.profiles ?? []), result.profile] } : item)) });
+        set({ pieces: mirrorInstances(get().pieces.map((item) => (item.id === pieceId ? { ...item, profiles: [...(item.profiles ?? []), result.profile] } : item)), pieceId) });
         return { ok: true, message: `${profile} on the ${side} ${edge} arris.` };
       },
 
@@ -191,7 +198,7 @@ export const useProject = create<ProjectState>()(
         if (!piece) return { ok: false, message: "Select a piece for the hole profile." };
         const result = profileOpening(piece, openingId, profile, radius);
         if ("error" in result) return { ok: false, message: result.error };
-        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? result.piece : item)) });
+        set({ pieces: mirrorInstances(get().pieces.map((item) => (item.id === pieceId ? result.piece : item)), pieceId) });
         return { ok: true, message: `${profile} around the opening.` };
       },
 
@@ -225,12 +232,12 @@ export const useProject = create<ProjectState>()(
       },
 
       setFinish: (pieceId, finish) => {
-        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, finish } : item)) });
+        set({ pieces: mirrorInstances(get().pieces.map((item) => (item.id === pieceId ? { ...item, finish } : item)), pieceId) });
       },
 
       removeRoute: (pieceId, routeId) => {
         set({
-          pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, routes: (item.routes ?? []).filter((route) => route.id !== routeId), profiles: (item.profiles ?? []).filter((profile) => profile.id !== routeId) } : item)),
+          pieces: mirrorInstances(get().pieces.map((item) => (item.id === pieceId ? { ...item, routes: (item.routes ?? []).filter((route) => route.id !== routeId), profiles: (item.profiles ?? []).filter((profile) => profile.id !== routeId) } : item)), pieceId),
         });
       },
 
@@ -241,12 +248,11 @@ export const useProject = create<ProjectState>()(
         if (!piece) return { ok: false, message: "Select a piece to duplicate." };
         const copy = clonePiece(piece, 40);
         set({ pieces: [...get().pieces, copy] });
-        return { ok: true, selectId: copy.id, message: `Duplicated ${piece.name}.` };
+        return { ok: true, selectId: copy.id, message: piece.componentId ? `Another ${piece.name}. Edits apply to every one.` : `Duplicated ${piece.name}.` };
       },
 
       resizePiece: (pieceId, size) => {
-        set({
-          pieces: get().pieces.map((piece) => {
+        const resized = get().pieces.map((piece) => {
             if (piece.id !== pieceId) return piece;
             const length = clampSize(size.length ?? piece.length);
             const width = clampSize(size.width ?? piece.width);
@@ -261,23 +267,23 @@ export const useProject = create<ProjectState>()(
               widthEnd: (piece.widthEnd || piece.width) * scaleX,
               position: [piece.position[0], keepBottom(piece.position[1], piece.thickness, thickness), piece.position[2]] as Vec3Tuple,
             };
-          }),
-        });
+          });
+        set({ pieces: mirrorInstances(resized, pieceId) });
       },
 
       addMark: (pieceId, mark) => {
         set({
-          pieces: get().pieces.map((piece) =>
+          pieces: mirrorInstances(get().pieces.map((piece) =>
             piece.id === pieceId ? { ...piece, marks: [...(piece.marks ?? []), { ...mark, id: uid("mark") }] } : piece,
-          ),
+          ), pieceId),
         });
       },
 
       removeMark: (pieceId, markId) => {
         set({
-          pieces: get().pieces.map((piece) =>
+          pieces: mirrorInstances(get().pieces.map((piece) =>
             piece.id === pieceId ? { ...piece, marks: (piece.marks ?? []).filter((mark) => mark.id !== markId) } : piece,
-          ),
+          ), pieceId),
         });
       },
 
@@ -364,9 +370,9 @@ export const useProject = create<ProjectState>()(
 
       removeHole: (pieceId, holeId) => {
         set({
-          pieces: get().pieces.map((piece) =>
+          pieces: mirrorInstances(get().pieces.map((piece) =>
             piece.id === pieceId ? { ...piece, holes: piece.holes.filter((hole) => hole.id !== holeId) } : piece,
-          ),
+          ), pieceId),
         });
       },
 
@@ -383,9 +389,29 @@ export const useProject = create<ProjectState>()(
         const trimmed = name.trim();
         if (!trimmed) return;
         set({
-          pieces: get().pieces.map((piece) => (piece.id === pieceId ? { ...piece, name: trimmed } : piece)),
+          pieces: mirrorInstances(get().pieces.map((piece) => (piece.id === pieceId ? { ...piece, name: trimmed } : piece)), pieceId),
         });
       },
+
+      makeComponent: (pieceId) => {
+        const piece = get().pieces.find((item) => item.id === pieceId);
+        if (!piece) return { ok: false, message: "Select a piece first." };
+        if (piece.componentId) return { ok: true, message: `${piece.name} is already a component.` };
+        const componentId = uid("cmp");
+        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, componentId } : item)) });
+        return { ok: true, message: `${piece.name} is a component. Duplicates stay in step.` };
+      },
+
+      makeUnique: (pieceId) => {
+        set({ pieces: get().pieces.map((item) => (item.id === pieceId ? { ...item, componentId: undefined } : item)) });
+        return { ok: true, message: "This piece is on its own now." };
+      },
+
+      addGuide: (guide) => set({ guides: [...get().guides, guide] }),
+
+      removeGuide: (id) => set({ guides: get().guides.filter((guide) => guide.id !== id) }),
+
+      clearGuides: () => set({ guides: [] }),
 
       renameProject: (name) => set({ name: name.trim() || "Untitled bench" }),
 
@@ -420,6 +446,7 @@ export const useProject = create<ProjectState>()(
           fasteners: project.fasteners,
           hardware: project.hardware ?? [],
           dimensions: project.dimensions ?? [],
+          guides: project.guides ?? [],
           planBill: project.planBill,
         });
       },
@@ -434,6 +461,7 @@ export const useProject = create<ProjectState>()(
           fasteners: [],
           hardware: [],
           dimensions: [],
+          guides: [],
           planBill: undefined,
         });
       },
@@ -448,6 +476,7 @@ export const useProject = create<ProjectState>()(
           fasteners: frame.fasteners,
           hardware: frame.hardware ?? [],
           dimensions: frame.dimensions ?? [],
+          guides: frame.guides ?? [],
           planBill: frame.planBill,
         });
       },
@@ -464,6 +493,7 @@ export const useProject = create<ProjectState>()(
         fasteners: get().fasteners,
         hardware: get().hardware,
         dimensions: get().dimensions,
+        guides: get().guides,
         planBill: get().planBill,
       }),
     }),
@@ -478,6 +508,7 @@ export const useProject = create<ProjectState>()(
         fasteners: state.fasteners,
         hardware: state.hardware,
         dimensions: state.dimensions,
+        guides: state.guides,
         planBill: state.planBill,
       }),
       equality: (past, current) =>
@@ -486,6 +517,7 @@ export const useProject = create<ProjectState>()(
         past.fasteners === current.fasteners &&
         past.hardware === current.hardware &&
         past.dimensions === current.dimensions &&
+        past.guides === current.guides &&
         past.planBill === current.planBill &&
         past.catalog === current.catalog &&
         past.name === current.name &&
@@ -499,6 +531,24 @@ export function assemblyOf(pieceId: string | null): string[] {
   return connectedIds(useProject.getState().fasteners, pieceId, useProject.getState().pieces);
 }
 
+const SHARED_FIELDS = ["name", "species", "profileName", "thickness", "width", "length", "widthStart", "widthEnd", "holes", "routes", "profiles", "openings", "marks", "finish", "mitreStart", "mitreEnd", "bevelStart", "bevelEnd", "outline", "section"] as const;
+
+function mirrorInstances(pieces: Piece[], sourceId: string): Piece[] {
+  const source = pieces.find((piece) => piece.id === sourceId);
+  if (!source?.componentId) return pieces;
+  return pieces.map((piece) => {
+    if (piece.id === source.id || piece.componentId !== source.componentId) return piece;
+    const next: Piece = { ...piece };
+    for (const key of SHARED_FIELDS) {
+      (next as unknown as Record<string, unknown>)[key] = source[key];
+    }
+    if (piece.thickness !== source.thickness) {
+      next.position = [piece.position[0], keepBottom(piece.position[1], piece.thickness, source.thickness), piece.position[2]];
+    }
+    return next;
+  });
+}
+
 function sameTuple(a: Vec3Tuple, b: Vec3Tuple): boolean {
   return Math.abs(a[0] - b[0]) < 0.05 && Math.abs(a[1] - b[1]) < 0.05 && Math.abs(a[2] - b[2]) < 0.05;
 }
@@ -508,7 +558,7 @@ function clonePiece(piece: Piece, offset: number): Piece {
   return {
     ...piece,
     id: stamp("piece"),
-    name: `${piece.name} copy`,
+    name: piece.componentId ? piece.name : `${piece.name} copy`,
     position: [piece.position[0] + offset, piece.position[1], piece.position[2]],
     holes: piece.holes.map((hole) => ({ ...hole, id: stamp("hole") })),
     openings: (piece.openings ?? []).map((opening) => ({ ...opening, id: stamp("open") })),
@@ -535,6 +585,7 @@ function holeSawDisc(piece: Piece, hole: Hole): Piece {
   return {
     ...piece,
     id: uid("piece"),
+    componentId: undefined,
     name: `${piece.name} plug ⌀${Math.round(hole.diameter)}`,
     width: hole.diameter,
     widthStart: hole.diameter,

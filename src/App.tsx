@@ -12,6 +12,7 @@ import { saveStoredProject } from "./domain/project-io.ts";
 import { MIN_PART_MM } from "./domain/types.ts";
 import { CheatSheet } from "./components/CheatSheet.tsx";
 import { beginModal, cancelModal, commitModal, nudgeSelection, previewModal } from "./input/modal.ts";
+import { applyMeasurement, backspaceMeasurement, cancelGuide, cancelPointMove, lockCurrentInference, measurementLive, typeMeasurement } from "./input/sessions.ts";
 import { useProject } from "./store/useProject.ts";
 import { useUi, type ToolId } from "./store/useUi.ts";
 
@@ -89,6 +90,7 @@ function useHotkeys() {
       const target = event.target;
       const typing = target instanceof HTMLElement && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable);
       if (event.key === "Control") useUi.getState().setCtrlDown(true);
+      if (event.key === "Shift" && !event.repeat) lockCurrentInference();
       if (typing) return;
       const meta = event.metaKey || event.ctrlKey;
       const key = event.key.toLowerCase();
@@ -101,6 +103,25 @@ function useHotkeys() {
         event.preventDefault();
         handleModalKey(event);
         return;
+      }
+      const measurementKey = event.code.startsWith("Digit") || event.code === "Minus" || event.code === "Period" || event.code === "Comma" || event.code === "Space";
+      if (measurementLive() && !meta && measurementKey) {
+        event.preventDefault();
+        typeMeasurement(event.key);
+        return;
+      }
+      if ((event.key === "Backspace" || event.key === "Delete") && measurementLive() && (ui.measurementText.length > 0 || ui.moveSession || ui.guideDraft || ui.pencilDraft)) {
+        if (event.key === "Delete" && ui.selectedGuideId && ui.measurementText.length === 0) {
+          event.preventDefault();
+          useProject.getState().removeGuide(ui.selectedGuideId);
+          useUi.getState().setSelectedGuide(null);
+          return;
+        }
+        if (event.key === "Backspace" || ui.measurementText.length > 0) {
+          event.preventDefault();
+          backspaceMeasurement();
+          return;
+        }
       }
       if (meta && key === "z") {
         event.preventDefault();
@@ -147,7 +168,20 @@ function useHotkeys() {
         toast.success(result.ok ? result.message ?? "Pasted" : result.message);
         return;
       }
+      if (event.key === "Enter") {
+        event.preventDefault();
+        if (applyMeasurement()) return;
+        if (useUi.getState().tool === "saw") cutSelected();
+        return;
+      }
       if (event.key === "Delete" || event.key === "Backspace") {
+        if (ui.moveSession || ui.guideDraft) return;
+        if (ui.selectedGuideId) {
+          event.preventDefault();
+          useProject.getState().removeGuide(ui.selectedGuideId);
+          useUi.getState().setSelectedGuide(null);
+          return;
+        }
         const id = ui.selection;
         if (!id) return;
         event.preventDefault();
@@ -181,7 +215,7 @@ function useHotkeys() {
         return;
       }
       if (key === "n") useUi.getState().setInspectorOpen(!ui.inspectorOpen);
-      if (event.key.startsWith("Arrow") && ui.selection) {
+      if (event.key.startsWith("Arrow") && ui.selection && !ui.moveSession && !ui.guideDraft) {
         event.preventDefault();
         const step = event.shiftKey ? 10 : 1;
         if (event.key === "ArrowLeft") nudgeSelection(0, -step);
@@ -190,14 +224,15 @@ function useHotkeys() {
         if (event.key === "ArrowDown") nudgeSelection(2, step);
         return;
       }
+      if (ui.moveSession || ui.guideDraft) return;
       if (key === "g") beginModal("grab");
       if (key === "r") beginModal("rotate");
       if (key === "s" && !meta) beginModal("scale");
       if (!meta && key in toolKeys) useUi.getState().setTool(toolKeys[key] as ToolId);
-      if (event.key === "Enter" && useUi.getState().tool === "saw") cutSelected();
     }
     function onKeyUp(event: KeyboardEvent) {
       if (event.key === "Control") useUi.getState().setCtrlDown(false);
+      if (event.key === "Shift") useUi.getState().setInferenceLock(null);
     }
     window.addEventListener("keydown", onKey);
     window.addEventListener("keyup", onKeyUp);
@@ -235,6 +270,18 @@ function handleModalKey(event: KeyboardEvent): void {
 function cancelDraft(): void {
   const ui = useUi.getState();
   useUi.getState().setHover(null);
+  if (ui.moveSession) {
+    cancelPointMove();
+    return;
+  }
+  if (ui.guideDraft) {
+    cancelGuide();
+    return;
+  }
+  if (ui.measurementText) {
+    useUi.getState().setMeasurementText("");
+    return;
+  }
   if (ui.jointFirst) {
     useUi.getState().setJointFirst(null);
     return;

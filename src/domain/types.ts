@@ -161,6 +161,8 @@ export interface Piece {
   modifiers: WoodModifier[];
   /** Assembly order. A step-through hides pieces from later steps. */
   step?: number;
+  /** Shared part. Instances with the same id edit together. */
+  componentId?: string;
   /**
    * Interval this part still occupies on the purchased board's length.
    * Kerf gaps are not included. Rips share a span.
@@ -243,6 +245,7 @@ export interface ProjectData {
   fasteners: Fastener[];
   hardware: HardwareItem[];
   dimensions: DimensionNote[];
+  guides?: Guide[];
   planBill?: PlanBillLine[];
 }
 
@@ -303,6 +306,11 @@ export interface DimensionNote {
   a: AnchorPoint;
   b: AnchorPoint;
 }
+
+/** A construction guide. Lines run through `origin` along `direction`. */
+export type Guide =
+  | { id: string; kind: "line"; origin: Vec3Tuple; direction: Vec3Tuple }
+  | { id: string; kind: "point"; point: Vec3Tuple };
 
 export const MIN_PART_MM = 5;
 export const PROJECT_FORMAT = "benchwork-project" as const;

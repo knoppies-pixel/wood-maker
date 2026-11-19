@@ -57,6 +57,36 @@ export interface FastenerLine {
   joints: string[];
 }
 
+export interface PartGroup {
+  key: string;
+  name: string;
+  quantity: number;
+  length: number;
+  width: number;
+  thickness: number;
+}
+
+/** One row per component, plus one row for each piece that is not a component. */
+export function partGroups(pieces: Piece[]): PartGroup[] {
+  const groups = new Map<string, PartGroup>();
+  for (const piece of pieces) {
+    const key = piece.componentId ?? piece.id;
+    const existing = groups.get(key);
+    if (existing) existing.quantity += 1;
+    else {
+      groups.set(key, {
+        key,
+        name: piece.name,
+        quantity: 1,
+        length: piece.length,
+        width: piece.width,
+        thickness: piece.thickness,
+      });
+    }
+  }
+  return [...groups.values()];
+}
+
 export function cutList(boards: Board[], pieces: Piece[]): CutBoard[] {
   return boards.map((board) => {
     const parts = pieces

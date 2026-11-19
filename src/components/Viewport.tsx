@@ -23,6 +23,8 @@ import { NumberSlider } from "./fields.tsx";
 import { modalLabel } from "../input/modal.ts";
 import { commitModal, previewModal } from "../input/modal.ts";
 import { PieceView, lastPiecePointer, pieceGroups } from "./PieceView.tsx";
+import { FirstHint, MeasurementsBox, SketchLayer } from "./SketchOverlay.tsx";
+import { commitGuide, commitPointMove } from "../input/sessions.ts";
 import { shopMaps } from "./wood.ts";
 import { cn } from "cn";
 
@@ -94,11 +96,13 @@ export function Viewport() {
         {tool === "saw" && sawMode === "curve" && selected ? <CurvePreview piece={selected} /> : null}
         <Ghosts />
         <DimensionNotes />
-        {tool === "select" && selected && !modal ? <MoveGizmo pieceId={selected.id} /> : null}
+        {tool === "select" && selected && !modal ? <MoveGizmoGate pieceId={selected.id} /> : null}
+        <SketchLayer />
         <OrbitControls
           makeDefault
           enableDamping
           dampingFactor={0.12}
+          zoomToCursor
           maxPolarAngle={Math.PI / 2 - 0.03}
           minDistance={80}
           maxDistance={16000}
@@ -144,6 +148,8 @@ export function Viewport() {
         </button>
       </div>
       <StatusLine />
+      <MeasurementsBox />
+      <FirstHint />
       <ToolDock />
     </div>
   );
@@ -494,8 +500,18 @@ function MissSelect() {
     const element = gl.domElement;
     function onClick(event: MouseEvent) {
       if (event.button !== 0) return;
-      if (useUi.getState().tool !== "select" || useUi.getState().modal) return;
-      if (performance.now() - lastPiecePointer < 150) return;
+      if (performance.now() - lastPiecePointer < 180) return;
+      if (performance.now() - useUi.getState().pointerAt < 200) return;
+      const ui = useUi.getState();
+      if (ui.moveSession) {
+        if (ui.inference) commitPointMove(ui.inference.point);
+        return;
+      }
+      if (ui.guideDraft) {
+        if (ui.inference) commitGuide(ui.inference.point);
+        return;
+      }
+      if (ui.tool !== "select" || ui.modal) return;
       const rect = element.getBoundingClientRect();
       const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -525,13 +541,28 @@ function fatPick(ray: THREE.Ray, pieces: Piece[]): string | null {
 
 function CameraButtons() {
   const controls = useThree((state) => state.controls) as OrbitControlsImpl | null;
+  const gl = useThree((state) => state.gl);
   useEffect(() => {
     if (!controls) return;
+    controls.zoomToCursor = true;
     controls.mouseButtons.LEFT = -1 as unknown as THREE.MOUSE;
     controls.mouseButtons.MIDDLE = THREE.MOUSE.ROTATE;
     controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
-  }, [controls]);
+    const element = gl.domElement;
+    function onDown(event: PointerEvent) {
+      if (!controls || event.button !== 1) return;
+      controls.mouseButtons.MIDDLE = event.shiftKey ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
+    }
+    element.addEventListener("pointerdown", onDown);
+    return () => element.removeEventListener("pointerdown", onDown);
+  }, [controls, gl]);
   return null;
+}
+
+function MoveGizmoGate({ pieceId }: { pieceId: string }) {
+  const moving = useUi((state) => state.moveSession);
+  if (moving) return null;
+  return <MoveGizmo pieceId={pieceId} />;
 }
 
 function ViewRig({ signal }: { signal: number }) {
@@ -1337,15 +1368,15 @@ function StatusLine() {
   const tool = useUi((state) => state.tool);
   const modal = useUi((state) => state.modal);
   const hints: Record<string, string> = {
-    select: "Middle mouse orbits · Shift+middle pans · wheel zooms · G R S",
-    saw: "Click the board to cut · both lengths show on the blade · Enter cuts too",
+    select: "Click a piece, then click the point to grab and where it should land. Shift locks the inference. G R S still work.",
+    saw: "Type a distance and press Enter to set the station. Enter on an empty measurement cuts.",
     drill: "Ghost hole follows the face under the cursor · red will not fit",
     screw: "Ghost fastener · red means it does not reach a second piece",
     router: "Edge and face come from the cursor, not a fixed side",
     joint: "Ghost joint · first face, then the mate",
     hardware: "Ghost hardware on the face under the cursor",
     pencil: "Straight, freehand, or erase · marks travel with the piece",
-    measure: "Tape keeps a dimension · speed square and combination square mark the face",
+    measure: "Tape from an edge pulls a guide line. From a point it drops a guide point. Type the offset.",
   };
   return (
     <div className="pointer-events-none absolute top-12 left-3 max-w-md rounded-md border bg-card/92 px-2.5 py-1 text-xs text-muted-foreground shadow-sm">
@@ -1374,7 +1405,8 @@ function MeasureDock() {
   const mode = useUi((state) => state.measureMode);
   const angle = useUi((state) => state.angleDegrees);
   const offset = useUi((state) => state.offsetMm);
-  const anchor = useUi((state) => state.measureAnchor);
+  const showGuides = useUi((state) => state.showGuides);
+  const guides = useProject((state) => state.guides);
   return (
     <div className="flex flex-col gap-2">
       <div className="flex flex-wrap gap-1">
@@ -1382,6 +1414,14 @@ function MeasureDock() {
         <Toggle on={mode === "angle"} onClick={() => useUi.getState().setMeasureMode("angle")}>Speed square</Toggle>
         <Toggle on={mode === "offset"} onClick={() => useUi.getState().setMeasureMode("offset")}>Combination square</Toggle>
       </div>
+      {mode === "tape" ? (
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-muted-foreground">Guides</span>
+          <Switch checked={showGuides} onCheckedChange={(on) => useUi.getState().setShowGuides(on)} />
+          <span className="nums text-muted-foreground">{guides.length}</span>
+          <button type="button" className="rounded-md border px-2 py-1 hover:bg-muted" onClick={() => useProject.getState().clearGuides()}>Clear</button>
+        </div>
+      ) : null}
       {mode === "angle" ? (
         <div className="flex flex-wrap items-center gap-1">
           {[22.5, 26.6, 30, 45, 60].map((preset) => (
@@ -1395,7 +1435,7 @@ function MeasureDock() {
       ) : null}
       <p className="text-xs text-muted-foreground">
         {mode === "tape"
-          ? anchor ? "Click the second point. The dimension stays, and you can click the label to remove it." : "Click two points. The distance is kept on the pieces."
+          ? "Click an edge and drag a parallel guide, or click a point for a guide point. Type the offset and press Enter. Click a guide, then Delete. Guides stay until you clear them."
           : mode === "angle"
             ? "Hover shows the blade. Click to pencil that angle onto the face. 22.5° and 45° are the common stops. 6/12 is a rafter pitch."
             : "Hover shows the gauge line, offset from the nearest edge of the face under the cursor. Click to mark it."}

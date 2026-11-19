@@ -4,6 +4,8 @@ import { useLayoutEffect, useMemo, useRef, type MutableRefObject, type Ref } fro
 import { toast } from "sonner";
 import * as THREE from "three";
 import { canPlaceHole, kerfAlong, preferLegalHole, sawDistance } from "../domain/operations.ts";
+import { guideFaceSnap } from "../domain/inference.ts";
+import { beginGuideLine, beginGuidePoint, commitGuide, commitPointMove, rememberPencilAnchor, startPointMove, trackInference } from "../input/sessions.ts";
 import { nearestInteriorOpening, nearestPieceEdge, profileTarget, routeFits, sawDistanceFromStation, snapFaceHit, stationFromHit } from "../domain/picking.ts";
 import { explodedPosition } from "../domain/assembly.ts";
 import { faceExtent, localCopies } from "../domain/modifiers.ts";
@@ -203,6 +205,8 @@ function PieceCopy({
         onPointerOut={() => {
           const hover = useUi.getState().hover;
           if (hover?.pieceId === piece.id) useUi.getState().setHover(null);
+          const ui = useUi.getState();
+          if (!ui.moveSession && !ui.guideDraft) useUi.getState().setInference(null);
         }}
       >
         <meshStandardMaterial attach="material-0" map={steel ? undefined : faceMap} color={faceTint} roughness={steel ? 0.38 : piece.finish?.treatment === "paint" ? 0.55 : 0.72} metalness={steel ? 0.62 : 0.02} emissive={selected || hovered ? "#e26a1a" : "#000000"} emissiveIntensity={selected ? 0.16 : hovered ? 0.08 : 0} side={THREE.DoubleSide} />
@@ -272,12 +276,28 @@ function HoleMark({ piece, hole }: { piece: Piece; hole: Hole }) {
 }
 
 function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "down" | "move") {
+  if (event.buttons !== 0 && (event.buttons & 1) === 0) return;
+  if (kind === "down" && event.button !== 0) return;
   event.stopPropagation();
   if (kind === "down") lastPiecePointer = performance.now();
   if (useUi.getState().modal) return;
   const tool = useUi.getState().tool;
   const hit = readHit(event, piece);
   if (hit) useUi.getState().setHover(hit);
+  if (hit && (tool === "select" || tool === "pencil" || tool === "measure" || tool === "saw" || tool === "drill")) trackInference(hit.point);
+  if (kind === "down" && tool === "select") {
+    const point = hit ? trackInference(hit.point)?.point ?? hit.point : null;
+    if (useUi.getState().moveSession && point) {
+      commitPointMove(point);
+      return;
+    }
+    if (hit && point && useUi.getState().selection === piece.id) {
+      startPointMove(piece.id, point);
+      return;
+    }
+    useUi.getState().select(piece.id);
+    return;
+  }
   if (kind === "move" && tool === "pencil" && hit && useUi.getState().pencilDrawing && useUi.getState().pencilFace === hit.face) {
     const draft = useUi.getState().pencilDraft ?? [];
     const last = draft[draft.length - 1];
@@ -319,7 +339,7 @@ function onPiecePointer(event: ThreeEvent<PointerEvent>, piece: Piece, kind: "do
     useUi.getState().select(piece.id);
     return;
   }
-  if (kind === "down" && (tool === "select" || tool === "saw")) {
+  if (kind === "down" && tool === "saw") {
     useUi.getState().select(piece.id);
     return;
   }
@@ -470,6 +490,7 @@ function readHit(event: ThreeEvent<PointerEvent>, piece: Piece): HoverHit | null
   const ui = useUi.getState();
   const anySnap = ui.snapVertices || ui.snapMidpoints || ui.snapEdges || ui.snapCentres || ui.snapGrid || ui.snapMarks || ui.snapDimensions;
   const forceAll = ui.ctrlDown && !anySnap;
+  const guides = ui.showGuides && (ui.tool === "pencil" || ui.tool === "saw" || ui.tool === "drill") ? useProject.getState().guides : [];
   const snapped = snapFaceHit(
     piece,
     uv.face,
@@ -495,9 +516,13 @@ function readHit(event: ThreeEvent<PointerEvent>, piece: Piece): HoverHit | null
   );
   const tool = ui.tool;
   const drillDepth = ui.drillStyle === "hole-saw" ? piece.thickness : ui.drillDepth;
+  const guide = guides.length > 0 && (snapped.snap == null || snapped.snap === "grid" || snapped.snap === "edge")
+    ? guideFaceSnap(piece, uv.face, snapped.u, snapped.v, guides)
+    : null;
+  const guided = guide ? { ...snapped, u: guide.u, v: guide.v, snap: guide.label } : snapped;
   const drillPoint = tool === "drill"
-    ? preferLegalHole(piece, uv.face, uv, snapped, ui.drillDiameter, drillDepth)
-    : { u: snapped.u, v: snapped.v, keepSnap: snapped.snap != null };
+    ? preferLegalHole(piece, uv.face, uv, guided, ui.drillDiameter, drillDepth)
+    : { u: guided.u, v: guided.v, keepSnap: guided.snap != null };
   const u = drillPoint.u;
   const v = drillPoint.v;
   const edge = drillPoint.keepSnap && snapped.snap ? snapped.edge : nearestPieceEdge(piece, uv.face, u, v);
@@ -563,6 +588,8 @@ function drawPencil(piece: Piece, hit: HoverHit): void {
   }
   if (!ui.pencilDraft || ui.pencilPieceId !== piece.id || ui.pencilFace !== hit.face) {
     useUi.getState().setPencilDraft([{ u: hit.u, v: hit.v }], piece.id, hit.face);
+    rememberPencilAnchor(piece, hit.face, hit.u, hit.v);
+    useUi.getState().setMeasurementText("");
     return;
   }
   const start = ui.pencilDraft[0];
@@ -576,17 +603,17 @@ function measure(piece: Piece, hit: HoverHit): void {
   const ui = useUi.getState();
   useUi.getState().select(piece.id);
   if (ui.measureMode === "tape") {
-    if (!ui.measureAnchor) {
-      useUi.getState().setMeasureAnchor({ pieceId: piece.id, face: hit.face, u: hit.u, v: hit.v });
-      toast.success("First point. Click the second.");
+    if (ui.guideDraft) {
+      commitGuide(ui.inference?.point ?? hit.point);
       return;
     }
-    useProject.getState().addDimension({
-      a: ui.measureAnchor,
-      b: { pieceId: piece.id, face: hit.face, u: hit.u, v: hit.v },
-    });
-    useUi.getState().setMeasureAnchor(null);
-    toast.success("Dimension kept. Click it to remove it.");
+    if (hit.snap === "edge") {
+      beginGuideLine(piece, hit.edge);
+      toast.success("Guide from the edge. Move, type the offset, and click or press Enter.");
+      return;
+    }
+    beginGuidePoint(ui.inference?.point ?? hit.point);
+    toast.success("Guide from that point. Click where it should sit, or type a distance.");
     return;
   }
   if (ui.measureMode === "angle") {

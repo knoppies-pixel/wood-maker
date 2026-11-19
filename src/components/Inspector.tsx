@@ -15,7 +15,7 @@ import { FINISH_PRESETS } from "../domain/features.ts";
 import { DEG, formatMm, formatZar } from "../domain/math.ts";
 import { axisExtent } from "../domain/modifiers.ts";
 import { connectedIds } from "../domain/operations.ts";
-import { checkPlan, cutList, fastenerList, profileLabel, shoppingList, type CutPart } from "../domain/reports.ts";
+import { checkPlan, cutList, fastenerList, partGroups, profileLabel, shoppingList, type CutPart } from "../domain/reports.ts";
 import type { Piece, PlanBillLine, Vec3Tuple } from "../domain/types.ts";
 import { useProject } from "../store/useProject.ts";
 import { useUi } from "../store/useUi.ts";
@@ -113,6 +113,24 @@ function PiecePane({ piece, joined }: { piece: Piece; joined: boolean }) {
             {formatMm(piece.length)} × {formatMm(piece.width)} × {formatMm(piece.thickness)}
           </Badge>
           {joined ? <Badge>Assembly</Badge> : null}
+          {piece.componentId ? <Badge>Component</Badge> : null}
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              const result = piece.componentId
+                ? useProject.getState().makeUnique(piece.id)
+                : useProject.getState().makeComponent(piece.id);
+              if (result.ok) toast.success(result.message ?? "Updated");
+              else toast.error(result.message);
+            }}
+          >
+            {piece.componentId ? "Make unique" : "Make component"}
+          </Button>
+          {piece.componentId ? <span className="text-xs text-muted-foreground">Size, holes, marks and the name update every instance.</span> : null}
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
           From {board?.name ?? piece.profileName}
@@ -344,11 +362,37 @@ function turn(piece: Piece, axis: 0 | 1 | 2, radians: number) {
 }
 
 function CutPane({ rows }: { rows: ReturnType<typeof cutList> }) {
+  const pieces = useProject((state) => state.pieces);
+  const groups = partGroups(pieces).filter((group) => pieces.some((piece) => piece.componentId === group.key));
   if (rows.length === 0) {
     return <p className="text-sm text-muted-foreground">The cut list fills in as soon as a board is on the bench. Each part remembers which purchased length it came from.</p>;
   }
   return (
     <div className="flex flex-col gap-4">
+      {groups.length > 0 ? (
+        <article className="rounded-xl border bg-background/60 p-3">
+          <div className="text-sm font-semibold">Parts</div>
+          <p className="text-xs text-muted-foreground">Identical components share a name and a quantity. Pieces that are not components stay one row each.</p>
+          <table className="mt-2 w-full text-left text-sm">
+            <thead className="text-[11px] tracking-wide text-muted-foreground uppercase">
+              <tr>
+                <th className="py-1 font-medium">Part</th>
+                <th className="py-1 font-medium">Qty</th>
+                <th className="py-1 font-medium">Finished</th>
+              </tr>
+            </thead>
+            <tbody>
+              {groups.map((group) => (
+                <tr key={group.key} className="border-t">
+                  <td className="py-1.5 pr-2">{group.name}</td>
+                  <td className="nums py-1.5 pr-2">{group.quantity}</td>
+                  <td className="nums py-1.5">{formatMm(group.length)} × {formatMm(group.width)} × {formatMm(group.thickness)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </article>
+      ) : null}
       {rows.map((board) => (
         <article key={board.boardId} className="rounded-xl border bg-background/60 p-3">
           <div className="text-sm font-semibold">{board.stockName}</div>

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { Inference, InferenceLock } from "../domain/inference.ts";
 import type { AnchorPoint, FaceId, FacePoint, FastenerType, HoleStyle, Piece, ProfileName, Vec3Tuple } from "../domain/types.ts";
 
 export type ToolId = "select" | "saw" | "drill" | "screw" | "router" | "joint" | "hardware" | "pencil" | "measure";
@@ -30,6 +31,19 @@ export type InspectorTab = "piece" | "cuts" | "shop" | "screws";
 export interface DragPose {
   position: Vec3Tuple;
   rotation: Vec3Tuple;
+}
+
+export interface MoveSession {
+  pieceId: string;
+  from: Vec3Tuple;
+  origins: Record<string, Vec3Tuple>;
+}
+
+export interface GuideDraft {
+  kind: "line" | "point";
+  origin: Vec3Tuple;
+  direction?: Vec3Tuple;
+  offsetAxis?: Vec3Tuple;
 }
 
 export interface HoverHit {
@@ -102,6 +116,15 @@ interface UiState {
   offsetMm: number;
   offsetEdge: "left" | "right" | "start" | "end";
   modal: TransformModal | null;
+  moveSession: MoveSession | null;
+  guideDraft: GuideDraft | null;
+  measurementText: string;
+  inference: Inference | null;
+  inferenceLock: InferenceLock | null;
+  showGuides: boolean;
+  selectedGuideId: string | null;
+  pencilAnchor: Vec3Tuple | null;
+  pointerAt: number;
   viewRequest: ViewRequest | null;
   ortho: boolean;
   explode: number;
@@ -169,6 +192,15 @@ interface UiState {
   setOffsetMm: (mm: number) => void;
   setOffsetEdge: (edge: "left" | "right" | "start" | "end") => void;
   setModal: (modal: TransformModal | null) => void;
+  setMoveSession: (session: MoveSession | null) => void;
+  setGuideDraft: (draft: GuideDraft | null) => void;
+  setMeasurementText: (text: string) => void;
+  setInference: (inference: Inference | null) => void;
+  setInferenceLock: (lock: InferenceLock | null) => void;
+  setShowGuides: (on: boolean) => void;
+  setSelectedGuide: (id: string | null) => void;
+  setPencilAnchor: (point: Vec3Tuple | null) => void;
+  armPointer: () => void;
   requestView: (kind: ViewKind) => void;
   setOrtho: (ortho: boolean) => void;
   setExplode: (explode: number) => void;
@@ -241,6 +273,15 @@ export const useUi = create<UiState>((set) => ({
   offsetMm: 20,
   offsetEdge: "left",
   modal: null,
+  moveSession: null,
+  guideDraft: null,
+  measurementText: "",
+  inference: null,
+  inferenceLock: null,
+  showGuides: true,
+  selectedGuideId: null,
+  pencilAnchor: null,
+  pointerAt: 0,
   viewRequest: null,
   ortho: false,
   explode: 0,
@@ -253,7 +294,15 @@ export const useUi = create<UiState>((set) => ({
   drag: null,
   hover: null,
   sceneEpoch: 0,
-  setTool: (tool) => set({ tool, hover: null }),
+  setTool: (tool) => set((state) => ({
+    tool,
+    hover: null,
+    moveSession: null,
+    guideDraft: null,
+    measurementText: "",
+    inferenceLock: null,
+    drag: state.moveSession ? null : state.drag,
+  })),
   setTransformMode: (transformMode) => set({ transformMode }),
   setSpace: (space) => set({ space }),
   select: (selection) => set({ selection }),
@@ -312,6 +361,15 @@ export const useUi = create<UiState>((set) => ({
   setOffsetMm: (offsetMm) => set({ offsetMm }),
   setOffsetEdge: (offsetEdge) => set({ offsetEdge }),
   setModal: (modal) => set({ modal }),
+  setMoveSession: (moveSession) => set({ moveSession }),
+  setGuideDraft: (guideDraft) => set({ guideDraft }),
+  setMeasurementText: (measurementText) => set({ measurementText }),
+  setInference: (inference) => set({ inference }),
+  setInferenceLock: (inferenceLock) => set({ inferenceLock }),
+  setShowGuides: (showGuides) => set({ showGuides }),
+  setSelectedGuide: (selectedGuideId) => set({ selectedGuideId }),
+  setPencilAnchor: (pencilAnchor) => set({ pencilAnchor }),
+  armPointer: () => set({ pointerAt: performance.now() }),
   requestView: (kind) => set({ viewRequest: { kind, nonce: Date.now() } }),
   setOrtho: (ortho) => set({ ortho }),
   setExplode: (explode) => set({ explode }),
